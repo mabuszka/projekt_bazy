@@ -4,7 +4,7 @@ CREATE TABLE Uczestnicy(
 				Nazwisko 			VARCHAR(100),
 				Kraj_zamieszkania 	VARCHAR(100),
 				Miasto 				VARCHAR(100),
-				Kod_pocztowy 		?,
+				Kod_pocztowy 		VARCHAR(6),
 				Ulica 				VARCHAR(100)
 				Numer_domu 			INTEGER,
 				Data_urodzenia		DATE
