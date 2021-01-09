@@ -3,6 +3,7 @@ require(stringi)
 require(stringr)
 require(maps)
 require(dplyr)
+require(lubridate)
 
 #klienci
 n_klientow <- 100
@@ -48,12 +49,32 @@ world.cities %>%
 
 oferty_rand <- data.frame("miejsce_wyjazdu" = sample(cities[["name"]], n_ofert,replace = TRUE),
                           
-                          "limit_uczestnikow" = sample(10:60, n_ofert, replace = TRUE),
-                          "dlugosc_trwania" = sample(2:14, n_ofert, replace = TRUE))
+                          "limit_uczestnikow" = sample(10:35, n_ofert, replace = TRUE),
+                          "dlugosc" = sample(2:14, n_ofert, replace = TRUE))
 oferty_rand %>% 
   mutate("cena" = sample(400:1200, n_ofert) * dlugosc_trwania) -> oferty_rand
 templatka_opisu <- c("Wspanialy wyjazd do city! Niewiarygodne przeżycia gwarantowane. Zrelaksuj sie az liczba_dni dni. W ramach wyjazdu wiele niesamowitych atrakcji.")
 
 oferty_rand %>%
   mutate("opis" =  str_replace(templatka_opisu, "city", miejsce_wyjazdu )) %>%
-  mutate(opis = str_replace(opis, "liczba_dni", as.character(dlugosc_trwania))) -> oferty_rand
+  mutate(opis = str_replace(opis, "liczba_dni", as.character(dlugosc))) -> oferty_rand
+
+#tymczasowe zanim zrobię ściągnięcie z tabeli
+oferty_rand %>%
+  mutate("oferta_id" = 1:n_ofert) -> oferty_rand
+
+# wycieczki
+n_wycieczek <- 50
+wycieczki_rand <- data.frame("oferta_id" = sample(oferty_rand$oferta_id,n_wycieczek, replace = TRUE))
+wycieczki_rand %>%
+  left_join( oferty_rand[,c("oferta_id", "dlugosc", "limit_uczestnikow")], by = "oferta_id")%>%
+  mutate("data_rozpoczecia" = sample(seq(as.Date("2021/01/01"), as.Date("2021/12/31"),by = "day"), n_wycieczek, replace = TRUE)) %>%
+  mutate("data_zakonczenia" = data_rozpoczecia + dlugosc) %>%
+  mutate("liczba_uczestnikow" = sapply(limit_uczestnikow, function(x) {
+    sample(seq(5, x, by = 1), 1)
+    })) %>%
+  select(!c(dlugosc, limit_uczestnikow)) -> wycieczki_rand
+
+
+
+
