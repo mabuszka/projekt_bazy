@@ -1,7 +1,8 @@
 require(randomNames)
 require(stringi)
 require(stringr)
-
+require(maps)
+require(dplyr)
 
 #klienci
 n_klientow <- 100
@@ -39,4 +40,20 @@ emaile <- apply(przewodnicy_rand, 1, function(x){
 przewodnicy_rand <- cbind(przewodnicy_rand, emaile)
 
 
-#
+#oferty
+
+n_ofert <- 20
+world.cities %>%
+  filter( pop > 300000) -> cities
+
+oferty_rand <- data.frame("miejsce_wyjazdu" = sample(cities[["name"]], n_ofert,replace = TRUE),
+                          
+                          "limit_uczestnikow" = sample(10:60, n_ofert, replace = TRUE),
+                          "dlugosc_trwania" = sample(2:14, n_ofert, replace = TRUE))
+oferty_rand %>% 
+  mutate("cena" = sample(400:1200, n_ofert) * dlugosc_trwania) -> oferty_rand
+templatka_opisu <- c("Wspanialy wyjazd do city! Niewiarygodne przeżycia gwarantowane. Zrelaksuj sie az liczba_dni dni. W ramach wyjazdu wiele niesamowitych atrakcji.")
+
+oferty_rand %>%
+  mutate("opis" =  str_replace(templatka_opisu, "city", miejsce_wyjazdu )) %>%
+  mutate(opis = str_replace(opis, "liczba_dni", as.character(dlugosc_trwania))) -> oferty_rand
