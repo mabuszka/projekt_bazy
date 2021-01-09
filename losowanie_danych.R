@@ -75,6 +75,17 @@ wycieczki_rand %>%
     })) %>%
   select(!c(dlugosc, limit_uczestnikow)) -> wycieczki_rand
 
+# tagi
+tagi_rand <- data.frame("nazwa_tagu" = c("morze", "zagranica", "kasyna", "jezioro", "hotel", "gory", "autokar", "samolot", "widoki"))
+tagi_rand %>% 
+  mutate("opis" = str_replace("To jest bardzo ladny opis tego o tutaj tagu - tag_holder", "tag_holder", nazwa_tagu)) -> tagi_rand
+
+# atrakcje 
+atrakcje_rand <- data.frame("nazwa_atrakcji" = c("kino", "teatr", "muzeum", "basen", "kregle", "dyskoteka",
+                                                 "bar", "safari", "lot balonem", "zwiedzanie", "sesja zdjeciowa"))
+atrakcje_rand%>%
+  mutate("opis_atrakcji" = str_replace("W ramach wyjazdu - placeholder", "placeholder", nazwa_atrakcji)) %>%
+  mutate("czy_dla_dzieci" = c(T,T,T,T,T, F, F, F, T, T, T)) -> atrakcje_rand
 
 
 
