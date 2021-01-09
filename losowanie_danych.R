@@ -4,6 +4,7 @@ require(stringr)
 require(maps)
 require(dplyr)
 require(lubridate)
+require(DescTools)
 
 #klienci: imie, nazwisko, kraj, data urodzenia, ulica, nr domu, miasto, kod pocztowy, pesel, nr telefonu
 n_klientow <- 100
@@ -91,7 +92,7 @@ oferty_rand <- data.frame("miejsce_wyjazdu" = sample(cities[["name"]], n_ofert,r
                           "limit_uczestnikow" = sample(10:35, n_ofert, replace = TRUE),
                           "dlugosc" = sample(2:14, n_ofert, replace = TRUE))
 oferty_rand %>% 
-  mutate("cena" = sample(400:1200, n_ofert) * dlugosc_trwania) -> oferty_rand
+  mutate("cena" = sample(400:1200, n_ofert) * dlugosc) -> oferty_rand
 templatka_opisu <- c("Wspanialy wyjazd do city! Niewiarygodne przeÅ¼ycia gwarantowane. Zrelaksuj sie az liczba_dni dni. W ramach wyjazdu wiele niesamowitych atrakcji.")
 
 oferty_rand %>%
@@ -126,5 +127,56 @@ atrakcje_rand%>%
   mutate("opis_atrakcji" = str_replace("W ramach wyjazdu - placeholder", "placeholder", nazwa_atrakcji)) %>%
   mutate("czy_dla_dzieci" = c(T,T,T,T,T, F, F, F, T, T, T)) -> atrakcje_rand
 
+# zamowienia: klient_id, wycieczka_id, liczba_osob, klasa_oferty, sposob_platnosci
+n_zamowien <- 75
+#tymczasowo, potem trzeba zaci¹gn¹æ z bazy
+id_wycieczki <- 1:n_wycieczek
+trwanie<-as.integer(unlist(wycieczki_rand[3]-wycieczki_rand[2]))
+limit<-wycieczki_rand[4]
+wycieczki<-wycieczki_rand
+
+platnosci <- c("karta", "gotowka", "przelew_internetowy", "przelew_tradycyjny", "paypal", "voucher")
+generator_zamowien <- function(wycieczki){
+  id_wycieczki <- 1:n_wycieczek
+  limit<-wycieczki[[4]]
+  
+  klienci <- sample(1:n_klientow,n_zamowien,replace = TRUE)
+  wyjazdy <- sample(1:n_wycieczek,n_zamowien,replace=TRUE)
+  liczba <- sample(1:5,n_zamowien,replace=TRUE)
+  
+  limity_wyjazdow<-limit[wyjazdy]
+  poczatek_wyjazdu<-wycieczki[[2]][wyjazdy]
+  koniec_wyjazdu<-wycieczki[[3]][wyjazdy]
+  
+  tymczasowe_zamowienia<-data.frame(klienci=klienci,wyjazdy=wyjazdy,liczba_osob=liczba,limity=limity_wyjazdow,poczatek=poczatek_wyjazdu,koniec=koniec_wyjazdu)
+  for(i in 1:n_zamowien){
+    if (tymczasowe_zamowienia[[3]][i]<=tymczasowe_zamowienia[[4]][i]){
+      tymczasowe_zamowienia[[4]][i]=tymczasowe_zamowienia[[4]][i]-tymczasowe_zamowienia[[3]][i]
+    }else(tymczasowe_zamowienia[[3]][i]>tymczasowe_zamowienia[[4]][i] & tymczasowe_zamowienia[[4]]>0){
+      tymczasowe_zamowienia[[3]][i]=tymczasowe_zamowienia[[4]]
+    }else{
+      tymczasowe_zamowienia=tymczasowe_zamowienia[-c(i),] # uznalam ¿e latwiej niz sie bawic bêdzie po prostu usunac te kilka zamówieñ co nie bêd¹ pasowac, nadal powinno zostaæ sporo zamowien
+    }
+  }
+  for(i in unique(klienci)){
+    zamowienie<-tymczasowe_zamowienia[tymczasowe_zamowienia[[1]]==i,]
+    daty<-zamowienie[5:6]
+    daty[order(daty[[1]],decreasing = TRUE),]
+    ilosc_dat<-length(daty[[1]])
+    for (k in ilosc_dat-1){
+      if(Overlap(c(daty[[1]][k],daty[[2]][k]),c(daty[[1]][k+1],daty[[2]][k+1]))>0){
+        #nie wiem co tu zrobic, usunac pierwszy wyjazd tego klienta z tych co sie nachodza?
+      }
+    }
+  }
+  zamowienia <- data.frame("klient" = klienci,
+                         "wycieczka" = wyjazdy,
+                         "liczba_osob" = liczba,
+                         "klasa" = sample(1:3,n_zamowien,replace=TRUE), #zakladajac ze bedziemy miec 3 klasy, bo jeszcze nie wiem ile
+                         "platnosc" = sample(platnosci,n_zamowien,replace=TRUE)
+                         )
+  return(zamowienia)
+}
+generator_zamowien(wycieczki_rand)
 
 
