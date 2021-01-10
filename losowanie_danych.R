@@ -145,6 +145,7 @@ tagi_ofert %>%
   distinct(`tag_id`, `oferta_id`)
 
 # zamowienia: klient_id, wycieczka_id, liczba_osob, klasa_oferty, sposob_platnosci
+
 # n_zamowien <- 250
 # #tymczasowo, potem trzeba zaci?gn?? z bazy
 # id_wycieczki <- 1:n_wycieczek
@@ -179,7 +180,7 @@ tagi_ofert %>%
 #     }
 #   }
 #   for(i in unique(klienci)){
-#     zamowienie<-tymczasowe_zamowienia[tymczasowe_zamowienia[["klienci"]]==4,]
+#     zamowienie<-tymczasowe_zamowienia[tymczasowe_zamowienia[["klienci"]]==i,]
 #     daty<-zamowienie[c(5:7)]
 #     daty <- daty[order(daty[[1]],decreasing = FALSE),]
 #     ilosc_dat<-length(daty[[1]])
@@ -201,3 +202,36 @@ tagi_ofert %>%
 # generator_zamowien(wycieczki_rand)
 
 
+
+# przewodnictwa
+
+generator_przewodnictw <- function(wycieczki,n_przewodnictw,przewodnicy){
+  n_wycieczek<-nrow(wycieczki)
+  n_przewodnikow<-nrow(przewodnicy)
+  
+  przewodnictwa_rand <- data.frame("wycieczka_id" = sample(1:n_wycieczek, n_przewodnictw, replace = TRUE),
+                           "przewodnik_id" = sample(1:n_przewodnikow, n_przewodnictw, replace = TRUE))
+  przewodnictwa_rand %>% 
+    distinct(`wycieczka_id`, `przewodnik_id`) -> przewodnictwa_rand
+  przewodnictwa_rand %>%
+    left_join(wycieczki[,c("wycieczka_id", "data_rozpoczecia", "data_zakonczenia")], by = "wycieczka_id") -> przewodnictwa_rand_daty
+
+  tymczasowe_przewodnictwa<-przewodnictwa_rand_daty
+  for(i in unique(tymczasowe_przewodnictwa[,"przewodnik_id"])){
+    przewodnictwo<-tymczasowe_przewodnictwa[tymczasowe_przewodnictwa[,"przewodnik_id"]==i,]
+    przewodnictwo<-przewodnictwo[order(przewodnictwo[,"data_rozpoczecia"],decreasing = FALSE),]
+    ilosc_dat<-length(przewodnictwo[[1]])
+    if(ilosc_dat<2){next}
+    for (k in 1:(ilosc_dat-1)){
+      if(przewodnictwo[k+1,"data_rozpoczecia"]<=przewodnictwo[k,"data_zakonczenia"]){
+        zle_id <- przewodnictwo[k, "wycieczka_id"]
+        tymczasowe_przewodnictwa <- tymczasowe_przewodnictwa["wycieczka_id"!=zle_id,]
+      }
+    }
+  }
+  zamowienia <- data.frame("przewodnik_id" = tymczasowe_przewodnictwa[,"przewodnik_id"],
+                         "wycieczka_id" = tymczasowe_przewodnictwa[,"wycieczka_id"]
+                         )
+  return(zamowienia)
+}
+przewodnictwa_rand<-generator_przewodnictw(cbind("wycieczka_id"=1:nrow(wycieczki_rand),wycieczki_rand),200,przewodnicy_rand)
