@@ -39,6 +39,8 @@ pesel_generator_z_daty <- function(wiersz){
   else{return(NA)}
 }
 
+apply(data.frame("kraj" = c("Polska", "Niemcy"), "data" = random_date(2)),1, pesel_generator_z_daty)
+
 
 niemieckie_miasta <- world.cities[world.cities[2]=="Germany",][,1]
 niemieckie_ulice <- c("Ackerstrasse","Bernauerstrasse","Frankfurter Allee","Invalidenstrasse","Silvio Meier Strasse","Legiendamm Allee","Mozartstrasse")
@@ -75,15 +77,14 @@ adresy <- t(apply(adresy,1,losuj_adres_dla_kraju))
 klienci_rand <- data.frame("imie" = randomNames(n_klientow, ethnicity = 5, which.names = "first"),
                            "nazwisko" = randomNames(n_klientow, ethnicity = 5, which.names = "last"),
                            "data" = random_date(n_klientow),
-                           "kraj" = adresy[1],
-                           "ulica" = adresy[4],
-                           "nr_domu" = adresy[5],
-                           "miasto" = adresy[2],
-                           "kod_pocztowy" = adresy[3],
-                           "nr_telefonu" = stri_rand_strings(n_klientow, 9, pattern = "[0-9]"),
-                           "pesel" = rep(NA,n_klientow))
+                           "kraj" = adresy[,"kraj"],
+                           "ulica" = adresy[,"ulica"],
+                           "nr_domu" = adresy[,"nr_domu"],
+                           "miasto" = adresy[,"miasto"],
+                           "kod_pocztowy" = adresy[,"kod_pocztowy"],
+                           "nr_telefonu" = stri_rand_strings(n_klientow, 9, pattern = "[0-9]"))
 
-apply(klienci_rand, 1, pesel_generator_z_daty)
+klienci_rand <- cbind( klienci_rand, "pesel" = apply(klienci_rand, 1, pesel_generator_z_daty))
 
 
 
