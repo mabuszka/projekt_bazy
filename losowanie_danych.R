@@ -9,33 +9,44 @@ require(DescTools)
 data("world.cities")
 #klienci: imie, nazwisko, kraj, data urodzenia, ulica, nr domu, miasto, kod pocztowy, pesel, nr telefonu
 n_klientow <- 100
-# do poprawienia
+
+make_months <-function(m){
+  if (str_length(as.character(m)) == 1){m = paste("0", m, sep = "")}
+  else m = as.character(m)
+  m
+}
+
 random_date <- function(n) {
-  years <- sample(1:99, n, replace = TRUE)
-  months <- sample(c(1:12),n, replace = TRUE)
-  days <- sample(1:28, n, replace = TRUE)
+  years <- sample(1900:2020, n, replace = TRUE)
+  dates <- sample(seq(as.Date("2021/01/01"), as.Date("2021/12/31"),by = "day"),n)
+  months <- month(dates)
+  months <- sapply(months, make_months)
+  days <- day(dates)
   paste(years,months,days,sep='-')
 }
-# do poprawienia
+
+
 pesel_generator_z_daty <- function(wiersz){
-  data <- wiersz[3]
-  kraj <- wiersz[4]
+  data <- wiersz["data"]
+  kraj <- wiersz["kraj"]
   if (kraj=="Polska"){
-    years <- strsplit(data, "[-]")[[1]][1]
+    years <- str_sub(strsplit(data, "[-]")[[1]][1], 3,4)
     months <- strsplit(data, "[-]")[[1]][2]
     days <-  strsplit(data, "[-]")[[1]][3]
     rest <- stri_rand_strings(1, 5, pattern = "[0-9]") # patrzymy tyko zeby zgadzala sie liczba znakow, nie bawimy sie w sumy kontrolne
     return(paste(sprintf("%02d", as.integer(years)), sprintf("%02d", as.integer(months)), sprintf("%02d", as.integer(days)), rest, sep=''))
   }
-  else{return(NaN)}
+  else{return(NA)}
 }
+
+
 niemieckie_miasta <- world.cities[world.cities[2]=="Germany",][,1]
 niemieckie_ulice <- c("Ackerstrasse","Bernauerstrasse","Frankfurter Allee","Invalidenstrasse","Silvio Meier Strasse","Legiendamm Allee","Mozartstrasse")
 polskie_miasta <- world.cities[world.cities[2]=="Poland",][,1]
 polskie_ulice <- c("Miodowa","Krakowska","Legionowa","Szkolna","Graniczna","Pokorna","Rycerska","Piwna","Boczna","Cicha")
 francuskie_miasta <- world.cities[world.cities[2]=="France",][,1]
 francuskie_ulice <- c("Avenue Victor Hugo","Avenue Montaigne","Rue de Rivoli","Passages Couverts","Boulevard de Clichy","Avenue de Lopera","Rue de la Paix")
-adresy <- data.frame("kraj" = sample(c("Polska", "Niemcy", "Francja"), n_klientow, replace = TRUE),"miasto"=rep(NaN,n_klientow),"kod_pocztowy"=rep(NaN,n_klientow),"ulica"=rep(NaN,n_klientow),"nr_domu"=rep(NaN,n_klientow))
+adresy <- data.frame("kraj" = sample(c("Polska", "Niemcy", "Francja"), n_klientow, replace = TRUE),"miasto"=rep(NA,n_klientow),"kod_pocztowy"=rep(NA,n_klientow),"ulica"=rep(NA,n_klientow),"nr_domu"=rep(NA,n_klientow))
 losuj_adres_dla_kraju <- function(wiersz) {
   kraj <- wiersz[1]
   if (kraj=="Polska"){
@@ -70,7 +81,7 @@ klienci_rand <- data.frame("imie" = randomNames(n_klientow, ethnicity = 5, which
                            "miasto" = adresy[2],
                            "kod_pocztowy" = adresy[3],
                            "nr_telefonu" = stri_rand_strings(n_klientow, 9, pattern = "[0-9]"),
-                           "pesel" = rep(NaN,n_klientow))
+                           "pesel" = rep(NA,n_klientow))
 
 apply(klienci_rand, 1, pesel_generator_z_daty)
 
@@ -107,7 +118,6 @@ oferty_rand %>%
   mutate("opis" =  str_replace(templatka_opisu, "city", miejsce_wyjazdu )) %>%
   mutate(opis = str_replace(opis, "liczba_dni", as.character(dlugosc))) -> oferty_rand
 
-#tymczasowe zanim zrobię ściągnięcie z tabeli
 oferty_rand %>%
   mutate("oferta_id" = 1:n_ofert) -> oferty_rand
 
@@ -118,10 +128,10 @@ wycieczki_rand %>%
   left_join( oferty_rand[,c("oferta_id", "dlugosc", "limit_uczestnikow")], by = "oferta_id")%>%
   mutate("data_rozpoczecia" = sample(seq(as.Date("2021/01/01"), as.Date("2021/12/31"),by = "day"), n_wycieczek, replace = TRUE)) %>%
   mutate("data_zakonczenia" = data_rozpoczecia + dlugosc) %>%
-  # mutate("liczba_uczestnikow" = sapply(limit_uczestnikow, function(x) {
-  #   sample(seq(5, x, by = 1), 1)
-  #   })) %>%
-  select(!c(dlugosc)) -> wycieczki_rand
+  mutate("liczba_uczestnikow" = sapply(limit_uczestnikow, function(x) {
+    sample(seq(5, x, by = 1), 1)
+    })) %>%
+  select(!c(dlugosc, liczba_uczestnikow)) -> wycieczki_rand
 
 # tagi
 tagi_rand <- data.frame("nazwa_tagu" = c("morze", "zagranica", "kasyna", "jezioro", "hotel", "gory", "autokar", "samolot", "widoki"))
@@ -137,12 +147,34 @@ atrakcje_rand%>%
 
  platnosci <- c("karta", "gotowka", "przelew_internetowy", "przelew_tradycyjny", "paypal", "voucher")
 
-#losowanie tagów do zamówień
+#losowanie tagów do ofert
 n_otagowan <- 200
-tagi_ofert <- data.frame("tag_id" = sample(1:nrow(tagi_rand), n_otagowan, replace = TRUE),
-                         "oferta_id" = sample(1:nrow(oferty_rand), n_otagowan, replace = TRUE))
-tagi_ofert %>% 
+#potem bedzie sciagniete z tabeli, na razie 1:nrow(tagi_rand) i 1:nrow(oferty_rand)
+id_tagi <- 1:nrow(tagi_rand)
+id_ofert <- 1:nrow(oferty_rand)
+
+tagi_ofert <- data.frame("tag_id" = sample(id_tagi, n_otagowan, replace = TRUE),
+                         "oferta_id" = sample(id_ofert, n_otagowan, replace = TRUE))
+tagi_ofert_rand <- tagi_ofert %>% 
   distinct(`tag_id`, `oferta_id`)
+
+# losowanie atrakcji wycieczek
+n_atrakcji_w_ofertcie <- 200
+#potem bedzie sciagniete z tabeli, na razie 1:nrow(atrakcje_rand) i 1:nrow(oferty_rand)
+id_atrakcji <- 1:nrow(atrakcje_rand)
+id_ofert <- 1:nrow(oferty_rand)
+
+atrakcje_ofert <- data.frame("atrakcja_id" = sample(id_atrakcji, n_atrakcji_w_ofertcie, replace = TRUE),
+                         "oferta_id" = sample(id_ofert, n_atrakcji_w_ofertcie, replace = TRUE))
+atrakcje_ofert_rand <- atrakcje_ofert %>% 
+  distinct(`atrakcja_id`, `oferta_id`)
+
+#klasy ofert
+klasy_ofert <- data.frame("mnoznik" = c(1.25, 1.5, 2),
+                          "opis" = c("dostep do nielimitowanych przekasek",
+                                     "dostep do nielimitowanych przekasek, pierwszenstwo w wyborze pokoju",
+                                     "klasa VIP, pokoje VIP, trasport VIP"))
+
 
 # zamowienia: klient_id, wycieczka_id, liczba_osob, klasa_oferty, sposob_platnosci
 # n_zamowien <- 250
@@ -199,5 +231,4 @@ tagi_ofert %>%
 #   return(zamowienia)
 # }
 # generator_zamowien(wycieczki_rand)
-
 
