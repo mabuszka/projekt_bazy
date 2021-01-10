@@ -72,7 +72,6 @@ losuj_adres_dla_kraju <- function(wiersz) {
   return(wiersz)
 }
 
-# ogarnąć żeby doklejać pesele
 adresy <- t(apply(adresy,1,losuj_adres_dla_kraju))
 klienci_rand <- data.frame("imie" = randomNames(n_klientow, ethnicity = 5, which.names = "first"),
                            "nazwisko" = randomNames(n_klientow, ethnicity = 5, which.names = "last"),
@@ -180,7 +179,7 @@ klasy_ofert <- data.frame("mnoznik" = c(1.25, 1.5, 2),
 # zamowienia: klient_id, wycieczka_id, liczba_osob, klasa_oferty, sposob_platnosci
 
 # n_zamowien <- 250
-# #tymczasowo, potem trzeba zaci?gn?? z bazy
+# #tymczasowo, potem trzeba zaciagnac z bazy
 # id_wycieczki <- 1:n_wycieczek
 # trwanie<-as.integer(unlist(wycieczki_rand["data_zakonczenia"]-wycieczki_rand["data_rozpoczecia"]))
 # limit<-wycieczki_rand["limit_uczestnikow"]
