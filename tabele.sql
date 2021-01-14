@@ -1,93 +1,94 @@
-CREATE TABLE Uczestnicy(
-				Uczestnik_id 		SERIAL,
-				Imie 				VARCHAR(100),
-				Nazwisko 			VARCHAR(100),
-				Kraj_zamieszkania 	VARCHAR(100),
-				Miasto 				VARCHAR(100),
-				Kod_pocztowy 		VARCHAR(6),
-				Ulica 				VARCHAR(100)
-				Numer_domu 			INTEGER,
-				Data_urodzenia		DATE
+CREATE TABLE uczestnicy(
+				uczestnik_id 		SERIAL,
+				imie 				VARCHAR(100),
+				nazwisko 			VARCHAR(100),
+				kraj_zamieszkania 	VARCHAR(100),
+				miasto 				VARCHAR(100),
+				kod_pocztowy 		VARCHAR(6),
+				ulica 				VARCHAR(100)
+				numer_domu 			VARCHAR(100),
+				data_urodzenia		DATE
 				PESEL 				VARCHAR(11),
-				Nr_telefonu			VARCHAR(20)
+				nr_telefonu			VARCHAR(20)
 )
 
-CREATE TABLE Przewodnicy(
-				Przewodnik_id 		SERIAL
-				Imie 				VARCHAR(100),
-				Nazwisko 			VARCHAR(100),
-				Adres_email 		VARCHAR(200),
-				Nr_telefonu 		VARCHAR(20)
+CREATE TABLE przewodnicy(
+				przewodnik_id 		SERIAL
+				imie 				VARCHAR(100),
+				nazwisko 			VARCHAR(100),
+				adres_email 		VARCHAR(200),
+				nr_telefonu 		VARCHAR(20)
 )
 
-CREATE TABLE Wycieczki(
-				Wycieczka_id 		SERIAL,
-				Liczba_uczestnikow 	INTEGER,
-				Data_rozpoczecia 	DATE,
-				Data_zakonczenia 	DATE,
-				Oferta_id 			INTEGER
+CREATE TABLE wycieczki(
+				wycieczka_id 		SERIAL,
+				liczba_uczestnikow 	INTEGER,
+				data_rozpoczecia 	DATE,
+				data_zakonczenia 	DATE,
+				oferta_id 			INTEGER
 )
 
-CREATE TABLE Oferty(
-				Oferta_id 			SERIAL,
-				Miejsce_wyjazdu 	VARCHAR(100),
-				Limit_uczestnikow 	INTEGER,
-				Dlugosc_trwania 	INTEGER,
-				Cena_podstawowa 	DECIMAL(10,2),
-				Opis_oferty 		TEXT
+CREATE TABLE oferty(
+				oferta_id 			SERIAL,
+				miejsce_wyjazdu 	VARCHAR(100),
+				limit_uczestnikow 	INTEGER,
+				dlugosc_trwania 	INTEGER,
+				cena_podstawowa 	DECIMAL(10,2),
+				opis_oferty 		TEXT,
+				zdjecie				TEXT
 )
 
-CREATE TABLE Multimedia(
-				Multimedium_id 		SERIAL,
-				Zdjecie 			TEXT,
-				Oferta_id 			INTEGER
+-- CREATE TABLE Multimedia(
+				-- Multimedium_id 		SERIAL,
+				-- Zdjecie 				TEXT,
+				-- Oferta_id 			INTEGER
+-- )
+
+CREATE TABLE tagi(
+				tag_id 				SERIAL,
+				nazwa_tagu 			VARCHAR(100),
+				opis 				TEXT
 )
 
-CREATE TABLE Tagi(
-				Tag_id 				SERIAL,
-				Nazwa_tagu 			VARCHAR(100),
-				Opis 				TEXT
+CREATE TABLE tagi_ofert(
+				tag_id 				INTEGER,
+				oferta_id 			INTEGER
 )
 
-CREATE TABLE Tagi_ofert(
-				Tag_id 				INTEGER,
-				Oferta_id 			INTEGER
+CREATE TABLE atrakcje(
+				atrakcja_id 		SERIAL,
+				nazwa_artakcji 		VARCHAR(250),
+				czy_dla_dzieci 		BOOLEAN,
+				opis_atrakcji 		TEXT
 )
 
-CREATE TABLE Atrakcje(
-				Atrakcja_id 		SERIAL,
-				Nazwa_artakcji 		VARCHAR(250),
-				Czy_dla_dzieci 		BOOLEAN,
-				Opis_atrakcji 		TEXT
+CREATE TABLE atrakcje_w_ofercie(
+				oferta_id 			INTEGER,
+				atrakcja_id 		INTEGER
 )
 
-CREATE TABLE Atrakcje_w_ofercie(
-				Oferta_id 			INTEGER,
-				Atrakcja_id 		INTEGER
+CREATE TABLE przewodnictwa(
+				przewodnik_id 		INTEGER,
+				wycieczka_id 		INTEGER
 )
 
-CREATE TABLE Przewodnictwa(
-				Przewodnik_id 		INTEGER,
-				Wycieczka_id 		INTEGER
+CREATE TABLE zamowienia(
+				zamowienie_id 		SERIAL,
+				klient_id 			INTEGER,
+				wycieczka_id 		INTEGER,
+				liczba_osob 		INTEGER,
+				wartosc_zamowienia 	DECIMAL(10,2),
+				klasa_oferty 		INTEGER,
+				sposob_platnosci 	VARCHAR(100)
 )
 
-CREATE TABLE Zamowienia(
-				Zamowienie_id 		SERIAL,
-				Klient_id 			INTEGER,
-				Wycieczka_id 		INTEGER,
-				Liczba_osob 		INTEGER,
-				Wartosc_zamowienia 	DECIMAL(10,2),
-				Klasa_oferty 		INTEGER,
-				Sposob_platnosci 	VARCHAR(100)
+CREATE TABLE klasy_ofert(
+				klasa 				INTEGER,
+				mnoznik 			DECIMAL(10,2),
+				opis_slowny 		TEXT
 )
 
-CREATE TABLE Klasy_ofert(
-				Klasa 				INTEGER,
-				Mnoznik 			DECIMAL(10,2),
-				Opis_slowny 		TEXT
-)
-
-CREATE TABLE Uczestnicy_w_zamowieniu(
-				Uczestnik_id 		INTEGER,
-				Zamowienie_id 		INTEGER
+CREATE TABLE uczestnicy_w_zamowieniu(
+				uczestnik_id 		INTEGER,
+				zamowienie_id 		INTEGER
 )
