@@ -30,6 +30,11 @@ ALTER TABLE uczestnicy COLUMN numer_domu SET NOT NULL;
 
 ALTER TABLE uczestnicy COLUMN nr_telefonu SET NOT NULL;
 
+ALTER TABLE uczestnicy ADD PRIMARY KEY (uczestnik_id);
+
+ALTER TABLE uczestnicy ADD CHECK (nr_telefonu SIMILAR TO '[0-9+.-]{1,}');
+--ALTER TABLE uczestnicy ADD CHECK (kod_pocztowy LIKE );
+
 -- zamowienia (zamowienie_id 		SERIAL,
 				-- klient_id 			INTEGER,
 				-- wycieczka_id 		INTEGER,
@@ -52,6 +57,15 @@ ALTER TABLE zamowienia COLUMN klient_id SET NOT NULL;
 
 ALTER TABLE zamowienia ADD CHECK (liczba_osob >= 0);
 
+ALTER TABLE zamowienia ADD PRIMARY KEY (zamowienie_id);
+
+ALTER TABLE zamowienia ADD FOREIGN KEY (klient_id) REFERENCES uczestnicy(uczestnik_id) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE zamowienia ADD FOREIGN KEY (wycieczka_id) REFERENCES wycieczki(wycieczka_id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+ALTER TABLE zamowienia ADD FOREIGN KEY (klasa_oferty) REFERENCES klasy_ofert(klasa) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+ALTER TABLE zamowienia ADD CHECK (sposob_platnosci IN ('karta','gotowka','przelew_internetowy','przelew_tradycyjny','paypal','voucher'));
 
 -- przewodnicy (przewodnik_id 		SERIAL
 				-- imie 				VARCHAR(100),
@@ -66,6 +80,12 @@ ALTER TABLE przewodnicy COLUMN nazwisko SET NOT NULL;
 ALTER TABLE przewodnicy COLUMN adres_email SET NOT NULL;
 
 ALTER TABLE przewodnicy COLUMN nr_telefonu SET NOT NULL;
+
+ALTER TABLE przewodnicy ADD PRIMARY KEY (przewodnik_id);
+
+ALTER TABLE przewodnicy ADD CHECK (nr_telefonu SIMILAR TO “[0-9+.-]{1,}”);
+
+ALTER TABLE przewodnicy ADD CHECK (adres_email LIKE '%_@_%._%');
 
 -- wycieczki (wycieczka_id 		SERIAL,
 				-- liczba_uczestnikow 	INTEGER,
@@ -84,6 +104,10 @@ ALTER TABLE wycieczki COLUMN oferta_id SET NOT NULL;
 ALTER TABLE wycieczki ADD CHECK (data_zakonczenia >= data_rozpoczecia);
 
 ALTER TABLE wycieczki ADD CHECK (liczba_uczestnikow >= 0);
+
+ALTER TABLE wycieczki ADD PRIMARY KEY (wycieczka_id);
+
+ALTER TABLE wycieczki ADD FOREIGN KEY (oferta_id) REFERENCES oferty(oferta_id);
 
 
 -- oferty      	  (oferta_id 			SERIAL,
@@ -110,5 +134,5 @@ ALTER TABLE oferty ADD CHECK (limit_uczestnikow > 0);
 
 ALTER TABLE oferty ADD CHECK (cena_podstawowa > 0);
 
-
+ALTER TABLE oferty ADD PRIMARY KEY (oferta_id);
 
