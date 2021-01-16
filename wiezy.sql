@@ -1,6 +1,8 @@
 -- klasy_ofert
 ALTER TABLE klasy_ofert ADD CHECK (mnoznik > 0);
 
+ALTER TABLE ADD PRIMARY KEY (klasa);
+
 -- uczestnicy uczestnik_id 		SERIAL,
 				-- imie 				VARCHAR(100),
 				-- nazwisko 			VARCHAR(100),
@@ -126,4 +128,24 @@ ALTER TABLE oferty ADD CHECK (limit_uczestnikow > 0);
 ALTER TABLE oferty ADD CHECK (cena_podstawowa > 0);
 
 ALTER TABLE oferty ADD PRIMARY KEY (oferta_id);
+
+-- tagi
+
+ALTER TABLE tagi ADD PRIMARY KEY (tag_id);
+
+-- tagi_ofert
+
+ALTER TABLE tagi_ofert ADD PRIMARY KEY (oferta_id, tag_id);
+
+-- przewodnictwa
+
+ALTER TABLE przewodnictwa ADD PRIMARY KEY (przewodnik_id, wycieczka_id);
+
+-- atrakcje_w_ofercie
+
+ALTER TABLE atrakcje_w_ofercie ADD PRIMARY KEY (oferta_id, atrakcja_id);
+
+-- uczestnicy_w_zamowieniu
+
+ALTER TABLE uczestnicy_w_zamowieniu ADD PRIMARY KEY (zamowienie_id, uczestnik_id);
 
