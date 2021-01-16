@@ -122,11 +122,6 @@ LIMIT 5;
 
 
 
-
-
-
-
-
 -- 10 przewodnikow z największą liczbą poprowadzonych wycieczek
 
 CREATE VIEW najbardziej_doswiadczeni_przewodnicy AS
@@ -140,3 +135,50 @@ LIMIT 10;
 
 -- dane do sprawdzenia 
 -- INSERT INTO przewodnicy(imie) VALUES ('Adam')
+
+
+-- kolidujące wycieczki dla przewodników (id przewodnika - id wycieczki ktorej nie może poprowadzić bo już ma coś w tym terminie)
+
+CREATE VIEW kolidujace_wycieczki_przewodnikow AS
+SELECT DISTINCT p.przewodnik_id, w2.wycieczka_id AS wycieczka_z_kolizja
+FROM przewodnicy p 
+	JOIN przewodnictwa pa
+		ON (p.przewodnik_id = pa.przewodnik_id)
+	JOIN wycieczki w 
+		ON (w.wycieczka_id = pa.wycieczka_id)
+	JOIN wycieczki w2
+		ON	(((w.data_rozpoczecia <= w2.data_rozpoczecia) 
+				AND (w.data_zakonczenia >= w2.data_rozpoczecia)) 
+			OR
+			((w.data_rozpoczecia <= w2.data_zakonczenia) 
+				AND (w.data_zakonczenia >= w2.data_zakonczenia)) 
+			OR 
+			((w.data_rozpoczecia >= w2.data_rozpoczecia) 
+				AND (w.data_zakonczenia <= w2.data_zakonczenia)))
+EXCEPT 
+	SELECT DISTINCT p.przewodnik_id, w.wycieczka_id
+FROM przewodnicy p 
+	JOIN przewodnictwa pa
+		ON (p.przewodnik_id = pa.przewodnik_id)
+	JOIN wycieczki w 
+		ON (w.wycieczka_id = pa.wycieczka_id)
+ORDER BY przewodnik_id ASC;
+				
+-- INSERT INTO przewodnicy(imie) VALUES ('Adam'); --1
+-- INSERT INTO przewodnicy(imie) VALUES ('Borys'); --2
+-- INSERT INTO przewodnicy(imie ) VALUES ('Hans');--3
+-- INSERT INTO przewodnicy(imie ) VALUES ('Stef');--4
+-- INSERT INTO przewodnicy(imie) VALUES ('Pierr');--5
+-- INSERT INTO przewodnicy(imie) VALUES ('Jaux');--6
+			
+			
+-- INSERT INTO wycieczki(data_rozpoczecia, data_zakonczenia) VALUES ('2020.01.01','2020.01.14'); --16
+-- INSERT INTO wycieczki(data_rozpoczecia, data_zakonczenia) VALUES ('2020.01.07','2020.01.14'); --17
+-- INSERT INTO wycieczki(data_rozpoczecia, data_zakonczenia) VALUES ('2020.02.07','2020.02.14'); --18
+-- INSERT INTO wycieczki(data_rozpoczecia, data_zakonczenia) VALUES ('2020.02.07','2020.02.10'); --19
+
+-- INSERT INTO przewodnictwa(przewodnik_id, wycieczka_id) VALUES (1,16);
+-- INSERT INTO przewodnictwa(przewodnik_id, wycieczka_id) VALUES (1,17);
+-- INSERT INTO przewodnictwa(przewodnik_id, wycieczka_id) VALUES (2,16);
+-- INSERT INTO przewodnictwa(przewodnik_id, wycieczka_id) VALUES (3,18);
+-- INSERT INTO przewodnictwa(przewodnik_id, wycieczka_id) VALUES (4,19);
