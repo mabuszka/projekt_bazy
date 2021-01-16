@@ -9,8 +9,12 @@ CREATE TABLE Uczestnicy(
 				Numer_domu 			VARCHAR(100),
 				Data_urodzenia 		DATE,
 				PESEL 				VARCHAR(11),
+<<<<<<< Updated upstream
 				Nr_telefonu 		VARCHAR(20)
 );
+=======
+				nr_telefonu			VARCHAR(20))
+>>>>>>> Stashed changes
 
 CREATE TABLE Przewodnicy(
 				Przewodnik_id 	 	SERIAL,
