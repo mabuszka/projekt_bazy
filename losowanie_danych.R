@@ -112,10 +112,10 @@ oferty_rand <- data.frame("miejsce_wyjazdu" = sample(cities[["name"]], n_ofert,r
                           "dlugosc" = sample(2:14, n_ofert, replace = TRUE))
 oferty_rand %>% 
   mutate("cena" = sample(400:1200, n_ofert) * dlugosc) -> oferty_rand
-templatka_opisu <- c("Wspanialy wyjazd do city! Niewiarygodne przeżycia gwarantowane. Zrelaksuj sie az liczba_dni dni. W ramach wyjazdu wiele niesamowitych atrakcji.")
+templatka_opisu <- c("Wspanialy wyjazd do city! Niewiarygodne przezycia gwarantowane. Zrelaksuj sie az liczba_dni dni. W ramach wyjazdu wiele niesamowitych atrakcji.")
 
 oferty_rand %>%
-  mutate("opis" =  str_replace(templatka_opisu, "city", miejsce_wyjazdu )) %>%
+  mutate("opis" =  str_replace(templatka_opisu, "city", as.character(miejsce_wyjazdu) )) %>%
   mutate(opis = str_replace(opis, "liczba_dni", as.character(dlugosc))) -> oferty_rand
 
 oferty_rand %>%

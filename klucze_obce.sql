@@ -16,3 +16,14 @@ ALTER TABLE atrakcje_w_ofercie ADD CONSTRAINT atrakcje_w_ofercie_oferta FOREIGN 
 ALTER TABLE atrakcje_w_ofercie ADD CONSTRAINT atrakcje_w_ofercie_atrakcja FOREIGN KEY (atrakcja_id)
 	REFERENCES atrakcje(atrakcja_id) ON DELETE CASCADE ON UPDATE UPDATE;
 	
+ALTER TABLE zamowienia ADD FOREIGN KEY (klient_id) 
+	REFERENCES uczestnicy(uczestnik_id) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE zamowienia ADD FOREIGN KEY (wycieczka_id) 
+	REFERENCES wycieczki(wycieczka_id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+ALTER TABLE zamowienia ADD FOREIGN KEY (klasa_oferty) 
+	REFERENCES klasy_ofert(klasa) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+ALTER TABLE wycieczki ADD FOREIGN KEY (oferta_id) REFERENCES oferty(oferta_id);
+
