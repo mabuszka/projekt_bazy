@@ -94,9 +94,11 @@ LIMIT 10;
 -- INSERT INTO oferty(miejsce_wyjazdu) VALUES ('a');
 -- INSERT INTO oferty(miejsce_wyjazdu) VALUES ('b');
 -- INSERT INTO oferty(miejsce_wyjazdu) VALUES ('c');
--- INSERT INTO wycieczki(oferta_id) VALUES (1);
--- INSERT INTO wycieczki(oferta_id) VALUES (1);
--- INSERT INTO wycieczki(oferta_id) VALUES (1);
+INSERT INTO wycieczki(oferta_id, liczba_uczestnikow) VALUES (1,2);
+INSERT INTO wycieczki(oferta_id,liczba_uczestnikow) VALUES (1,2);
+INSERT INTO wycieczki(oferta_id,liczba_uczestnikow) VALUES (1,2);
+INSERT INTO wycieczki(oferta_id,liczba_uczestnikow) VALUES (1,2);
+INSERT INTO wycieczki(oferta_id,liczba_uczestnikow) VALUES (1,2);
 -- INSERT INTO wycieczki(oferta_id) VALUES (1);
 -- INSERT INTO wycieczki(oferta_id) VALUES (1);
 -- INSERT INTO wycieczki(oferta_id) VALUES (2);
@@ -107,7 +109,14 @@ LIMIT 10;
 
 -- 5 najbardziej popularnych ofert 
 
-CREATE
+CREATE VIEW najwiecej_odwiedzane_cele AS
+SELECT o.miejsce_wyjazdu, SUM(w.liczba_uczestnikow) AS ile_osob_odwiedzilo
+FROM oferty o
+	JOIN wycieczki w 
+		ON (o.oferta_id = w.oferta_id)
+GROUP BY o.miejsce_wyjazdu
+ORDER BY SUM(w.liczba_uczestnikow) DESC
+LIMIT 5;
 
 
 
