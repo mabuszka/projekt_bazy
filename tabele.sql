@@ -7,17 +7,18 @@ CREATE TABLE uczestnicy(
 				kod_pocztowy 		VARCHAR(6),
 				ulica 				VARCHAR(100),
 				numer_domu 			VARCHAR(100),
-				data_urodzenia		 DATE,
+				data_urodzenia 		DATE,
 				PESEL 				VARCHAR(11),
-				nr_telefonu			 VARCHAR(20)
+				nr_telefonu 		VARCHAR(20)
 );
 
 CREATE TABLE przewodnicy(
-				przewodnik_id 		SERIAL,
-				imie 				VARCHAR(100),
-				nazwisko 			VARCHAR(100),
-				adres_email 		VARCHAR(200),
-				nr_telefonu 		VARCHAR(20)
+				przewodnik_id 	 	SERIAL,
+				imie 	 			VARCHAR(100),
+				nazwisko 	  		VARCHAR(100),
+				adres_email 	 	VARCHAR(200),
+				nr_telefonu  		VARCHAR(20),
+				aktywny 			BOOLEAN --nowe
 );
 
 CREATE TABLE wycieczki(
@@ -29,37 +30,31 @@ CREATE TABLE wycieczki(
 );
 
 CREATE TABLE oferty(
-				oferta_id 			 SERIAL,
-				miejsce_wyjazdu 	 VARCHAR(100),
-				limit_uczestnikow 	 INTEGER,
-				dlugosc_trwania 	 INTEGER,
-				cena_podstawowa 	 DECIMAL(10,2),
-				opis_oferty 		 TEXT,
-				zdjecie				 TEXT
+				oferta_id 		  	SERIAL,
+				miejsce_wyjazdu  	VARCHAR(100),
+				limit_uczestnikow  	INTEGER,
+				dlugosc_trwania  	INTEGER,
+				cena_podstawowa  	DECIMAL(10,2),
+				opis_oferty 	 	TEXT,
+				zdjecie	 		 	TEXT
 );
 
--- CREATE TABLE Multimedia(
-				-- Multimedium_id 		SERIAL,
-				-- Zdjecie 				TEXT,
-				-- Oferta_id 			INTEGER
--- )
-
 CREATE TABLE tagi(
-				tag_id 				SERIAL,
-				nazwa_tagu 			VARCHAR(100),
-				opis 				TEXT
+				tag_id 	 			SERIAL,
+				nazwa_tagu 	 		VARCHAR(100),
+				opis 		 		TEXT
 );
 
 CREATE TABLE tagi_ofert(
-				tag_id 				INTEGER,
-				oferta_id 			INTEGER
+				tag_id 		 		INTEGER,
+				oferta_id 	 		INTEGER
 );
 
 CREATE TABLE atrakcje(
-				atrakcja_id 		SERIAL,
+				atrakcja_id  		SERIAL,
 				nazwa_artakcji 		VARCHAR(250),
 				czy_dla_dzieci 		BOOLEAN,
-				opis_atrakcji 		TEXT
+				opis_atrakcji   	TEXT
 );
 
 CREATE TABLE atrakcje_w_ofercie(
@@ -84,7 +79,7 @@ CREATE TABLE zamowienia(
 
 CREATE TABLE klasy_ofert(
 				klasa 				INTEGER,
-				mnoznik 			DECIMAL(10,2),
+				nnoznik 			DECIMAL(10,2),
 				opis_slowny 		TEXT
 );
 
