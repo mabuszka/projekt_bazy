@@ -273,8 +273,33 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 
-
-
+-- sprawdz zblizajace sie wycieczki
+CREATE FUNCTION zblizajace_sie_wycieczki(dni INTEGER) 
+RETURNS TABLE ( wycieczka_id 		INTEGER,
+				miejsce_wyjazdu  	VARCHAR(100),
+				liczba_uczestnikow 	INTEGER,
+				limit_uczestnikow  	INTEGER,
+				data_rozpoczecia 	DATE,
+				data_zakonczenia 	DATE,
+				dlugosc_trwania  	INTEGER,
+				cena_podstawowa  	DECIMAL(10,2)
+) AS $$
+BEGIN
+	RETURN QUERY
+	SELECT w.wycieczka_id,
+			o.miejsce_wyjazdu,
+			w.liczba_uczestnikow,
+			o.limit_uczestnikow,
+			w.data_rozpoczecia ,
+			w.data_zakonczenia,
+			o.dlugosc_trwania,
+			o.cena_podstawowa
+	FROM oferty o
+		JOIN wycieczki w
+			ON (w.oferta_id = o.oferta_id)
+	WHERE w.data_rozpoczecia < CURRENT_DATE + dni;
+END;
+$$ LANGUAGE 'plpgsql';
 
 
 
