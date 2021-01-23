@@ -198,7 +198,7 @@ ORDER BY przewodnik_id ASC;
 CREATE VIEW statystyki_ofert AS
 SELECT o.oferta_id, o.miejsce_wyjazdu, o.dlugosc_trwania, MIN(date_part('year',age(u.data_urodzenia))) najmlodszy_uczestnik,
 		MAX(date_part('year',age(u.data_urodzenia))) AS najstarszy_uczestnik,
-		AVG(date_part('year',age(u.data_urodzenia))) AS sredni_wiek_uczestnika,
+		ROUND(AVG(date_part('year',age(u.data_urodzenia)))::DECIMAL(10,3),1) AS sredni_wiek_uczestnika,
 		MODE() WITHIN GROUP (ORDER BY kraj_zamieszkania DESC) AS najwiecej_z_kraju
 FROM oferty o
 	JOIN wycieczki w
@@ -212,3 +212,32 @@ FROM oferty o
 GROUP BY (o.oferta_id, o.miejsce_wyjazdu, o.dlugosc_trwania);
 
 
+INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Adam','Nowak','Polska', '1999-03-13' );
+INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Borys','Nowak','Polska','2001-03-13');
+INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Hans','Nowak','Niemcy', '1987-03-13');
+INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Stef','Nowak','Niemcy', '1954-03-13');
+INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Pierr','Nowak','Francja', '1996-03-13');
+INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Jaux','Nowak','Francja', '2003-03-13');
+
+INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(1,1);
+INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(1,2);
+INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(2,1);
+INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(3,1);
+INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(3,2);
+INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(4,1);
+INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(5,1);
+INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(5,2);
+
+INSERT INTO zamowienia(wycieczka_id) VALUES (1),(2),(3),(4);
+
+INSERT INTO oferty(miejsce_wyjazdu) VALUES ('a');
+INSERT INTO oferty(miejsce_wyjazdu) VALUES ('b');
+INSERT INTO oferty(miejsce_wyjazdu) VALUES ('c');
+
+INSERT INTO wycieczki(oferta_id) VALUES (1);
+INSERT INTO wycieczki(oferta_id) VALUES (1);
+INSERT INTO wycieczki(oferta_id) VALUES (2);
+INSERT INTO wycieczki(oferta_id) VALUES (2);
+INSERT INTO wycieczki(oferta_id) VALUES (2);
+INSERT INTO wycieczki(oferta_id) VALUES (3);
+INSERT INTO wycieczki(oferta_id) VALUES (3);
