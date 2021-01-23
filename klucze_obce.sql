@@ -34,7 +34,8 @@ ALTER TABLE zamowienia ADD FOREIGN KEY (wycieczka_id)
 ALTER TABLE zamowienia ADD FOREIGN KEY (klasa_oferty) 
 	REFERENCES klasy_ofert(klasa) ON UPDATE CASCADE ON DELETE RESTRICT;
 
--- wycieczki
+ALTER TABLE wycieczki ADD FOREIGN KEY (oferta_id) 
+	REFERENCES oferty(oferta_id) ON UPDATE RESTRICT ON DELETE RESTRICT;
 
 ALTER TABLE wycieczki ADD FOREIGN KEY (oferta_id) 
 	REFERENCES oferty(oferta_id) ON UPDATE CASCADE ON DELETE RESTRICT;
