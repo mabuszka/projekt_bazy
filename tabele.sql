@@ -79,7 +79,7 @@ CREATE TABLE zamowienia(
 
 CREATE TABLE klasy_ofert(
 				klasa 				INTEGER,
-				nnoznik 			DECIMAL(10,2),
+				mnoznik 			DECIMAL(10,2),
 				opis_slowny 		TEXT
 );
 
