@@ -52,7 +52,7 @@ CREATE TABLE tagi_ofert(
 
 CREATE TABLE atrakcje(
 				atrakcja_id  		SERIAL,
-				nazwa_artakcji 		VARCHAR(250),
+				nazwa_atrakcji 		VARCHAR(250),
 				czy_dla_dzieci 		BOOLEAN,
 				opis_atrakcji   	TEXT
 );
