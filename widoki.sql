@@ -211,33 +211,33 @@ FROM oferty o
 		ON (u.uczestnik_id = uz.uczestnik_id)
 GROUP BY (o.oferta_id, o.miejsce_wyjazdu, o.dlugosc_trwania);
 
+-- do sprawdzenia statystyki_ofert (musza byc swieze tabele zeby sie id zgadzaly)
+-- INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Adam','Nowak','Polska', '1999-03-13' );
+-- INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Borys','Nowak','Polska','2001-03-13');
+-- INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Hans','Nowak','Niemcy', '1987-03-13');
+-- INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Stef','Nowak','Niemcy', '1954-03-13');
+-- INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Pierr','Nowak','Francja', '1996-03-13');
+-- INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Jaux','Nowak','Francja', '2003-03-13');
 
-INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Adam','Nowak','Polska', '1999-03-13' );
-INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Borys','Nowak','Polska','2001-03-13');
-INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Hans','Nowak','Niemcy', '1987-03-13');
-INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Stef','Nowak','Niemcy', '1954-03-13');
-INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Pierr','Nowak','Francja', '1996-03-13');
-INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Jaux','Nowak','Francja', '2003-03-13');
+-- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(1,1);
+-- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(1,2);
+-- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(2,1);
+-- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(3,1);
+-- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(3,2);
+-- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(4,1);
+-- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(5,1);
+-- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(5,2);
 
-INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(1,1);
-INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(1,2);
-INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(2,1);
-INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(3,1);
-INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(3,2);
-INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(4,1);
-INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(5,1);
-INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(5,2);
+-- INSERT INTO zamowienia(wycieczka_id) VALUES (1),(2),(3),(4);
 
-INSERT INTO zamowienia(wycieczka_id) VALUES (1),(2),(3),(4);
+-- INSERT INTO oferty(miejsce_wyjazdu) VALUES ('a');
+-- INSERT INTO oferty(miejsce_wyjazdu) VALUES ('b');
+-- INSERT INTO oferty(miejsce_wyjazdu) VALUES ('c');
 
-INSERT INTO oferty(miejsce_wyjazdu) VALUES ('a');
-INSERT INTO oferty(miejsce_wyjazdu) VALUES ('b');
-INSERT INTO oferty(miejsce_wyjazdu) VALUES ('c');
-
-INSERT INTO wycieczki(oferta_id) VALUES (1);
-INSERT INTO wycieczki(oferta_id) VALUES (1);
-INSERT INTO wycieczki(oferta_id) VALUES (2);
-INSERT INTO wycieczki(oferta_id) VALUES (2);
-INSERT INTO wycieczki(oferta_id) VALUES (2);
-INSERT INTO wycieczki(oferta_id) VALUES (3);
-INSERT INTO wycieczki(oferta_id) VALUES (3);
+-- INSERT INTO wycieczki(oferta_id) VALUES (1);
+-- INSERT INTO wycieczki(oferta_id) VALUES (1);
+-- INSERT INTO wycieczki(oferta_id) VALUES (2);
+-- INSERT INTO wycieczki(oferta_id) VALUES (2);
+-- INSERT INTO wycieczki(oferta_id) VALUES (2);
+-- INSERT INTO wycieczki(oferta_id) VALUES (3);
+-- INSERT INTO wycieczki(oferta_id) VALUES (3);

@@ -1,7 +1,7 @@
 -- klasy_ofert
 ALTER TABLE klasy_ofert ADD CHECK (mnoznik > 0);
 
-ALTER TABLE ADD PRIMARY KEY (klasa);
+ALTER TABLE klasy_ofert ADD PRIMARY KEY (klasa);
 
 -- uczestnicy uczestnik_id 		SERIAL,
 				-- imie 				VARCHAR(100),
@@ -20,17 +20,17 @@ ALTER TABLE uczestnicy ADD CHECK (kraj_zamieszkania IN ('Polska', 'Francja', 'Ni
 
 ALTER TABLE uczestnicy ADD CHECK (data_urodzenia <= CURRENT_DATE);
 
-ALTER TABLE uczestnicy COLUMN imie SET NOT NULL;
+ALTER TABLE uczestnicy ALTER COLUMN imie SET NOT NULL;
 
-ALTER TABLE uczestnicy COLUMN nazwisko SET NOT NULL;
+ALTER TABLE uczestnicy ALTER COLUMN nazwisko SET NOT NULL;
 
-ALTER TABLE uczestnicy COLUMN kraj_zamieszkania SET NOT NULL;
+ALTER TABLE uczestnicy ALTER COLUMN kraj_zamieszkania SET NOT NULL;
 
-ALTER TABLE uczestnicy COLUMN miasto SET NOT NULL;
+ALTER TABLE uczestnicy ALTER COLUMN miasto SET NOT NULL;
 
-ALTER TABLE uczestnicy COLUMN numer_domu SET NOT NULL;
+ALTER TABLE uczestnicy ALTER COLUMN numer_domu SET NOT NULL;
 
-ALTER TABLE uczestnicy COLUMN nr_telefonu SET NOT NULL;
+ALTER TABLE uczestnicy ALTER COLUMN nr_telefonu SET NOT NULL;
 
 ALTER TABLE uczestnicy ADD PRIMARY KEY (uczestnik_id);
 
@@ -44,17 +44,17 @@ ALTER TABLE uczestnicy ADD CHECK (nr_telefonu SIMILAR TO '[0-9+.-]{1,}');
 				-- klasa_oferty 		INTEGER,
 				-- sposob_platnosci 	VARCHAR(100))
 
-ALTER TABLE zamowienia COLUMN liczba_osob SET NOT NULL;
+ALTER TABLE zamowienia ALTER COLUMN liczba_osob SET NOT NULL;
 
-ALTER TABLE zamowienia COLUMN wartosc_zamowienia SET NOT NULL;
+ALTER TABLE zamowienia ALTER COLUMN wartosc_zamowienia SET NOT NULL;
 
-ALTER TABLE zamowienia COLUMN klasa_oferty SET NOT NULL;
+ALTER TABLE zamowienia ALTER COLUMN klasa_oferty SET NOT NULL;
 
-ALTER TABLE zamowienia COLUMN sposob_platnosci SET NOT NULL;
+ALTER TABLE zamowienia ALTER COLUMN sposob_platnosci SET NOT NULL;
 
-ALTER TABLE zamowienia COLUMN wycieczka_id SET NOT NULL;
+ALTER TABLE zamowienia ALTER COLUMN wycieczka_id SET NOT NULL;
 
-ALTER TABLE zamowienia COLUMN klient_id SET NOT NULL;
+ALTER TABLE zamowienia ALTER COLUMN klient_id SET NOT NULL;
 
 ALTER TABLE zamowienia ADD CHECK (liczba_osob >= 0);
 
@@ -68,13 +68,13 @@ ALTER TABLE zamowienia ADD CHECK (sposob_platnosci IN ('karta','gotowka','przele
 				-- adres_email 		VARCHAR(200),
 				-- nr_telefonu 		VARCHAR(20))
 
-ALTER TABLE przewodnicy COLUMN imie SET NOT NULL;
+ALTER TABLE przewodnicy ALTER COLUMN imie SET NOT NULL;
 
-ALTER TABLE przewodnicy COLUMN nazwisko SET NOT NULL;
+ALTER TABLE przewodnicy ALTER COLUMN nazwisko SET NOT NULL;
 
-ALTER TABLE przewodnicy COLUMN adres_email SET NOT NULL;
+ALTER TABLE przewodnicy ALTER COLUMN adres_email SET NOT NULL;
 
-ALTER TABLE przewodnicy COLUMN nr_telefonu SET NOT NULL;
+ALTER TABLE przewodnicy ALTER COLUMN nr_telefonu SET NOT NULL;
 
 ALTER TABLE przewodnicy ADD PRIMARY KEY (przewodnik_id);
 
@@ -88,13 +88,13 @@ ALTER TABLE przewodnicy ADD CHECK (adres_email LIKE '%_@biuro_bazy.com');
 				-- data_zakonczenia 	DATE,
 				-- oferta_id 			INTEGER)
 
-ALTER TABLE wycieczki COLUMN liczba_uczestnikow SET NOT NULL;
+ALTER TABLE wycieczki ALTER COLUMN liczba_uczestnikow SET NOT NULL;
 
-ALTER TABLE wycieczki COLUMN data_rozpoczecia SET NOT NULL;
+ALTER TABLE wycieczki ALTER COLUMN data_rozpoczecia SET NOT NULL;
 
-ALTER TABLE wycieczki COLUMN data_zakonczenia SET NOT NULL;
+ALTER TABLE wycieczki ALTER COLUMN data_zakonczenia SET NOT NULL;
 
-ALTER TABLE wycieczki COLUMN oferta_id SET NOT NULL;
+ALTER TABLE wycieczki ALTER COLUMN oferta_id SET NOT NULL;
 
 ALTER TABLE wycieczki ADD CHECK (data_zakonczenia >= data_rozpoczecia);
 
@@ -111,15 +111,15 @@ ALTER TABLE wycieczki ADD PRIMARY KEY (wycieczka_id);
 				-- opis_oferty 			TEXT,
 				-- zdjecie				TEXT)
 
-ALTER TABLE oferty COLUMN miejsce_wyjazdu SET NOT NULL;
+ALTER TABLE oferty ALTER COLUMN miejsce_wyjazdu SET NOT NULL;
 
-ALTER TABLE oferty COLUMN limit_uczestnikow SET NOT NULL;
+ALTER TABLE oferty ALTER COLUMN limit_uczestnikow SET NOT NULL;
 
-ALTER TABLE oferty COLUMN dlugosc_trwania SET NOT NULL;
+ALTER TABLE oferty ALTER COLUMN dlugosc_trwania SET NOT NULL;
 
-ALTER TABLE oferty COLUMN cena_podstawowa SET NOT NULL;
+ALTER TABLE oferty ALTER COLUMN cena_podstawowa SET NOT NULL;
 
-ALTER TABLE oferty COLUMN opis_oferty SET NOT NULL;
+ALTER TABLE oferty ALTER COLUMN opis_oferty SET NOT NULL;
 
 ALTER TABLE oferty ADD CHECK (dlugosc_trwania >= 0);
 
