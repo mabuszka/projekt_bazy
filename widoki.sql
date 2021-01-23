@@ -182,3 +182,33 @@ ORDER BY przewodnik_id ASC;
 -- INSERT INTO przewodnictwa(przewodnik_id, wycieczka_id) VALUES (2,16);
 -- INSERT INTO przewodnictwa(przewodnik_id, wycieczka_id) VALUES (3,18);
 -- INSERT INTO przewodnictwa(przewodnik_id, wycieczka_id) VALUES (4,19);
+
+
+-- CREATE VIEW zblizajace_sie_wycieczki AS
+-- SELECT *
+-- FROM wycieczki w
+	-- JOIN oferty o
+		-- ON (o.oferta_id = w.oferta_id)
+-- WHERE 
+
+
+-- CREATE VIEW przewodnicy_bez_zlecenia AS
+
+
+CREATE VIEW statystyki_ofert AS
+SELECT o.oferta_id, o.miejsce_wyjazdu, o.dlugosc_trwania, MIN(date_part('year',age(u.data_urodzenia))) najmlodszy_uczestnik,
+		MAX(date_part('year',age(u.data_urodzenia))) AS najstarszy_uczestnik,
+		AVG(date_part('year',age(u.data_urodzenia))) AS sredni_wiek_uczestnika,
+		MODE() WITHIN GROUP (ORDER BY kraj_zamieszkania DESC) AS najwiecej_z_kraju
+FROM oferty o
+	JOIN wycieczki w
+		ON (w.oferta_id = o.oferta_id)
+	JOIN zamowienia z
+		ON (z.wycieczka_id = w.wycieczka_id)
+	JOIN uczestnicy_w_zamowieniu uz 
+		ON (uz.zamowienie_id = z.zamowienie_id)
+	JOIN uczestnicy u
+		ON (u.uczestnik_id = uz.uczestnik_id)
+GROUP BY (o.oferta_id, o.miejsce_wyjazdu, o.dlugosc_trwania);
+
+
