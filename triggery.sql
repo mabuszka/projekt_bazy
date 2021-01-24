@@ -127,4 +127,24 @@ $$ LANGUAGE 'plpgsql';
 CREATE TRIGGER spr_ilosc_osob_tr BEFORE INSERT OR UPDATE ON wycieczki
 	FOR EACH ROW EXECUTE PROCEDURE spr_ilosc_osob();
 
---spr zeby klient sie nie bilokował?
+
+--spr zeby przewodnik się nie bilokował
+CREATE FUNCTION przewodnik_w_jednym_miejscu() RETURNS TRIGGER AS $$
+DECLARE
+BEGIN
+END;
+$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER spr_przewodnik_tr BEFORE INSERT OR UPDATE ON przewodnictwa
+	FOR EACH ROW EXECUTE PROCEDURE przewodnik_w_jednym_miejscu();
+
+
+--spr czy cena odpowiednia
+CREATE FUNCTION spr_cena() RETURNS TRIGGER AS $$
+DECLARE
+BEGIN
+END;
+$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER spr_cena_tr BEFORE INSERT OR UPDATE ON zamowienia 
+	FOR EACH ROW EXECUTE PROCEDURE spr_cena();
