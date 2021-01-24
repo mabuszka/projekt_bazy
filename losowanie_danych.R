@@ -5,6 +5,15 @@ require(maps)
 require(dplyr)
 require(lubridate)  
 require(DescTools)
+require("RPostgres")
+
+
+
+con <- dbConnect(RPostgres::Postgres(), dbname = "projekt_bazy",
+                 host = "localhost", port = 5432, 
+                 user = "Magda", pass = "tajnehaslo")
+
+
 
 data("world.cities")
 #klienci: imie, nazwisko, kraj, data urodzenia, ulica, nr domu, miasto, kod pocztowy, pesel, nr telefonu
@@ -87,7 +96,27 @@ klienci_rand <- cbind( klienci_rand, "pesel" = apply(klienci_rand, 1, pesel_gene
 
 
 
+klienci_df <- dbGetQuery(con, "SELECT * FROM uczestnicy;")
+uczestnik_to_sql <- function(uczestnik){
+  if (!is.na(uczestnik[10])){
+  paste0("INSERT INTO uczestnicy (imie, nazwisko, data_urodzenia, kraj_zamieszkania, ulica, numer_domu, miasto, kod_pocztowy, nr_telefonu, PESEL) VALUES ('",
+         str_replace_all(uczestnik[1], "'", "''"), "', '", str_replace_all(uczestnik[2], "'", "''"), "', '", str_replace_all(uczestnik[3], "'", "''"), "', '", str_replace_all(uczestnik[4], "'", "''"), "', '", str_replace_all(uczestnik[5], "'", "''"), "', '",
+         str_replace_all(uczestnik[6], "'", "''"), "', '", str_replace_all(uczestnik[7], "'", "''"), "', '", str_replace_all(uczestnik[8], "'", "''"), "', '", str_replace_all(uczestnik[9], "'", "''"), "', '", str_replace_all(uczestnik[10], "'", "''"), "');")
+  }
+  else {
+    paste0("INSERT INTO uczestnicy (imie, nazwisko, data_urodzenia, kraj_zamieszkania, ulica, numer_domu, miasto, kod_pocztowy, nr_telefonu) VALUES ('",
+           str_replace_all(uczestnik[1], "'", "''"), "', '", str_replace_all(uczestnik[2], "'", "''"), "', '", str_replace_all(uczestnik[3], "'", "''"), "', '", str_replace_all(uczestnik[4], "'", "''"), "', '", str_replace_all(uczestnik[5], "'", "''"), "', '",
+           str_replace_all(uczestnik[6], "'", "''"), "', '", str_replace_all(uczestnik[7], "'", "''"), "', '", str_replace_all(uczestnik[8], "'", "''"), "', '", str_replace_all(uczestnik[9], "'", "''"), "');")
+    
+    
+  }
+}
+uczestnik_to_sql(klienci_rand[62,])
+uczestnicy_sql <- apply(klienci_rand, 1, uczestnik_to_sql)
+uczestnicy_sql[62]
+write.table(uczestnicy_sql, file = "uczestnicy_rand.sql", quote = FALSE, row.names = FALSE, col.names = FALSE)
 
+klienci_df <- dbGetQuery(con, "SELECT * FROM uczestnicy;")
 # przewodnicy 
 n_przewodnikow <- 30
 przewodnicy_rand <- data.frame("imie" = randomNames(n_przewodnikow, ethnicity = 5, which.names = "first"),
@@ -98,6 +127,8 @@ emaile <- apply(przewodnicy_rand, 1, function(x){
                 str_to_lower(str_replace_all(x["nazwisko"], " ", "_")),
                 "@biuro_bazy.com", sep = "")})
 przewodnicy_rand <- cbind(przewodnicy_rand, emaile)
+
+
 
 
 #oferty
@@ -218,12 +249,11 @@ id_wycieczki <- 1:n_wycieczek
 trwanie<-as.integer(unlist(wycieczki_rand["data_zakonczenia"]-wycieczki_rand["data_rozpoczecia"]))
 limit<-wycieczki_rand["limit_uczestnikow"]
 wycieczki<-wycieczki_rand
-platnosci<-c("gotowka","karta","przelew_intermnetowy","przelew_tradycyjny","paypal","voucher")
+platnosci<-c("gotowka","karta","przelew_internetowy","przelew_tradycyjny","paypal","voucher")
 
 generator_zamowien <- function(wycieczki){
    id_wycieczki <- 1:n_wycieczek
    limit <- wycieczki["limit_uczestnikow"]
-   
    klienci <- sample(1:n_klientow,n_zamowien,replace = TRUE)
    wyjazdy <- sample(1:n_wycieczek,n_zamowien,replace=TRUE)
    liczba <- sample(1:5,n_zamowien,replace=TRUE) # liczba ludzi w jednym zamowieniu
@@ -270,9 +300,9 @@ zamowienia_rand<-generator_zamowien(wycieczki_rand)
 
 uczestnictwa_rand<-data.frame("wycieczka"=zamowienia_rand[,2],"uczestnik"=zamowienia_rand[,1]) # najpierw dodaje uczestnictwa klientow ktorzy kupili wycieczke
 ile_osob_dodac<-0 # zlicze tu ile ludzi musze dolosowac jako klientow po tym co zrobie na dole
-numer_nowego_uczestnika<-n_klientow #do tego bêdê dodawaæ liczby jako kolejni uczestnicy nowi
+numer_nowego_uczestnika<-n_klientow #do tego b?d? dodawa? liczby jako kolejni uczestnicy nowi
 
-for (k in unique(zamowienia_rand[,1])){ #przechodzê po klientach którzy s¹ w jakimkolwiek zamowieniu jako kupujacy
+for (k in unique(zamowienia_rand[,1])){ #przechodz? po klientach kt?rzy s? w jakimkolwiek zamowieniu jako kupujacy
   zamowienie<-zamowienia_rand[zamowienia_rand[,1]==k,c("wycieczka","liczba_osob")] # dla danego klienta wybieram numery wycieczek na jakie jedzie i ile osob chce na nie zabrac
   max_osob <- max(zamowienie[,2]) # max liczba osob jaka chce klient zabrac na jakas wycieczke
   ile_osob_dodac<-ile_osob_dodac+max_osob # tyle nowych uczestnikow musze wylosowac ze wzgl na tego klienta
@@ -285,4 +315,4 @@ for (k in unique(zamowienia_rand[,1])){ #przechodzê po klientach którzy s¹ w jak
   numer_nowego_uczestnika<-numer_nowego_uczestnika+max_osob #tyle osob dodaje i kolejnych dodaje od wyzszego numerka
 }
 
-# teraz trzeba znowu przeprowadzic losowanie klientow tylko zamiast n_klientow wpisaæ ile_osob_dodac i dokleiæ now¹ ramkê danych do tamtej
+# teraz trzeba znowu przeprowadzic losowanie klientow tylko zamiast n_klientow wpisa? ile_osob_dodac i doklei? now? ramk? danych do tamtej
