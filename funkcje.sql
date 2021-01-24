@@ -338,6 +338,7 @@ SELECT 	o.oferta_id,
 END;
 $$ LANGUAGE 'plpgsql';
 
+-- szukanie ofert z atrakcjami (wersja 'wszystkie') 
 CREATE OR REPLACE FUNCTION oferty_ze_wszystkimi_atrakcjami(VARIADIC szukane_atrakcje TEXT[]) 
 RETURNS TABLE(
 oferta_id 			INTEGER,
@@ -369,8 +370,76 @@ $$ LANGUAGE 'plpgsql';
 
 
 
---template
-CREATE FUNCTION f() RETURNS TEXT AS $$
+--DZIAŁA
+--szukanie ofert z tagami (wersja 'lub')
+CREATE OR REPLACE FUNCTION oferty_z_tagami(VARIADIC szukane_tagi TEXT[]) 
+RETURNS TABLE(
+oferta_id 			INTEGER,
+				miejsce_wyjazdu  	VARCHAR,
+				limit_uczestnikow  	INTEGER,
+				dlugosc_trwania  	INTEGER,
+				cena_podstawowa  	DECIMAL,
+				atrakcje			 TEXT[]
+) AS $$
 BEGIN
+	RETURN QUERY
+SELECT 	o.oferta_id,
+			o.miejsce_wyjazdu,
+			o.limit_uczestnikow,
+			o.dlugosc_trwania,
+			o.cena_podstawowa,
+			array_agg(t.tag)::TEXT[]	
+	FROM oferty o 
+		JOIN tagi_ofert t_o
+			ON (t_o.oferta_id = o.oferta_id)
+		JOIN tagi t
+			ON (t.tag = t_o.tag)
+	WHERE o.oferta_id IN (SELECT 	o.oferta_id
+						FROM oferty o 
+							JOIN tagi_ofert t_o
+								ON (t_o.oferta_id = o.oferta_id)
+							JOIN tagi t
+								ON (t.tag = t_o.tag)
+						WHERE t.tag LIKE ANY(szukane_tagi))
+	GROUP BY (o.oferta_id, o.miejsce_wyjazdu, o.limit_uczestnikow, o.dlugosc_trwania, o.cena_podstawowa);
 END;
 $$ LANGUAGE 'plpgsql';
+
+
+-- szukanie ofert z tagami (wersja 'wszystkie')
+CREATE OR REPLACE FUNCTION oferty_ze_wszystkimi_tagami(VARIADIC szukane_tagi TEXT[]) 
+RETURNS TABLE(
+oferta_id 			INTEGER,
+				miejsce_wyjazdu  	VARCHAR,
+				limit_uczestnikow  	INTEGER,
+				dlugosc_trwania  	INTEGER,
+				cena_podstawowa  	DECIMAL,
+				tagi			 	TEXT[]
+) AS $$
+BEGIN
+	RETURN QUERY
+	
+	
+SELECT 	o.oferta_id,
+			o.miejsce_wyjazdu,
+			o.limit_uczestnikow,
+			o.dlugosc_trwania,
+			o.cena_podstawowa,
+			array_agg(t.tag)::TEXT[]	
+	FROM oferty o 
+		JOIN tagi_ofert t_o
+			ON (t_o.oferta_id = o.oferta_id)
+		JOIN tagi t
+			ON (t.tag = t_o.tag)
+	GROUP BY (o.oferta_id, o.miejsce_wyjazdu, o.limit_uczestnikow, o.dlugosc_trwania, o.cena_podstawowa)
+	HAVING array_agg(t.tag)::TEXT[] @> szukane_tagi;
+END;
+$$ LANGUAGE 'plpgsql';
+
+
+
+-- template
+-- CREATE FUNCTION f() RETURNS TEXT AS $$
+-- BEGIN
+-- END;
+-- $$ LANGUAGE 'plpgsql';
