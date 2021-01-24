@@ -114,10 +114,11 @@ DECLARE
 	osoby_licz INTEGER;
 BEGIN
 	SELECT sum(liczba_osob) INTO osoby_licz FROM zamowienia WHERE wycieczka_id=NEW.wycieczka_id;
+	IF (osoby_licz IS NULL) THEN
+		osoby_licz:=0;
+	END IF;
 	IF (osoby_licz!=NEW.liczba_uczestnikow) THEN
 		RAISE EXCEPTION 'Liczba uczestnikow wycieczki nie zgadza sie z iloscia osob w zamowieniach na te wycieczke.';
-	ELSIF (osoby_licz IS NULL) THEN
-		
 	ELSE
 		RETURN NEW;
 	END IF;
@@ -132,6 +133,13 @@ CREATE TRIGGER spr_ilosc_osob_tr BEFORE INSERT OR UPDATE ON wycieczki
 CREATE FUNCTION przewodnik_w_jednym_miejscu() RETURNS TRIGGER AS $$
 DECLARE
 BEGIN
+	IF (NEW.wycieczka_id IN (SELECT wycieczka_z_kolizja 
+								FROM kolidujace_wycieczki_przewodnikow
+								WHERE przewodnik_id=NEW.przewodnik_id)) THEN
+		RAISE EXCEPTION 'Przewodnik jest w tym czasie zajety.';
+	ELSE
+		RETURN NEW;
+	END IF;
 END;
 $$ LANGUAGE 'plpgsql';
 
