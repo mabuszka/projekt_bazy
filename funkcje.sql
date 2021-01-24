@@ -321,7 +321,7 @@ SELECT 	o.oferta_id,
 			o.limit_uczestnikow,
 			o.dlugosc_trwania,
 			o.cena_podstawowa,
-			array_agg(a.nazwa_atrakcji)::TEXT[]	
+			array_agg(a.atrakcja)::TEXT[]	
 	FROM oferty o 
 		JOIN atrakcje_w_ofercie ao
 			ON (ao.oferta_id = o.oferta_id)
@@ -356,7 +356,7 @@ SELECT 	o.oferta_id,
 			o.limit_uczestnikow,
 			o.dlugosc_trwania,
 			o.cena_podstawowa,
-			array_agg(a.nazwa_atrakcji)::TEXT[]	
+			array_agg(a.atrakcja)::TEXT[]	
 	FROM oferty o 
 		JOIN atrakcje_w_ofercie ao
 			ON (ao.oferta_id = o.oferta_id)
