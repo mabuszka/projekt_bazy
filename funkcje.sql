@@ -325,7 +325,7 @@ SELECT 	o.oferta_id,
 END;
 $$ LANGUAGE 'plpgsql';
 
-
+-- szukanie ofert z atrakcjami (wersja 'wszystkie') 
 CREATE OR REPLACE FUNCTION oferty_ze_wszystkimi_atrakcjami(VARIADIC szukane_atrakcje TEXT[]) 
 RETURNS TABLE(
 oferta_id 			INTEGER,
@@ -356,3 +356,62 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 
+
+--DZIAŁA
+--szukanie ofert z tagami (wersja 'lub')
+CREATE OR REPLACE FUNCTION oferty_z_tagami(VARIADIC szukane_tagi TEXT[]) 
+RETURNS TABLE(
+oferta_id 			INTEGER,
+				miejsce_wyjazdu  	VARCHAR,
+				limit_uczestnikow  	INTEGER,
+				dlugosc_trwania  	INTEGER,
+				cena_podstawowa  	DECIMAL,
+				atrakcje			 TEXT[]
+) AS $$
+BEGIN
+	RETURN QUERY
+SELECT 	o.oferta_id,
+			o.miejsce_wyjazdu,
+			o.dlugosc_trwania,
+			o.limit_uczestnikow,
+			o.cena_podstawowa,
+	FROM oferty o 
+			array_agg(t.tag)::TEXT[]	
+			ON (t_o.oferta_id = o.oferta_id)
+		JOIN tagi_ofert t_o
+		JOIN tagi t
+			ON (t.tag = t_o.tag)
+	WHERE o.oferta_id IN (SELECT 	o.oferta_id
+						FROM oferty o 
+							JOIN tagi_ofert t_o
+								ON (t_o.oferta_id = o.oferta_id)
+							JOIN tagi t
+								ON (t.tag = t_o.tag)
+						WHERE t.tag LIKE ANY(szukane_tagi))
+	GROUP BY (o.oferta_id, o.miejsce_wyjazdu, o.limit_uczestnikow, o.dlugosc_trwania, o.cena_podstawowa);
+CREATE OR REPLACE FUNCTION oferty_ze_wszystkimi_tagami(VARIADIC szukane_tagi TEXT[]) 
+-- szukanie ofert z tagami (wersja 'wszystkie')
+
+
+END;
+$$ LANGUAGE 'plpgsql';
+oferta_id 			INTEGER,
+				limit_uczestnikow  	INTEGER,
+				cena_podstawowa  	DECIMAL,
+) AS $$
+				dlugosc_trwania  	INTEGER,
+				miejsce_wyjazdu  	VARCHAR,
+RETURNS TABLE(
+				tagi			 	TEXT[]
+SELECT 	o.oferta_id,
+	
+	
+BEGIN
+	RETURN QUERY
+			o.dlugosc_trwania,
+			o.limit_uczestnikow,
+			o.miejsce_wyjazdu,
+			o.cena_podstawowa,
+			array_agg(t.tag)::TEXT[]	
+	FROM oferty o 
+		JOIN tagi_ofert t_o
