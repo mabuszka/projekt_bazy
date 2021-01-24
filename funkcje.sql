@@ -178,7 +178,7 @@ $$ LANGUAGE 'plpgsql';
 CREATE FUNCTION edytuj_klienta(id INTEGER, imie_nowe VARCHAR(100), nazwisko_nowe VARCHAR(100), kraj VARCHAR(100), miasto_nowe VARCHAR(100), ulica_nowa VARCHAR(100), dom VARCHAR(100), kod VARCHAR(6), telefon VARCHAR(20), urodzony DATE, pesel_nowy VARCHAR(100) DEFAULT NULL) RETURNS TEXT AS $$
 BEGIN
 	IF ((SELECT uczestnik_id FROM uczestnicy WHERE uczestnik_id=id) IS NULL) THEN
-		RAISE EXCEPTION 'Najpierw dodaj klienta';
+		RAISE EXCEPTION 'Nie istnieje taki klient.';
 	END IF;
 	UPDATE uczestnicy SET imie=imie_nowe,nazwisko=nazwisko_nowe,kraj_zamieszkania=kraj,miasto=miasto_nowe,kod_pocztowy=kod,ulica=ulica_nowa,numer_domu=dom,data_urodzenia=urodzony,pesel=pesel_nowy,nr_telefonu=telefon WHERE uczestnik_id=id;
 	RETURN 'Pomyslnie zmodyfikowano dane o kliencie.';
