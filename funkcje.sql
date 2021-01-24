@@ -356,8 +356,6 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 
-
---DZIAŁA
 --szukanie ofert z tagami (wersja 'lub')
 CREATE OR REPLACE FUNCTION oferty_z_tagami(VARIADIC szukane_tagi TEXT[]) 
 RETURNS TABLE(
