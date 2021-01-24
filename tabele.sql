@@ -40,26 +40,24 @@ CREATE TABLE oferty(
 );
 
 CREATE TABLE tagi(
-				tag_id 	 			SERIAL,
-				nazwa_tagu 	 		VARCHAR(100),
+				tag_	 		VARCHAR(100),
 				opis 		 		TEXT
 );
 
 CREATE TABLE tagi_ofert(
-				tag_id 		 		INTEGER,
+				tag		 			VARCHAR(100),
 				oferta_id 	 		INTEGER
 );
 
 CREATE TABLE atrakcje(
-				atrakcja_id  		SERIAL,
-				nazwa_atrakcji 		VARCHAR(250),
+				atrakcja 			VARCHAR(250),
 				czy_dla_dzieci 		BOOLEAN,
 				opis_atrakcji   	TEXT
 );
 
 CREATE TABLE atrakcje_w_ofercie(
 				oferta_id 			INTEGER,
-				atrakcja_id 		INTEGER
+				atrakcja 			VARCHAR(250)
 );
 
 CREATE TABLE przewodnictwa(

@@ -304,7 +304,7 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 --DZIAŁA
---szukanie ofert z atrakcjami
+--szukanie ofert z atrakcjami (wersja 'lub')
 CREATE OR REPLACE FUNCTION oferty_z_atrakcjami(VARIADIC szukane_atrakcje TEXT[]) 
 RETURNS TABLE(
 oferta_id 			INTEGER,
@@ -326,17 +326,47 @@ SELECT 	o.oferta_id,
 		JOIN atrakcje_w_ofercie ao
 			ON (ao.oferta_id = o.oferta_id)
 		JOIN atrakcje a
-			ON (a.atrakcja_id = ao.atrakcja_id)
+			ON (a.atrakcja = ao.atrakcja)
 	WHERE o.oferta_id IN (SELECT 	o.oferta_id
 						FROM oferty o 
 							JOIN atrakcje_w_ofercie ao
 								ON (ao.oferta_id = o.oferta_id)
 							JOIN atrakcje a
-								ON (a.atrakcja_id = ao.atrakcja_id)
-						WHERE a.nazwa_atrakcji LIKE ANY(szukane_atrakcje))
+								ON (a.atrakcja = ao.atrakcja)
+						WHERE a.atrakcja LIKE ANY(szukane_atrakcje))
 	GROUP BY (o.oferta_id, o.miejsce_wyjazdu, o.limit_uczestnikow, o.dlugosc_trwania, o.cena_podstawowa);
 END;
 $$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION oferty_ze_wszystkimi_atrakcjami(VARIADIC szukane_atrakcje TEXT[]) 
+RETURNS TABLE(
+oferta_id 			INTEGER,
+				miejsce_wyjazdu  	VARCHAR,
+				limit_uczestnikow  	INTEGER,
+				dlugosc_trwania  	INTEGER,
+				cena_podstawowa  	DECIMAL,
+				atrakcje			 TEXT[]
+) AS $$
+BEGIN
+	RETURN QUERY
+	
+	
+SELECT 	o.oferta_id,
+			o.miejsce_wyjazdu,
+			o.limit_uczestnikow,
+			o.dlugosc_trwania,
+			o.cena_podstawowa,
+			array_agg(a.nazwa_atrakcji)::TEXT[]	
+	FROM oferty o 
+		JOIN atrakcje_w_ofercie ao
+			ON (ao.oferta_id = o.oferta_id)
+		JOIN atrakcje a
+			ON (a.atrakcja = ao.atrakcja)
+	GROUP BY (o.oferta_id, o.miejsce_wyjazdu, o.limit_uczestnikow, o.dlugosc_trwania, o.cena_podstawowa)
+	HAVING array_agg(a.atrakcja)::TEXT[] @> szukane_atrakcje;
+END;
+$$ LANGUAGE 'plpgsql';
+
 
 
 --template

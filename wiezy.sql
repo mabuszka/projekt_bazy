@@ -131,19 +131,23 @@ ALTER TABLE oferty ADD PRIMARY KEY (oferta_id);
 
 -- tagi
 
-ALTER TABLE tagi ADD PRIMARY KEY (tag_id);
+ALTER TABLE tagi ADD PRIMARY KEY (tag);
 
 -- tagi_ofert
 
-ALTER TABLE tagi_ofert ADD PRIMARY KEY (oferta_id, tag_id);
+ALTER TABLE tagi_ofert ADD PRIMARY KEY (oferta_id, tag);
 
 -- przewodnictwa
 
 ALTER TABLE przewodnictwa ADD PRIMARY KEY (przewodnik_id, wycieczka_id);
 
+-- atrakcje
+ALTER TABLE atrakcje ADD PRIMARY KEY (atrakcja);
+
+
 -- atrakcje_w_ofercie
 
-ALTER TABLE atrakcje_w_ofercie ADD PRIMARY KEY (oferta_id, atrakcja_id);
+ALTER TABLE atrakcje_w_ofercie ADD PRIMARY KEY (oferta_id, atrakcja);
 
 -- uczestnicy_w_zamowieniu
 
