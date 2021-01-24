@@ -90,13 +90,12 @@ CREATE TRIGGER spr_date_tr BEFORE UPDATE OR INSERT ON wycieczki
 
 
 --spr kod pocztowy
---NIE DZIAŁA COŚ JESZCZE
 DROP FUNCTION spr_kod_pocztowy CASCADE;
 CREATE FUNCTION spr_kod_pocztowy() RETURNS TRIGGER AS $$
 BEGIN
-	IF (NEW.kraj_zamieszkania = 'Polska' AND NEW.kod_pocztowy LIKE '[0-9]{2)-[0-9]{3}') THEN
+	IF (NEW.kraj_zamieszkania = 'Polska' AND NEW.kod_pocztowy SIMILAR TO '[0-9]{2}-[0-9]{3}') THEN
 		RETURN NEW;
-	ELSIF (NEW.kraj_zamieszkania IN ('Francja','Niemcy') AND NEW.kod_pocztowy LIKE '[0-9]{5}') THEN
+	ELSIF (NEW.kraj_zamieszkania IN ('Francja','Niemcy') AND NEW.kod_pocztowy SIMILAR TO '[0-9]{5}') THEN
 		RETURN NEW;
 	ELSE
 		RAISE EXCEPTION 'Niepoprawny kod pocztowy dla tego kraju.';
@@ -107,17 +106,18 @@ $$ LANGUAGE 'plpgsql';
 CREATE TRIGGER spr_kod_pocztowy_tr BEFORE INSERT OR UPDATE ON uczestnicy
 	FOR EACH ROW EXECUTE PROCEDURE spr_kod_pocztowy();
 
-INSERT INTO uczestnicy VALUES(10,'Zuza','roza','Polska','Wro','50424','Krako','39',current_date-1500,'12345123456','694-601-433');
 
-
---spr że w wycieczce jest tyle osób co trzeba 
+--spr że w wycieczce jest tyle osób co trzeba
+DROP FUNCTION spr_ilosc_osob CASCADE; 
 CREATE FUNCTION spr_ilosc_osob() RETURNS TRIGGER AS $$
 DECLARE
 	osoby_licz INTEGER;
 BEGIN
-	SELECT sum(liczba_osob) INTO osoby FROM zamowienia WHERE wycieczka_id=NEW.wycieczka_id;
-	IF (osoby!=NEW.liczba_uczestnikow) THEN
-		RAISE EXCEPTION 'Liczba uczestnikow wycieczki nie zgadza sie z iloscia osob w zamowieniach na ta wycieczke.';
+	SELECT sum(liczba_osob) INTO osoby_licz FROM zamowienia WHERE wycieczka_id=NEW.wycieczka_id;
+	IF (osoby_licz!=NEW.liczba_uczestnikow) THEN
+		RAISE EXCEPTION 'Liczba uczestnikow wycieczki nie zgadza sie z iloscia osob w zamowieniach na te wycieczke.';
+	ELSIF (osoby_licz IS NULL) THEN
+		
 	ELSE
 		RETURN NEW;
 	END IF;
@@ -140,11 +140,23 @@ CREATE TRIGGER spr_przewodnik_tr BEFORE INSERT OR UPDATE ON przewodnictwa
 
 
 --spr czy cena odpowiednia
+DROP FUNCTION spr_cena CASCADE;
 CREATE FUNCTION spr_cena() RETURNS TRIGGER AS $$
 DECLARE
+	oferta INTEGER;
+	cena DECIMAL(10,2);
 BEGIN
+	SELECT oferta_id INTO oferta FROM wycieczki WHERE wycieczka_id=NEW.wycieczka_id;
+	SELECT cena_podstawowa INTO cena FROM oferty WHERE oferta_id=oferta;
+	SELECT mnoznik*cena*NEW.liczba_osob INTO cena FROM klasy_ofert WHERE klasa=NEW.klasa_oferty;
+	IF (NEW.wartosc_zamowienia=cena) THEN
+		RETURN NEW;
+	ELSE
+		RAISE EXCEPTION 'Wartosc zamowienia nie zgadza sie z warunkami zamowienia.';
+	END IF;
 END;
 $$ LANGUAGE 'plpgsql';
 
 CREATE TRIGGER spr_cena_tr BEFORE INSERT OR UPDATE ON zamowienia 
 	FOR EACH ROW EXECUTE PROCEDURE spr_cena();
+INSERT INTO zamowienia VALUES(21,5,3,5,37500.00,1,'karta');

@@ -1,4 +1,4 @@
---DZIAŁA
+--złóż zamówienie
 DROP FUNCTION zloz_zamowienie;
 CREATE FUNCTION zloz_zamowienie(klient INTEGER, wycieczka INTEGER, osoby INTEGER, klasa_zam INTEGER, platnosc VARCHAR(100)) RETURNS TEXT AS $$
 DECLARE
@@ -28,7 +28,6 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 
---DZIAŁA
 --edycja zamowienia
 DROP FUNCTION edytuj_zamowienie;
 CREATE FUNCTION edytuj_zamowienie(id_zam INTEGER,osoby_nowe INTEGER,klasa_nowa INTEGER,platnosc_nowa VARCHAR(100)) RETURNS TEXT AS $$
@@ -57,7 +56,6 @@ $$ LANGUAGE 'plpgsql';
 SELECT edytuj_zamowienie(1,3,1,'przelew');
 
 
---DZIAŁA
 --usun zamowienie
 DROP FUNCTION anuluj_zamowienie;
 CREATE FUNCTION anuluj_zamowienie(id_zam INTEGER) RETURNS TEXT AS $$
@@ -74,7 +72,6 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 
---DZIAŁA
 --usun przewodnika z wycieczki
 CREATE FUNCTION usun_przewodnika(id_przewodnika INTEGER, id_wycieczki INTEGER) RETURNS TEXT AS $$
 DECLARE
@@ -99,7 +96,6 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 
---DZIAŁA
 --dodaj przewodnika do wycieczki
 CREATE FUNCTION dodaj_przewodnika(id_przewodnika INTEGER, id_wycieczki INTEGER) RETURNS TEXT AS $$
 DECLARE
@@ -123,8 +119,7 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 
---DZIAŁA
---dodaj klienta
+--dodaj klienta do bazy
 CREATE OR REPLACE FUNCTION dodaj_klienta(imie_nowe VARCHAR(100), nazwisko_nowe VARCHAR(100), kraj VARCHAR(100), miasto_nowe VARCHAR(100), ulica_nowa VARCHAR(100), dom VARCHAR(100), kod VARCHAR(6), telefon VARCHAR(20), urodzony DATE, pesel_nowy VARCHAR(11) DEFAULT NULL) RETURNS TEXT AS $$
 DECLARE 
 	klient INTEGER;
@@ -142,7 +137,6 @@ $$ LANGUAGE 'plpgsql';
 SELECT edytuj_klienta(4,'Anna','Panna','Polska','Miasto','Ulica','dom','kod','telefon',current_date-1000);
 
 
---DZIAŁA
 --znajdz klienta po danych 
 CREATE OR REPLACE FUNCTION wyszukaj_klienta(imie_nowe VARCHAR(100), nazwisko_nowe VARCHAR(100), kraj VARCHAR(100), miasto_nowe VARCHAR(100), ulica_nowa VARCHAR(100), dom VARCHAR(100), kod VARCHAR(6), telefon VARCHAR(20), urodzony DATE, pesel_nowy VARCHAR(11) DEFAULT NULL) RETURNS INTEGER AS $$
 DECLARE
@@ -173,8 +167,7 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 
---DZIAŁA
---modyfikuj uczestnika - dozwolić nulle i wtedy nie zmieniać?
+--modyfikuj uczestnika 
 CREATE FUNCTION edytuj_klienta(id INTEGER, imie_nowe VARCHAR(100), nazwisko_nowe VARCHAR(100), kraj VARCHAR(100), miasto_nowe VARCHAR(100), ulica_nowa VARCHAR(100), dom VARCHAR(100), kod VARCHAR(6), telefon VARCHAR(20), urodzony DATE, pesel_nowy VARCHAR(100) DEFAULT NULL) RETURNS TEXT AS $$
 BEGIN
 	IF ((SELECT uczestnik_id FROM uczestnicy WHERE uczestnik_id=id) IS NULL) THEN
@@ -186,7 +179,6 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 
---DZIAŁA
 --modyfikuj wycieczkę
 CREATE FUNCTION modyfikuj_wycieczke(id INTEGER, poczatek DATE) RETURNS TEXT AS $$
 DECLARE
@@ -204,7 +196,6 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 
---DZIAŁĄ
 --przedstaw cene
 CREATE FUNCTION przedstaw_cene(wycieczka INTEGER, klasa_zam INTEGER, osoby INTEGER) RETURNS DECIMAL(10,2) AS $$
 DECLARE
@@ -219,7 +210,6 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 
---DZIAŁA
 --zatrudnij przewodnika
 CREATE FUNCTION zatrudnij(imie_nowe VARCHAR(100), nazwisko_nowe VARCHAR(100), telefon VARCHAR(20), znam BOOLEAN DEFAULT FALSE) RETURNS TEXT AS $$
 DECLARE
@@ -243,7 +233,6 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 
---DZIAŁA
 --zwolnij przewodnika
 CREATE FUNCTION zwolnij(id INTEGER) RETURNS TEXT AS $$
 DECLARE
@@ -261,7 +250,6 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 
---DZIAŁA
 --dodaj wycieczke
 CREATE FUNCTION dodaj_wycieczke(oferta INTEGER, poczatek DATE) RETURNS TEXT AS $$
 DECLARE
@@ -274,7 +262,6 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 
---DZIAŁA
 -- sprawdz zblizajace sie wycieczki
 CREATE FUNCTION zblizajace_sie_wycieczki(dni INTEGER) 
 RETURNS TABLE ( wycieczka_id 		INTEGER,
@@ -303,7 +290,7 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 
---DZIAŁA
+
 --szukanie ofert z atrakcjami (wersja 'lub')
 CREATE OR REPLACE FUNCTION oferty_z_atrakcjami(VARIADIC szukane_atrakcje TEXT[]) 
 RETURNS TABLE(
@@ -338,6 +325,7 @@ SELECT 	o.oferta_id,
 END;
 $$ LANGUAGE 'plpgsql';
 
+
 CREATE OR REPLACE FUNCTION oferty_ze_wszystkimi_atrakcjami(VARIADIC szukane_atrakcje TEXT[]) 
 RETURNS TABLE(
 oferta_id 			INTEGER,
@@ -368,9 +356,3 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 
-
---template
-CREATE FUNCTION f() RETURNS TEXT AS $$
-BEGIN
-END;
-$$ LANGUAGE 'plpgsql';
