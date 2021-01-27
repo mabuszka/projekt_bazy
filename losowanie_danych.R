@@ -8,7 +8,7 @@ require(DescTools)
 require("RPostgres")
 
 
-
+set.seed(1)
 con <- dbConnect(RPostgres::Postgres(), dbname = "projekt_bazy",
                  host = "localhost", port = 5432, 
                  user = "Magda", pass = "tajnehaslo")
@@ -17,7 +17,7 @@ con <- dbConnect(RPostgres::Postgres(), dbname = "projekt_bazy",
 
 data("world.cities")
 #klienci: imie, nazwisko, kraj, data urodzenia, ulica, nr domu, miasto, kod pocztowy, pesel, nr telefonu
-n_klientow <- 100
+n_klientow <- 300
 
 make_months <-function(m){
   if (str_length(as.character(m)) == 1){m = paste("0", m, sep = "")}
@@ -111,13 +111,15 @@ uczestnik_to_sql <- function(uczestnik){
     
   }
 }
-uczestnik_to_sql(klienci_rand[62,])
+# uczestnik_to_sql(klienci_rand[62,])
 uczestnicy_sql <- apply(klienci_rand, 1, uczestnik_to_sql)
-uczestnicy_sql[62]
+# uczestnicy_sql[62]
 write.table(uczestnicy_sql, file = "uczestnicy_rand.sql", quote = FALSE, row.names = FALSE, col.names = FALSE)
 
 klienci_df <- dbGetQuery(con, "SELECT * FROM uczestnicy;")
 # przewodnicy 
+
+set.seed(1)
 n_przewodnikow <- 30
 przewodnicy_rand <- data.frame("imie" = randomNames(n_przewodnikow, ethnicity = 5, which.names = "first"),
                                "nazwisko" = randomNames(n_przewodnikow, ethnicity = 5, which.names = "last"),
@@ -128,7 +130,21 @@ emaile <- apply(przewodnicy_rand, 1, function(x){
                 "@biuro_bazy.com", sep = "")})
 przewodnicy_rand <- cbind(przewodnicy_rand, emaile)
 
+przewodnicy_df <- dbGetQuery(con, "SELECT * FROM przewodnicy;")
+przewodnik_to_sql <- function(przewodnik){
+    paste0("INSERT INTO przewodnicy (imie, nazwisko, adres_email, nr_telefonu, aktywny) VALUES ('",
+           str_replace_all(przewodnik[1], "'", "''"), "', '",
+           str_replace_all(przewodnik[2], "'", "''"), "', '",
+           str_replace_all(przewodnik[3], "'", "''"), "', '",
+           str_replace_all(przewodnik[4], "'", "''"), "', TRUE);")
+ 
+}
 
+przewodnik_to_sql(przewodnicy_rand[3,])
+przewodnicy_sql <- apply(przewodnicy_rand, 1, przewodnik_to_sql)
+write.table(przewodnicy_sql, file = "przewodnicy_rand.sql", quote = FALSE, row.names = FALSE, col.names = FALSE)
+
+klienci_df <- dbGetQuery(con, "SELECT * FROM uczestnicy;")
 
 
 #oferty
