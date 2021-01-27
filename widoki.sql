@@ -81,7 +81,7 @@ HAVING COUNT(*) > 5;
 
 -- 10 najczęstszych miejsc docelowych wycieczek
 
-CREATE VIEW najczestesze_cele AS
+CREATE VIEW najczestsze_cele AS
 SELECT o.miejsce_wyjazdu, COUNT(o.miejsce_wyjazdu) AS ile_wycieczek
 FROM oferty o
 	JOIN wycieczki w 
@@ -94,11 +94,11 @@ LIMIT 10;
 -- INSERT INTO oferty(miejsce_wyjazdu) VALUES ('a');
 -- INSERT INTO oferty(miejsce_wyjazdu) VALUES ('b');
 -- INSERT INTO oferty(miejsce_wyjazdu) VALUES ('c');
-INSERT INTO wycieczki(oferta_id, liczba_uczestnikow) VALUES (1,2);
-INSERT INTO wycieczki(oferta_id,liczba_uczestnikow) VALUES (1,2);
-INSERT INTO wycieczki(oferta_id,liczba_uczestnikow) VALUES (1,2);
-INSERT INTO wycieczki(oferta_id,liczba_uczestnikow) VALUES (1,2);
-INSERT INTO wycieczki(oferta_id,liczba_uczestnikow) VALUES (1,2);
+-- INSERT INTO wycieczki(oferta_id, liczba_uczestnikow) VALUES (1,2);
+-- INSERT INTO wycieczki(oferta_id,liczba_uczestnikow) VALUES (1,2);
+-- INSERT INTO wycieczki(oferta_id,liczba_uczestnikow) VALUES (1,2);
+-- INSERT INTO wycieczki(oferta_id,liczba_uczestnikow) VALUES (1,2);
+-- INSERT INTO wycieczki(oferta_id,liczba_uczestnikow) VALUES (1,2);
 -- INSERT INTO wycieczki(oferta_id) VALUES (1);
 -- INSERT INTO wycieczki(oferta_id) VALUES (1);
 -- INSERT INTO wycieczki(oferta_id) VALUES (2);
