@@ -135,8 +135,8 @@ przewodnik_to_sql <- function(przewodnik){
     paste0("INSERT INTO przewodnicy (imie, nazwisko, adres_email, nr_telefonu, aktywny) VALUES ('",
            str_replace_all(przewodnik[1], "'", "''"), "', '",
            str_replace_all(przewodnik[2], "'", "''"), "', '",
-           str_replace_all(przewodnik[3], "'", "''"), "', '",
-           str_replace_all(przewodnik[4], "'", "''"), "', TRUE);")
+           str_replace_all(przewodnik[4], "'", "''"), "', '",
+           str_replace_all(przewodnik[3], "'", "''"), "', TRUE);")
  
 }
 
@@ -144,19 +144,19 @@ przewodnik_to_sql(przewodnicy_rand[3,])
 przewodnicy_sql <- apply(przewodnicy_rand, 1, przewodnik_to_sql)
 write.table(przewodnicy_sql, file = "przewodnicy_rand.sql", quote = FALSE, row.names = FALSE, col.names = FALSE)
 
-klienci_df <- dbGetQuery(con, "SELECT * FROM uczestnicy;")
+przewodnicy_df <- dbGetQuery(con, "SELECT * FROM przewodnicy;")
 
 
 #oferty
-
+set.seed(2021)
 n_ofert <- 20
 world.cities %>%
-  filter( pop > 300000) -> cities
+  filter( pop > 3000000) -> cities
 
 oferty_rand <- data.frame("miejsce_wyjazdu" = sample(cities[["name"]], n_ofert,replace = TRUE),
                           
                           "limit_uczestnikow" = sample(10:35, n_ofert, replace = TRUE),
-                          "dlugosc" = sample(2:14, n_ofert, replace = TRUE))
+                          "dlugosc" = sample(3:14, n_ofert, replace = TRUE))
 oferty_rand %>% 
   mutate("cena" = sample(400:1200, n_ofert) * dlugosc) -> oferty_rand
 templatka_opisu <- c("Wspanialy wyjazd do city! Niewiarygodne przezycia gwarantowane. Zrelaksuj sie az liczba_dni dni. W ramach wyjazdu wiele niesamowitych atrakcji.")
@@ -168,51 +168,141 @@ oferty_rand %>%
 oferty_rand %>%
   mutate("oferta_id" = 1:n_ofert) -> oferty_rand
 
+oferta_to_sql <- function(oferta){
+  paste0("INSERT INTO oferty (miejsce_wyjazdu, limit_uczestnikow, dlugosc_wyjazdu, cena_podstawowa, opis_oferty) VALUES ('",
+         str_replace_all(oferta[1], "'", "''"), "', '",
+         str_replace_all(oferta[2], "'", "''"), "', '",
+         str_replace_all(oferta[3], "'", "''"), "', '",
+         str_replace_all(oferta[4], "'", "''"), "', '",
+         str_replace_all(oferta[5], "'", "''"), "');")
+  
+}
+
+# oferta_to_sql(oferty_rand[3,])
+oferty_sql <- apply(oferty_rand, 1, oferta_to_sql)
+write.table(oferty_sql, file = "oferty_rand.sql", quote = FALSE, row.names = FALSE, col.names = FALSE)
+
+oferty_df <- dbGetQuery(con, "SELECT * FROM oferty;")
+
+
+
 # wycieczki
-n_wycieczek <- 50
-wycieczki_rand <- data.frame("oferta_id" = sample(oferty_rand$oferta_id,n_wycieczek, replace = TRUE))
+set.seed(2021)
+n_wycieczek <- 60
+wycieczki_rand <- data.frame("oferta_id" = sample(oferty_df$oferta_id,n_wycieczek, replace = TRUE))
 wycieczki_rand %>%
-  left_join( oferty_rand[,c("oferta_id", "dlugosc", "limit_uczestnikow")], by = "oferta_id")%>%
-  mutate("data_rozpoczecia" = sample(seq(as.Date("2021/01/01"), as.Date("2021/12/31"),by = "day"), n_wycieczek, replace = TRUE)) %>%
+  left_join( oferty_rand[,c("oferta_id", "dlugosc")], by = "oferta_id")%>%
+  mutate("data_rozpoczecia" = sample(seq(as.Date("2020/01/01"), as.Date("2021/12/31"),by = "day"), n_wycieczek, replace = TRUE)) %>%
   mutate("data_zakonczenia" = data_rozpoczecia + dlugosc) %>%
-  mutate("liczba_uczestnikow" = sapply(limit_uczestnikow, function(x) {
-    sample(seq(5, x, by = 1), 1)
-    })) %>%
-  select(!c(dlugosc, liczba_uczestnikow)) -> wycieczki_rand
+  select(!c(dlugosc)) -> wycieczki_rand
+
+
+wycieczka_to_sql <- function(wycieczka){
+  paste0("INSERT INTO wycieczki (oferta_id, data_rozpoczecia, data_zakonczenia, liczba_uczestnikow) VALUES ('",
+         wycieczka[1], "', '",
+         wycieczka[2], "', '",
+         wycieczka[3], "', 0 );")
+}
+
+wycieczki_sql <- apply(wycieczki_rand, 1, wycieczka_to_sql)
+write.table(wycieczki_sql, file = "wycieczki_rand.sql", quote = FALSE, row.names = FALSE, col.names = FALSE)
+
+wycieczki_df <- dbGetQuery(con, "SELECT * FROM wycieczki;")
+
+
+
+
+
+
 
 # tagi
-tagi_rand <- data.frame("nazwa_tagu" = c("morze", "zagranica", "kasyna", "jezioro", "hotel", "gory", "autokar", "samolot", "widoki"))
+tagi_rand <- data.frame("nazwa_tagu" = c("duze miasto", "plaza", "kasyna", "morze", "hotel", "gory", "autokar", "samolot", "widoki"))
 tagi_rand %>% 
   mutate("opis" = str_replace("To jest bardzo ladny opis tego o tutaj tagu - tag_holder", "tag_holder", nazwa_tagu)) -> tagi_rand
 
+tag_to_sql <- function(tag){
+  paste0("INSERT INTO tagi (tag, opis) VALUES ('",
+         tag[1], "', '",
+         tag[2], "' );")
+}
+
+tagi_sql <- apply(tagi_rand, 1, tag_to_sql)
+write.table(tagi_sql, file = "tagi_rand.sql", quote = FALSE, row.names = FALSE, col.names = FALSE)
+
+tagi_df <- dbGetQuery(con, "SELECT * FROM tagi;")
+
+
+
 # atrakcje 
-atrakcje_rand <- data.frame("nazwa_atrakcji" = c("kino", "teatr", "muzeum", "basen", "kregle", "dyskoteka",
-                                                 "bar", "safari", "lot balonem", "zwiedzanie", "sesja zdjeciowa"))
+atrakcje_rand <- data.frame("atrakcja" = c("kino", "teatr", "muzeum", "basen", "kregle", "dyskoteka",
+                                                 "bar", "zoo", "lot balonem", "zwiedzanie", "sesja zdjeciowa"))
 atrakcje_rand%>%
-  mutate("opis_atrakcji" = str_replace("W ramach wyjazdu - placeholder", "placeholder", nazwa_atrakcji)) %>%
+  mutate("opis_atrakcji" = str_replace("W ramach wyjazdu - placeholder", "placeholder", atrakcja)) %>%
   mutate("czy_dla_dzieci" = c(T,T,T,T,T, F, F, F, T, T, T)) -> atrakcje_rand
 
-#losowanie tagów do ofert
-n_otagowan <- 200
-#potem bedzie sciagniete z tabeli, na razie 1:nrow(tagi_rand) i 1:nrow(oferty_rand)
-id_tagi <- 1:nrow(tagi_rand)
-id_ofert <- 1:nrow(oferty_rand)
+atrakcja_to_sql <- function(atrakcja){
+  paste0("INSERT INTO atrakcje (atrakcja,czy_dla_dzieci ,opis_atrakcji) VALUES ('",
+         atrakcja[1], "', ",
+         atrakcja[3], ", '",
+         atrakcja[2], "' );")
+}
 
-tagi_ofert <- data.frame("tag_id" = sample(id_tagi, n_otagowan, replace = TRUE),
+atrakcje_sql <- apply(atrakcje_rand, 1, atrakcja_to_sql)
+write.table(atrakcje_sql, file = "atrakcje_rand.sql", quote = FALSE, row.names = FALSE, col.names = FALSE)
+
+atrakcje_df <- dbGetQuery(con, "SELECT * FROM atrakcje;")
+
+
+
+
+#losowanie tagów do ofert
+n_otagowan <- 100
+
+#potem bedzie sciagniete z tabeli, na razie 1:nrow(tagi_rand) i 1:nrow(oferty_rand)
+tag <- tagi_df$tag
+id_ofert <- oferty_df$oferta_id
+
+tagi_ofert <- data.frame("tag" = sample(tag, n_otagowan, replace = TRUE),
                          "oferta_id" = sample(id_ofert, n_otagowan, replace = TRUE))
 tagi_ofert_rand <- tagi_ofert %>% 
-  distinct(`tag_id`, `oferta_id`)
+  distinct(`tag`, `oferta_id`)
+
+tagi_ofert_to_sql <- function(tag_ofert){
+  paste0("INSERT INTO tagi_ofert (tag, oferta_id) VALUES ('",
+         tag_ofert[1], "', ",
+         tag_ofert[2], ");")
+}
+
+tagi_ofert_sql <- apply(tagi_ofert_rand, 1, tagi_ofert_to_sql)
+write.table(tagi_ofert_sql, file = "tagi_ofert_rand.sql", quote = FALSE, row.names = FALSE, col.names = FALSE)
+
+tagi_ofert_df <- dbGetQuery(con, "SELECT * FROM tagi_ofert;")
+
+
 
 # losowanie atrakcji wycieczek
-n_atrakcji_w_ofertcie <- 200
+n_atrakcji_w_ofercie <- 100
 #potem bedzie sciagniete z tabeli, na razie 1:nrow(atrakcje_rand) i 1:nrow(oferty_rand)
-id_atrakcji <- 1:nrow(atrakcje_rand)
-id_ofert <- 1:nrow(oferty_rand)
+atrakcja <- atrakcje_df$atrakcja
+id_ofert <- oferty_df$oferta_id
 
-atrakcje_ofert <- data.frame("atrakcja_id" = sample(id_atrakcji, n_atrakcji_w_ofertcie, replace = TRUE),
-                         "oferta_id" = sample(id_ofert, n_atrakcji_w_ofertcie, replace = TRUE))
+atrakcje_ofert <- data.frame("atrakcja" = sample(atrakcja, n_atrakcji_w_ofercie, replace = TRUE),
+                         "oferta_id" = sample(id_ofert, n_atrakcji_w_ofercie, replace = TRUE))
 atrakcje_ofert_rand <- atrakcje_ofert %>% 
-  distinct(`atrakcja_id`, `oferta_id`)
+  distinct(`atrakcja`, `oferta_id`)
+
+atrakcje_ofert_to_sql <- function(atrakcja_ofert){
+  paste0("INSERT INTO atrakcje_w_ofercie (atrakcja, oferta_id) VALUES ('",
+         atrakcja_ofert[1], "', ",
+         atrakcja_ofert[2], ");")
+}
+
+atrakcje_w_ofercie_sql <- apply(atrakcje_ofert_rand, 1, atrakcje_ofert_to_sql)
+write.table(atrakcje_w_ofercie_sql, file = "atrakcje_w_ofercie_rand.sql", quote = FALSE, row.names = FALSE, col.names = FALSE)
+
+atrakcje_w_ofercie_df <- dbGetQuery(con, "SELECT * FROM atrakcje_w_ofercie;")
+
+
 
 #klasy ofert
 klasy_ofert <- data.frame("mnoznik" = c(1.25, 1.5, 2),
@@ -225,11 +315,11 @@ klasy_ofert <- data.frame("mnoznik" = c(1.25, 1.5, 2),
 # przewodnictwa
 
 generator_przewodnictw <- function(wycieczki,n_przewodnictw,przewodnicy){
-  n_wycieczek<-nrow(wycieczki)
-  n_przewodnikow<-nrow(przewodnicy)
+  n_wycieczek<-wycieczki$wycieczka_id
+  n_przewodnikow<-przewodnicy$przewodnik_id
   
-  przewodnictwa_rand <- data.frame("wycieczka_id" = sample(1:n_wycieczek, n_przewodnictw, replace = TRUE),
-                           "przewodnik_id" = sample(1:n_przewodnikow, n_przewodnictw, replace = TRUE))
+  przewodnictwa_rand <- data.frame("wycieczka_id" = sample(n_wycieczek, n_przewodnictw, replace = TRUE),
+                           "przewodnik_id" = sample(n_przewodnikow, n_przewodnictw, replace = TRUE))
   przewodnictwa_rand %>% 
     distinct(`wycieczka_id`, `przewodnik_id`) -> przewodnictwa_rand
   przewodnictwa_rand %>%
@@ -248,12 +338,25 @@ generator_przewodnictw <- function(wycieczki,n_przewodnictw,przewodnicy){
       }
     }
   }
-  zamowienia <- data.frame("przewodnik_id" = tymczasowe_przewodnictwa[,"przewodnik_id"],
+  przewodnictwa <- data.frame("przewodnik_id" = tymczasowe_przewodnictwa[,"przewodnik_id"],
                          "wycieczka_id" = tymczasowe_przewodnictwa[,"wycieczka_id"]
                          )
-  return(zamowienia)
+  return(przewodnictwa)
 }
-przewodnictwa_rand<-generator_przewodnictw(cbind("wycieczka_id"=1:nrow(wycieczki_rand),wycieczki_rand),200,przewodnicy_rand)
+przewodnictwa_rand <-generator_przewodnictw(wycieczki_df,200,przewodnicy_df)
+
+przewodnictwo_to_sql <- function(przewodnictwo){
+  paste0("INSERT INTO przewodnictwa (przewodnik_id, wycieczka_id) VALUES (",
+         przewodnictwo[1], ", ",
+         przewodnictwo[2], " );")
+}
+
+przewodnictwa_sql <- apply(przewodnictwa_rand, 1, przewodnictwo_to_sql)
+write.table(przewodnictwa_sql, file = "przewodnictwa_rand.sql", quote = FALSE, row.names = FALSE, col.names = FALSE)
+
+przewodnictwa_df <- dbGetQuery(con, "SELECT * FROM przewodnictwa;")
+
+
 
 
 
@@ -261,14 +364,15 @@ przewodnictwa_rand<-generator_przewodnictw(cbind("wycieczka_id"=1:nrow(wycieczki
 
 n_zamowien <- 250
 # tymczasowo, potem trzeba zaciagnac z bazy
-id_wycieczki <- 1:n_wycieczek
-trwanie<-as.integer(unlist(wycieczki_rand["data_zakonczenia"]-wycieczki_rand["data_rozpoczecia"]))
-limit<-wycieczki_rand["limit_uczestnikow"]
-wycieczki<-wycieczki_rand
+
+id_wycieczki <- wycieczki_df$wycieczka_id
+trwanie<-as.integer(unlist(wycieczki_df["data_zakonczenia"]-wycieczki_df["data_rozpoczecia"]))
+limit<-wycieczki_df["limit_uczestnikow"]
+wycieczki<-wycieczki_df
 platnosci<-c("gotowka","karta","przelew_internetowy","przelew_tradycyjny","paypal","voucher")
 
 generator_zamowien <- function(wycieczki){
-   id_wycieczki <- 1:n_wycieczek
+   id_wycieczki <- wycieczki$wycieczka_id
    limit <- wycieczki["limit_uczestnikow"]
    klienci <- sample(1:n_klientow,n_zamowien,replace = TRUE)
    wyjazdy <- sample(1:n_wycieczek,n_zamowien,replace=TRUE)

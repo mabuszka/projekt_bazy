@@ -55,7 +55,7 @@ CREATE TABLE oferty(
 );
 
 CREATE TABLE tagi(
-				tag_	 		VARCHAR(100),
+				tag	 		VARCHAR(100),
 				opis 		 		TEXT
 );
 
