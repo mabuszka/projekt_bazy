@@ -196,7 +196,7 @@ ORDER BY przewodnik_id ASC;
 
 
 CREATE VIEW statystyki_ofert AS
-SELECT o.oferta_id, o.miejsce_wyjazdu, o.dlugosc_trwania, MIN(date_part('year',age(u.data_urodzenia))) najmlodszy_uczestnik,
+SELECT o.oferta_id, o.miejsce_wyjazdu, o.dlugosc_wyjazdu, MIN(date_part('year',age(u.data_urodzenia))) najmlodszy_uczestnik,
 		MAX(date_part('year',age(u.data_urodzenia))) AS najstarszy_uczestnik,
 		ROUND(AVG(date_part('year',age(u.data_urodzenia)))::DECIMAL(10,3),1) AS sredni_wiek_uczestnika,
 		MODE() WITHIN GROUP (ORDER BY kraj_zamieszkania DESC) AS najwiecej_z_kraju
@@ -209,7 +209,7 @@ FROM oferty o
 		ON (uz.zamowienie_id = z.zamowienie_id)
 	JOIN uczestnicy u
 		ON (u.uczestnik_id = uz.uczestnik_id)
-GROUP BY (o.oferta_id, o.miejsce_wyjazdu, o.dlugosc_trwania);
+GROUP BY (o.oferta_id, o.miejsce_wyjazdu, o.dlugosc_wyjazdu);
 
 -- do sprawdzenia statystyki_ofert (musza byc swieze tabele zeby sie id zgadzaly)
 -- INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Adam','Nowak','Polska', '1999-03-13' );

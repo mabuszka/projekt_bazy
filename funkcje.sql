@@ -189,7 +189,7 @@ BEGIN
 		RAISE EXCEPTION 'Nie mozna ustawic przeszlej daty wyjazdu.';
 	END IF;
 	SELECT oferta_id INTO oferta FROM wycieczki WHERE wycieczka_id=id;
-	SELECT dlugosc_trwania INTO trwanie FROM oferty WHERE oferta_id=oferta;
+	SELECT dlugosc_wyjazdu INTO trwanie FROM oferty WHERE oferta_id=oferta;
 	UPDATE wycieczki SET data_rozpoczecia=poczatek, data_zakonczenia=poczatek+trwanie WHERE wycieczka_id=id;
 	RETURN 'Pomyslnie zmieniono date wycieczki';
 END;
@@ -255,7 +255,7 @@ CREATE FUNCTION dodaj_wycieczke(oferta INTEGER, poczatek DATE) RETURNS TEXT AS $
 DECLARE
 	trwanie INTEGER;
 BEGIN
-	SELECT dlugosc_trwania INTO trwanie FROM oferty WHERE oferta_id=oferta;
+	SELECT dlugosc_wyjazdu INTO trwanie FROM oferty WHERE oferta_id=oferta;
 	INSERT INTO wycieczki(oferta_id,data_rozpoczecia,data_zakonczenia,liczba_uczestnikow) VALUES(oferta,poczatek,poczatek+trwanie,0);
 	RETURN 'Pomyslnie utworzono nowa wycieczke.';
 END;
@@ -270,7 +270,7 @@ RETURNS TABLE ( wycieczka_id 		INTEGER,
 				limit_uczestnikow  	INTEGER,
 				data_rozpoczecia 	DATE,
 				data_zakonczenia 	DATE,
-				dlugosc_trwania  	INTEGER,
+				dlugosc_wyjazdu  	INTEGER,
 				cena_podstawowa  	DECIMAL(10,2)
 ) AS $$
 BEGIN
@@ -281,7 +281,7 @@ BEGIN
 			o.limit_uczestnikow,
 			w.data_rozpoczecia ,
 			w.data_zakonczenia,
-			o.dlugosc_trwania,
+			o.dlugosc_wyjazdu,
 			o.cena_podstawowa
 	FROM oferty o
 		JOIN wycieczki w
@@ -297,7 +297,7 @@ RETURNS TABLE(
 oferta_id 			INTEGER,
 				miejsce_wyjazdu  	VARCHAR,
 				limit_uczestnikow  	INTEGER,
-				dlugosc_trwania  	INTEGER,
+				dlugosc_wyjazdu  	INTEGER,
 				cena_podstawowa  	DECIMAL,
 				atrakcje			 TEXT[]
 ) AS $$
@@ -306,7 +306,7 @@ BEGIN
 SELECT 	o.oferta_id,
 			o.miejsce_wyjazdu,
 			o.limit_uczestnikow,
-			o.dlugosc_trwania,
+			o.dlugosc_wyjazdu,
 			o.cena_podstawowa,
 			array_agg(a.atrakcja)::TEXT[]	
 	FROM oferty o 
@@ -321,7 +321,7 @@ SELECT 	o.oferta_id,
 							JOIN atrakcje a
 								ON (a.atrakcja = ao.atrakcja)
 						WHERE a.atrakcja LIKE ANY(szukane_atrakcje))
-	GROUP BY (o.oferta_id, o.miejsce_wyjazdu, o.limit_uczestnikow, o.dlugosc_trwania, o.cena_podstawowa);
+	GROUP BY (o.oferta_id, o.miejsce_wyjazdu, o.limit_uczestnikow, o.dlugosc_wyjazdu, o.cena_podstawowa);
 END;
 $$ LANGUAGE 'plpgsql';
 
@@ -331,7 +331,7 @@ RETURNS TABLE(
 oferta_id 			INTEGER,
 				miejsce_wyjazdu  	VARCHAR,
 				limit_uczestnikow  	INTEGER,
-				dlugosc_trwania  	INTEGER,
+				dlugosc_wyjazdu  	INTEGER,
 				cena_podstawowa  	DECIMAL,
 				atrakcje			 TEXT[]
 ) AS $$
@@ -342,7 +342,7 @@ BEGIN
 SELECT 	o.oferta_id,
 			o.miejsce_wyjazdu,
 			o.limit_uczestnikow,
-			o.dlugosc_trwania,
+			o.dlugosc_wyjazdu,
 			o.cena_podstawowa,
 			array_agg(a.atrakcja)::TEXT[]	
 	FROM oferty o 
@@ -350,7 +350,7 @@ SELECT 	o.oferta_id,
 			ON (ao.oferta_id = o.oferta_id)
 		JOIN atrakcje a
 			ON (a.atrakcja = ao.atrakcja)
-	GROUP BY (o.oferta_id, o.miejsce_wyjazdu, o.limit_uczestnikow, o.dlugosc_trwania, o.cena_podstawowa)
+	GROUP BY (o.oferta_id, o.miejsce_wyjazdu, o.limit_uczestnikow, o.dlugosc_wyjazdu, o.cena_podstawowa)
 	HAVING array_agg(a.atrakcja)::TEXT[] @> szukane_atrakcje;
 END;
 $$ LANGUAGE 'plpgsql';
@@ -362,7 +362,7 @@ RETURNS TABLE(
 oferta_id 			INTEGER,
 				miejsce_wyjazdu  	VARCHAR,
 				limit_uczestnikow  	INTEGER,
-				dlugosc_trwania  	INTEGER,
+				dlugosc_wyjazdu  	INTEGER,
 				cena_podstawowa  	DECIMAL,
 				atrakcje			 TEXT[]
 ) AS $$
@@ -370,7 +370,7 @@ BEGIN
 	RETURN QUERY
 SELECT 	o.oferta_id,
 			o.miejsce_wyjazdu,
-			o.dlugosc_trwania,
+			o.dlugosc_wyjazdu,
 			o.limit_uczestnikow,
 			o.cena_podstawowa,
 	FROM oferty o 
@@ -386,7 +386,7 @@ SELECT 	o.oferta_id,
 							JOIN tagi t
 								ON (t.tag = t_o.tag)
 						WHERE t.tag LIKE ANY(szukane_tagi))
-	GROUP BY (o.oferta_id, o.miejsce_wyjazdu, o.limit_uczestnikow, o.dlugosc_trwania, o.cena_podstawowa);
+	GROUP BY (o.oferta_id, o.miejsce_wyjazdu, o.limit_uczestnikow, o.dlugosc_wyjazdu, o.cena_podstawowa);
 CREATE OR REPLACE FUNCTION oferty_ze_wszystkimi_tagami(VARIADIC szukane_tagi TEXT[]) 
 -- szukanie ofert z tagami (wersja 'wszystkie')
 
@@ -397,7 +397,7 @@ oferta_id 			INTEGER,
 				limit_uczestnikow  	INTEGER,
 				cena_podstawowa  	DECIMAL,
 ) AS $$
-				dlugosc_trwania  	INTEGER,
+				dlugosc_wyjazdu  	INTEGER,
 				miejsce_wyjazdu  	VARCHAR,
 RETURNS TABLE(
 				tagi			 	TEXT[]
@@ -406,7 +406,7 @@ SELECT 	o.oferta_id,
 	
 BEGIN
 	RETURN QUERY
-			o.dlugosc_trwania,
+			o.dlugosc_wyjazdu,
 			o.limit_uczestnikow,
 			o.miejsce_wyjazdu,
 			o.cena_podstawowa,

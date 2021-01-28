@@ -106,7 +106,7 @@ ALTER TABLE wycieczki ADD PRIMARY KEY (wycieczka_id);
 -- oferty      	  (oferta_id 			SERIAL,
 				-- miejsce_wyjazdu 		VARCHAR(100),
 				-- limit_uczestnikow 	INTEGER,
-				-- dlugosc_trwania 		INTEGER,
+				-- dlugosc_wyjazdu 		INTEGER,
 				-- cena_podstawowa 		DECIMAL(10,2),
 				-- opis_oferty 			TEXT,
 				-- zdjecie				TEXT)
@@ -115,13 +115,13 @@ ALTER TABLE oferty ALTER COLUMN miejsce_wyjazdu SET NOT NULL;
 
 ALTER TABLE oferty ALTER COLUMN limit_uczestnikow SET NOT NULL;
 
-ALTER TABLE oferty ALTER COLUMN dlugosc_trwania SET NOT NULL;
+ALTER TABLE oferty ALTER COLUMN dlugosc_wyjazdu SET NOT NULL;
 
 ALTER TABLE oferty ALTER COLUMN cena_podstawowa SET NOT NULL;
 
 ALTER TABLE oferty ALTER COLUMN opis_oferty SET NOT NULL;
 
-ALTER TABLE oferty ADD CHECK (dlugosc_trwania >= 0);
+ALTER TABLE oferty ADD CHECK (dlugosc_wyjazdu >= 0);
 
 ALTER TABLE oferty ADD CHECK (limit_uczestnikow > 0);
 

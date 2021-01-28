@@ -1,3 +1,18 @@
+-- DROP TABLE uczestnicy CASCADE;
+-- DROP TABLE przewodnicy CASCADE;
+-- DROP TABLE wycieczki CASCADE;
+-- DROP TABLE oferty CASCADE;
+-- DROP TABLE tagi CASCADE;
+-- DROP TABLE tagi_ofert CASCADE;
+-- DROP TABLE atrakcje CASCADE;
+-- DROP TABLE atrakcje_w_ofercie CASCADE;
+-- DROP TABLE uczestnicy_w_zamowieniu CASCADE;
+-- DROP TABLE klasy_ofert CASCADE;
+-- DROP TABLE zamowienia CASCADE;
+-- DROP TABLE przewodnictwa CASCADE;
+
+
+
 CREATE TABLE uczestnicy(
 				uczestnik_id 		SERIAL,
 				imie 				VARCHAR(100),
@@ -33,7 +48,7 @@ CREATE TABLE oferty(
 				oferta_id 		  	SERIAL,
 				miejsce_wyjazdu  	VARCHAR(100),
 				limit_uczestnikow  	INTEGER,
-				dlugosc_trwania  	INTEGER,
+				dlugosc_wyjazdu  	INTEGER,
 				cena_podstawowa  	DECIMAL(10,2),
 				opis_oferty 	 	TEXT,
 				zdjecie	 		 	TEXT

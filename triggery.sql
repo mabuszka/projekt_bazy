@@ -77,7 +77,7 @@ DECLARE
 	oferta INTEGER;
 	trwanie INTEGER;
 BEGIN
-	SELECT dlugosc_trwania INTO trwanie FROM oferty WHERE oferta_id=NEW.oferta_id;
+	SELECT dlugosc_wyjazdu INTO trwanie FROM oferty WHERE oferta_id=NEW.oferta_id;
 	IF (NEW.data_zakonczenia-NEW.data_rozpoczecia!=trwanie) THEN
 		RAISE EXCEPTION 'Daty wycieczki nie zgadzaja sie z dlugoscia trwania oferty';
 	END IF;
