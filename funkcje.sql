@@ -387,29 +387,37 @@ SELECT 	o.oferta_id,
 								ON (t.tag = t_o.tag)
 						WHERE t.tag LIKE ANY(szukane_tagi))
 	GROUP BY (o.oferta_id, o.miejsce_wyjazdu, o.limit_uczestnikow, o.dlugosc_wyjazdu, o.cena_podstawowa);
-CREATE OR REPLACE FUNCTION oferty_ze_wszystkimi_tagami(VARIADIC szukane_tagi TEXT[]) 
--- szukanie ofert z tagami (wersja 'wszystkie')
+
 
 
 END;
-$$ LANGUAGE 'plpgsql';
-oferta_id 			INTEGER,
-				limit_uczestnikow  	INTEGER,
-				cena_podstawowa  	DECIMAL,
-) AS $$
-				dlugosc_wyjazdu  	INTEGER,
-				miejsce_wyjazdu  	VARCHAR,
+-- szukanie ofert z tagami (wersja 'wszystkie')
+
+CREATE OR REPLACE FUNCTION oferty_ze_wszystkimi_tagami(VARIADIC szukane_tagi TEXT[]) 
 RETURNS TABLE(
-				tagi			 	TEXT[]
-SELECT 	o.oferta_id,
-	
-	
+oferta_id 			INTEGER,
+				miejsce_wyjazdu  	VARCHAR,
+				limit_uczestnikow  	INTEGER,
+				dlugosc_wyjazdu  	INTEGER,
+				cena_podstawowa  	DECIMAL,
+				tagi			 TEXT[]
+) AS $$
 BEGIN
 	RETURN QUERY
-			o.dlugosc_wyjazdu,
-			o.limit_uczestnikow,
+	
+	
+SELECT 	o.oferta_id,
 			o.miejsce_wyjazdu,
+			o.limit_uczestnikow,
+			o.dlugosc_wyjazdu,
 			o.cena_podstawowa,
 			array_agg(t.tag)::TEXT[]	
 	FROM oferty o 
 		JOIN tagi_ofert t_o
+			ON (t_o.oferta_id = o.oferta_id)
+		JOIN tagi t
+			ON (t.tag = t_o.tag)
+	GROUP BY (o.oferta_id, o.miejsce_wyjazdu, o.limit_uczestnikow, o.dlugosc_wyjazdu, o.cena_podstawowa)
+	HAVING array_agg(t.tag)::TEXT[] @> szukane_tagi;
+END;
+$$ LANGUAGE 'plpgsql';
