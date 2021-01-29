@@ -4,6 +4,7 @@ library(DT)
 library(stringi)
 
 shinyServer<- function(input, output){
+  #### UCZESTNICY
   # dodawanie nowego uczestnika
   observeEvent(input$uczestnik_dodaj_id, {
     imie <- input$ud_imie_input
@@ -62,6 +63,35 @@ shinyServer<- function(input, output){
   output$uczestnicy_tbl <- DT::renderDataTable({
     return(dbGetQuery(con, "SELECT * FROM uczestnicy;"))
   }, options = list(scrollX = TRUE))
+  #### UCZESTNICY KONIEC
+  
+  #### OFERTY
+  ## najczestsze miejsca docelowe
+  output$najczestsze_docelowe_tbl <- DT::renderDataTable(
+    {tryCatch({dbGetQuery(con, "SELECT * FROM najczestsze_cele;")},
+              error = function(e){
+                return(data.frame())
+              })
+  }, options = list(scrollX = TRUE))
+  
+  ## najbardziej oblegane miejsca docelowe
+  output$najbardziej_oblegane_tbl <- DT::renderDataTable(
+  {tryCatch({dbGetQuery(con, "SELECT * FROM najwiecej_odwiedzane_cele;")},
+            error = function(e){
+              return(data.frame())
+            })
+  }, options = list(scrollX = TRUE))
+  
+  
+  ## statystyki ofert 
+  output$statystyki_ofert_tbl<- DT::renderDataTable(
+    {tryCatch({dbGetQuery(con, "SELECT * FROM statystyki_ofert;")},
+              error = function(e){
+                return(data.frame())
+              })
+    }, options = list(scrollX = TRUE))
+  
+  #### OFERTY KONIEC
   
   
   
