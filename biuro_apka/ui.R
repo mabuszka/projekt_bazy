@@ -38,8 +38,8 @@ sidebar = dashboardSidebar(
                  menuSubItem(
                      "Przegladaj i modyfikuj", "uczestnicy", icon = icon("fas fa-search")
                  )
-                 ),
-        menuItem("Zamowienia", tabName = "zamowienia_tab", icon = icon("fas fa-chart-bar"),
+        ),
+        menuItem("Zamówienia", tabName = "zamowienia_tab", icon = icon("fas fa-chart-bar"),
                  menuSubItem(
                      "Przeglądaj", "przegladaj_zamowienia", icon = icon("fas fa-search")
                  ),
@@ -58,7 +58,7 @@ sidebar = dashboardSidebar(
     )
 )
 
-# zakładka uczestnicy 
+#################### zakładka UCZESTNICY 
 ## przeglądaj i modyfikuj
 
 box_dodaj_uczestnika = box(width = NULL,
@@ -83,13 +83,13 @@ box_dodaj_uczestnika = box(width = NULL,
                            
                            actionButton(inputId = "uczestnik_dodaj_id", label = "Dodaj uczestnika")
 )
-                           
+
 ## NIESKONCZONE
 box_modyfikuj_uczestnika <- box(width = NULL,
-    status = "primary",
-    title = "Modyfikuj uczestnika",
-    solidHeader = TRUE
-    
+                                status = "primary",
+                                title = "Modyfikuj uczestnika",
+                                solidHeader = TRUE
+                                
 )
 
 ## wyświetla tabelę z uczestnikami 
@@ -102,6 +102,46 @@ box_tabela_uczestnicy = box(width = NULL,
                             
 )
 
+## NIESKOŃCZONE box z wyszukiwaniem i wyświetlaniem tych wyszukanych uczestników
+box_wyszukaj_uczestnikow <- box(width = NULL,
+                                status = "primary",
+                                title = "Wyszukaj uczestników",
+                                solidHeader = TRUE   
+)
+
+############ zakładka OFERTY
+
+##statystyki
+
+box_najczestsze_docelowe <- box(width = NULL,
+                                status = "primary",
+                                title = "Najczęściej odwiedzane miejsca wyjazdów",
+                                solidHeader = TRUE,
+                                collapsible = TRUE,
+                                "Miasta, do których pojechało najwięcej wycieczek",
+                                DT::dataTableOutput(outputId = "najczestsze_docelowe_tbl")
+)
+
+box_najbardziej_oblegane_docelowe <- box(width = NULL,
+                                         status = "primary",
+                                         title = "Najczęściej odwiedzane miejsca wyjazdów",
+                                         solidHeader = TRUE,
+                                         collapsible = TRUE,
+                                         "Miasta, które odwiedziło najwięcej uczestników",
+                                         DT::dataTableOutput(outputId = "najbardziej_oblegane_tbl")
+)
+
+box_statystyki_ofert <- box(width = NULL,
+                            status = "primary",
+                            title = "Statystyki ofert",
+                            solidHeader = TRUE,
+                            collapsible = TRUE,
+                            DT::dataTableOutput(outputId = "statystyki_ofert_tbl")
+)
+
+
+
+
 
 
 body = dashboardBody(
@@ -109,31 +149,20 @@ body = dashboardBody(
     tags$head(
         tags$style(HTML(".main-sidebar { font-size: 18px; }")) #change the font size to 20
     ),
-# 
+    # 
     # zakładka przeglądaj i modyfikuj uczestników
     tabItems(
         tabItem(tabName = "uczestnicy",
                 column(4,
                        box_dodaj_uczestnika,
-                box(width = NULL,
-                    status = "primary",
-                    title = "Wyszukaj uczestników",
-                    solidHeader = TRUE
-                    
-                ),
-                box_modyfikuj_uczestnika
+                       box_modyfikuj_uczestnika
                 ),
                 column(8,
                        box_tabela_uczestnicy ,
-                       box(width = NULL,
-                           status = "primary",
-                           title = "Wyszukani",
-                           solidHeader = TRUE
-                           
-                       )
+                       box_wyszukaj_uczestnikow
                 )
         ),
-    # zakładka stali klienci 
+        # zakładka stali klienci 
         tabItem(tabName = "stali_klienci",
                 box(width = NULL,
                     status = "primary",
@@ -142,8 +171,8 @@ body = dashboardBody(
                     
                 )
         ),
-# zakładki od ofert
-    # zarządzanie ofertami
+        # zakładki od ofert
+        # zarządzanie ofertami
         tabItem(tabName = "zarzadzaj_oferty",
                 box(width = NULL,
                     status = "primary",
@@ -152,7 +181,7 @@ body = dashboardBody(
                     
                 )
         ),
-    # przeglądanie ofert
+        # przeglądanie ofert
         tabItem(tabName = "przegladaj_oferty",
                 box(width = NULL,
                     status = "primary",
@@ -161,16 +190,17 @@ body = dashboardBody(
                     
                 )
         ),
-    # statystyki ofert
+        # statystyki ofert
         tabItem(tabName = "statystyki_oferty",
-                box(width = NULL,
-                    status = "primary",
-                    title = "cos",
-                    solidHeader = TRUE
-                    
+                column(6,
+                       box_najczestsze_docelowe,
+                       box_najbardziej_oblegane_docelowe
+                ),
+                column(6,
+                       box_statystyki_ofert
                 )
         ),
-    # zarządzanie wycieczkami 
+        # zarządzanie wycieczkami 
         tabItem(tabName = "zarzadzaj_wycieczki",
                 box(width = NULL,
                     status = "primary",
@@ -179,7 +209,7 @@ body = dashboardBody(
                     
                 )
         ),
-    # przeglądaj wycieczki
+        # przeglądaj wycieczki
         tabItem(tabName = "przegladaj_wycieczki",
                 box(width = NULL,
                     status = "primary",
@@ -188,7 +218,7 @@ body = dashboardBody(
                     
                 )
         ),
-    # statystyki wycieczek 
+        # statystyki wycieczek 
         tabItem(tabName = "statystyki_wycieczki",
                 box(width = NULL,
                     status = "primary",
@@ -197,8 +227,8 @@ body = dashboardBody(
                     
                 )
         ),
-# zakładki do zamówień
-    #przeglądanie zamówień
+        # zakładki do zamówień
+        #przeglądanie zamówień
         tabItem(tabName = "przegladaj_zamowienia",
                 box(width = NULL,
                     status = "primary",
@@ -207,7 +237,7 @@ body = dashboardBody(
                     
                 )
         ),
-    #modyfikacja zamówień
+        #modyfikacja zamówień
         tabItem(tabName = "modyfikuj_zamowienie",
                 box(width = NULL,
                     status = "primary",
@@ -216,8 +246,8 @@ body = dashboardBody(
                     
                 )
         ),
-# zakładki do przewodników
-    # zarządzanie przewodnikami
+        # zakładki do przewodników
+        # zarządzanie przewodnikami
         tabItem(tabName = "zarzadzaj_przewodnicy",
                 box(width = NULL,
                     status = "primary",
@@ -226,7 +256,7 @@ body = dashboardBody(
                     
                 )
         ),
-    # przeglądanie przewodników 
+        # przeglądanie przewodników 
         tabItem(tabName = "przegladaj_przewodnicy",
                 box(width = NULL,
                     status = "primary",
@@ -243,5 +273,6 @@ dashboardPage(
     skin = "blue",
     dashboardHeader(title = "Biuro bazy"),
     sidebar,
-    body
+    body,
+    tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "bootstrap_custom.css"))
 )                    
