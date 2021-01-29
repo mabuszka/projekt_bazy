@@ -94,5 +94,23 @@ shinyServer<- function(input, output){
   #### OFERTY KONIEC
   
   
+  #### PRZEWODNICY
+  ## przeglądaj przewodników
+  output$przewodnicy <- DT::renderDataTable(
+    {tryCatch({dbGetQuery(con,"SELECT * FROM przewodnicy;")},
+              error = function(e){
+                return(data.frame())
+              })
+      }, options = list(scrollX=TRUE)
+  )
+  
+  output$doswiadczeni_przewodnicy <- DT::renderDataTable(
+    {tryCatch({dbGetQuery(con,"SELECT * FROM najbardziej_doswiadczeni_przewodnicy;")},
+              error = function(e){
+                return(data.frame())
+              })
+    }, options = list(scrollX=TRUE)
+  )
+  #### PRZWODNICY KONIEC
   
 }

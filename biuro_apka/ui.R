@@ -140,7 +140,26 @@ box_statystyki_ofert <- box(width = NULL,
 )
 
 
+############# zakładka PRZEWODNICY
+# przeglądaj: przewodnicy, widok najbardziej doświadczeni
 
+box_przegladaj_przewodnikow <- box(width=NULL,
+                                    status='primary',
+                                    title='Przewodnicy',
+                                    solidHeader = TRUE,
+                                    collapsible = TRUE,
+                                    DT::dataTableOutput(outputId = 'przewodnicy')
+                                   )
+
+box_doswiadczeni_przewodnicy <- box(width=NULL,
+                                   status='primary',
+                                   title='Najbardziej doświadczeni przewodnicy',
+                                   solidHeader = TRUE,
+                                   collapsible = TRUE,
+                                   DT::dataTableOutput(outputId = 'doswiadczeni_przewodnicy')
+)
+
+# modyfikuj: zwolnij, zatrudnij, aktualizuj informacje, zleć wycieczkę + kolidujące wycieczki
 
 
 
@@ -258,11 +277,11 @@ body = dashboardBody(
         ),
         # przeglądanie przewodników 
         tabItem(tabName = "przegladaj_przewodnicy",
-                box(width = NULL,
-                    status = "primary",
-                    title = "cos",
-                    solidHeader = TRUE
-                    
+                column(6,
+                       box_przegladaj_przewodnikow
+                ),
+                column(6,
+                       box_doswiadczeni_przewodnicy
                 )
         )
     )
