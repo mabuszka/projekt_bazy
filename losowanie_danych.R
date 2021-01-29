@@ -216,6 +216,8 @@ wycieczki_df <- dbGetQuery(con, "SELECT * FROM wycieczki;")
 
 
 # tagi
+set.seed(2021)
+
 tagi_rand <- data.frame("nazwa_tagu" = c("duze miasto", "plaza", "kasyna", "morze", "hotel", "gory", "autokar", "samolot", "widoki"))
 tagi_rand %>% 
   mutate("opis" = str_replace("To jest bardzo ladny opis tego o tutaj tagu - tag_holder", "tag_holder", nazwa_tagu)) -> tagi_rand
@@ -234,6 +236,8 @@ tagi_df <- dbGetQuery(con, "SELECT * FROM tagi;")
 
 
 # atrakcje 
+set.seed(2021)
+
 atrakcje_rand <- data.frame("atrakcja" = c("kino", "teatr", "muzeum", "basen", "kregle", "dyskoteka",
                                                  "bar", "zoo", "lot balonem", "zwiedzanie", "sesja zdjeciowa"))
 atrakcje_rand%>%
@@ -256,6 +260,8 @@ atrakcje_df <- dbGetQuery(con, "SELECT * FROM atrakcje;")
 
 
 #losowanie tagów do ofert
+set.seed(2021)
+
 n_otagowan <- 100
 
 #potem bedzie sciagniete z tabeli, na razie 1:nrow(tagi_rand) i 1:nrow(oferty_rand)
@@ -281,6 +287,8 @@ tagi_ofert_df <- dbGetQuery(con, "SELECT * FROM tagi_ofert;")
 
 
 # losowanie atrakcji wycieczek
+set.seed(2021)
+
 n_atrakcji_w_ofercie <- 100
 #potem bedzie sciagniete z tabeli, na razie 1:nrow(atrakcje_rand) i 1:nrow(oferty_rand)
 atrakcja <- atrakcje_df$atrakcja
@@ -305,6 +313,8 @@ atrakcje_w_ofercie_df <- dbGetQuery(con, "SELECT * FROM atrakcje_w_ofercie;")
 
 
 #klasy ofert
+set.seed(2021)
+
 klasy_ofert <- data.frame("mnoznik" = c(1.25, 1.5, 2),
                           "opis" = c("dostep do nielimitowanych przekasek",
                                      "dostep do nielimitowanych przekasek, pierwszenstwo w wyborze pokoju",
@@ -313,6 +323,8 @@ klasy_ofert <- data.frame("mnoznik" = c(1.25, 1.5, 2),
 
 
 # przewodnictwa
+set.seed(2021)
+
 
 generator_przewodnictw <- function(wycieczki,n_przewodnictw,przewodnicy){
   n_wycieczek<-wycieczki$wycieczka_id
@@ -365,74 +377,93 @@ przewodnictwa_df <- dbGetQuery(con, "SELECT * FROM przewodnictwa;")
 n_zamowien <- 250
 # tymczasowo, potem trzeba zaciagnac z bazy
 
-id_wycieczki <- wycieczki_df$wycieczka_id
-trwanie<-as.integer(unlist(wycieczki_df["data_zakonczenia"]-wycieczki_df["data_rozpoczecia"]))
-limit<-wycieczki_df["limit_uczestnikow"]
-wycieczki<-wycieczki_df
-platnosci<-c("gotowka","karta","przelew_internetowy","przelew_tradycyjny","paypal","voucher")
+# id_wycieczki <- wycieczki_df$wycieczka_id
+# trwanie<-as.integer(unlist(wycieczki_df["data_zakonczenia"]-wycieczki_df["data_rozpoczecia"]))
+# limit<-   (wycieczki_df %>%
+#   left_join( oferty_df[,c("oferta_id","limit_uczestnikow")], by = "oferta_id"))$limit_uczestnikow
+# platnosci<-c("gotowka","karta","przelew_internetowy","przelew_tradycyjny","paypal","voucher")
 
-generator_zamowien <- function(wycieczki){
-   id_wycieczki <- wycieczki$wycieczka_id
-   limit <- wycieczki["limit_uczestnikow"]
-   klienci <- sample(1:n_klientow,n_zamowien,replace = TRUE)
-   wyjazdy <- sample(1:n_wycieczek,n_zamowien,replace=TRUE)
-   liczba <- sample(1:5,n_zamowien,replace=TRUE) # liczba ludzi w jednym zamowieniu
+# tymczasowo, potem trzeba zaciagnac z bazy
+# id_wycieczki <- 1:n_wycieczek
+# trwanie<-as.integer(unlist(wycieczki_rand["data_zakonczenia"]-wycieczki_rand["data_rozpoczecia"]))
+# limit<-wycieczki_rand["limit_uczestnikow"]
+# wycieczki<-wycieczki_rand
+set.seed(2021)
 
-   limity_wyjazdow<-limit[wyjazdy,]
-   poczatek_wyjazdu<-wycieczki[,"data_rozpoczecia"][wyjazdy]
-   koniec_wyjazdu<-wycieczki[,"data_zakonczenia"][wyjazdy]
+generator_zamowien <- function( n_zamowien){
+  platnosci<-c("gotowka","karta","przelew internetowy","przelew tradycyjny","paypal","voucher")
 
- tymczasowe_zamowienia<-data.frame(klienci=klienci,wyjazdy=wyjazdy,liczba_osob=liczba,limity=limity_wyjazdow,poczatek=poczatek_wyjazdu,koniec=koniec_wyjazdu, tymczasowe_id = 1:n_zamowien)
-   for(i in 1:n_zamowien){
-     if (tymczasowe_zamowienia[[3]][i]<=tymczasowe_zamowienia[[4]][i]){
-       tymczasowe_zamowienia[[4]][i]=tymczasowe_zamowienia[[4]][i]-tymczasowe_zamowienia[[3]][i]
-     }else if(tymczasowe_zamowienia[[3]][i]>tymczasowe_zamowienia[[4]][i] & tymczasowe_zamowienia[[4]]>0){
-       tymczasowe_zamowienia[[3]][i]=tymczasowe_zamowienia[[4]]
-     }else{
-       tymczasowe_zamowienia=tymczasowe_zamowienia[-c(i),] # uznalam ?e latwiej niz sie bawic b?dzie po prostu usunac te kilka zam?wie? co nie b?d? pasowac, nadal powinno zosta? sporo zamowien
-     }
-   }
-   for(i in unique(klienci)){
-     zamowienie<-tymczasowe_zamowienia[tymczasowe_zamowienia[["klienci"]]==i,]
-     daty<-zamowienie[c(5:7)]
-     daty <- daty[order(daty[[1]],decreasing = FALSE),]
-     ilosc_dat<-length(daty[[1]])
-     if(ilosc_dat<2){next}else{
-     for (k in 1:(ilosc_dat-1)){
-       if(daty[k,2]<=daty[k+1,2]){
-         zle_id <- daty[k, "tymczasowe_id"]
-         tymczasowe_zamowienia <- tymczasowe_zamowienia["tymczasowe_id"!=zle_id,]
-       }
-     }
-     }
-   }
-   zamowienia <- data.frame("klient" = klienci,
-                          "wycieczka" = wyjazdy,
-                          "liczba_osob" = liczba,
-                          "klasa" = sample(1:3,n_zamowien,replace=TRUE), #zakladajac ze bedziemy miec 3 klasy, bo jeszcze nie wiem ile
-                          "platnosc" = sample(platnosci,n_zamowien,replace=TRUE)
-                          )
-   return(zamowienia)
-}
-
-zamowienia_rand<-generator_zamowien(wycieczki_rand)
-# uczestnictwa
-
-uczestnictwa_rand<-data.frame("wycieczka"=zamowienia_rand[,2],"uczestnik"=zamowienia_rand[,1]) # najpierw dodaje uczestnictwa klientow ktorzy kupili wycieczke
-ile_osob_dodac<-0 # zlicze tu ile ludzi musze dolosowac jako klientow po tym co zrobie na dole
-numer_nowego_uczestnika<-n_klientow #do tego b?d? dodawa? liczby jako kolejni uczestnicy nowi
-
-for (k in unique(zamowienia_rand[,1])){ #przechodz? po klientach kt?rzy s? w jakimkolwiek zamowieniu jako kupujacy
-  zamowienie<-zamowienia_rand[zamowienia_rand[,1]==k,c("wycieczka","liczba_osob")] # dla danego klienta wybieram numery wycieczek na jakie jedzie i ile osob chce na nie zabrac
-  max_osob <- max(zamowienie[,2]) # max liczba osob jaka chce klient zabrac na jakas wycieczke
-  ile_osob_dodac<-ile_osob_dodac+max_osob # tyle nowych uczestnikow musze wylosowac ze wzgl na tego klienta
-  for (z in zamowienie){
-    osoby_w_tym_zamowieniu<-zamowienie$liczba_osob
-    nr_wycieczki<-zamowienie$wycieczka
-    nowi_uczestnicy<-numer_nowego_uczestnika+seq(osoby_w_tym_zamowieniu)
-    uczestnictwa_rand<-rbind(uczestnictwa_rand,data.frame("wycieczka"=rep(nr_wycieczki,length(osoby_w_tym_zamowieniu)),"uczestnik"=nowi_uczestnicy))
+  wycieczki <- (wycieczki_df %>%
+                  left_join( oferty_df[,c("oferta_id","limit_uczestnikow")], by = "oferta_id"))
+  id_wycieczki <- 1:n_wycieczek
+  limit <- wycieczki["limit_uczestnikow"]
+  klienci <- sample(1:n_klientow,n_zamowien,replace = TRUE)
+  wyjazdy <- sample(1:n_wycieczek,n_zamowien,replace=TRUE)
+  liczba <- sample(1:5,n_zamowien,replace=TRUE) # liczba ludzi w jednym zamowieniu
+  
+  limity_wyjazdow<-limit[wyjazdy,]
+  poczatek_wyjazdu<-wycieczki[,"data_rozpoczecia"][wyjazdy]
+  koniec_wyjazdu<-wycieczki[,"data_zakonczenia"][wyjazdy]
+  
+  tymczasowe_zamowienia<-data.frame(klienci=klienci,wyjazdy=wyjazdy,liczba_osob=liczba,limity=limity_wyjazdow,poczatek=poczatek_wyjazdu,koniec=koniec_wyjazdu, tymczasowe_id = 1:n_zamowien)
+  for(i in 1:n_zamowien){
+    if (tymczasowe_zamowienia[[3]][i]<=tymczasowe_zamowienia[[4]][i]){
+      tymczasowe_zamowienia[[4]][i]=tymczasowe_zamowienia[[4]][i]-tymczasowe_zamowienia[[3]][i]
+    }else if(tymczasowe_zamowienia[[3]][i]>tymczasowe_zamowienia[[4]][i] & tymczasowe_zamowienia[[4]]>0){
+      tymczasowe_zamowienia[[3]][i]=tymczasowe_zamowienia[[4]]
+    }else{
+      tymczasowe_zamowienia=tymczasowe_zamowienia[-c(i),] # uznalam ?e latwiej niz sie bawic b?dzie po prostu usunac te kilka zam?wie? co nie b?d? pasowac, nadal powinno zosta? sporo zamowien
+    }
   }
-  numer_nowego_uczestnika<-numer_nowego_uczestnika+max_osob #tyle osob dodaje i kolejnych dodaje od wyzszego numerka
+  for(i in unique(klienci)){
+    zamowienie<-tymczasowe_zamowienia[tymczasowe_zamowienia[["klienci"]]==i,]
+    daty<-zamowienie[c(5:7)]
+    daty <- daty[order(daty[[1]],decreasing = FALSE),]
+    ilosc_dat<-length(daty[[1]])
+    if(ilosc_dat<2){next}else{
+      for (k in 1:(ilosc_dat-1)){
+        if(daty[k,2]<=daty[k+1,2]){
+          zle_id <- daty[k, "tymczasowe_id"]
+          tymczasowe_zamowienia <- tymczasowe_zamowienia["tymczasowe_id"!=zle_id,]
+        }
+      }
+    }
+  }
+  zamowienia <- data.frame("klient" = klienci,
+                           "wycieczka" = wyjazdy,
+                           "liczba_osob" = liczba,
+                           "klasa" = sample(1:3,n_zamowien,replace=TRUE),
+                           "platnosc" = sample(platnosci,n_zamowien,replace=TRUE)
+  )
+  return(zamowienia)
 }
+
+zamowienia_rand<-generator_zamowien(250)
+
+# zamowienia_to_SQL 
+
+zamowienia_z_datami <- left_join(zamowienia_rand, wycieczki_df, on = c("wycieczka" = "wycieczka_id"))
+
+
+
+
+# uczestnictwa
+# 
+# uczestnictwa_rand<-data.frame("wycieczka"=zamowienia_rand[,2],"uczestnik"=zamowienia_rand[,1]) # najpierw dodaje uczestnictwa klientow ktorzy kupili wycieczke
+# ile_osob_dodac<-0 # zlicze tu ile ludzi musze dolosowac jako klientow po tym co zrobie na dole
+# numer_nowego_uczestnika<-n_klientow #do tego b?d? dodawa? liczby jako kolejni uczestnicy nowi
+# 
+# for (k in unique(zamowienia_rand[,1])){ #przechodz? po klientach kt?rzy s? w jakimkolwiek zamowieniu jako kupujacy
+#   zamowienie<-zamowienia_rand[zamowienia_rand[,1]==k,c("wycieczka","liczba_osob")] # dla danego klienta wybieram numery wycieczek na jakie jedzie i ile osob chce na nie zabrac
+#   max_osob <- max(zamowienie[,2]) # max liczba osob jaka chce klient zabrac na jakas wycieczke
+#   ile_osob_dodac<-ile_osob_dodac+max_osob # tyle nowych uczestnikow musze wylosowac ze wzgl na tego klienta
+#   for (z in zamowienie){
+#     osoby_w_tym_zamowieniu<-zamowienie$liczba_osob
+#     nr_wycieczki<-zamowienie$wycieczka
+#     nowi_uczestnicy<-numer_nowego_uczestnika+seq(osoby_w_tym_zamowieniu)
+#     uczestnictwa_rand<-rbind(uczestnictwa_rand,data.frame("wycieczka"=rep(nr_wycieczki,length(osoby_w_tym_zamowieniu)),"uczestnik"=nowi_uczestnicy))
+#   }
+#   numer_nowego_uczestnika<-numer_nowego_uczestnika+max_osob #tyle osob dodaje i kolejnych dodaje od wyzszego numerka
+# }
 
 # teraz trzeba znowu przeprowadzic losowanie klientow tylko zamiast n_klientow wpisa? ile_osob_dodac i doklei? now? ramk? danych do tamtej
