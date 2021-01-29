@@ -1,6 +1,7 @@
 source("db_con.R")
 library(shiny)
 library(DT)
+library(stringi)
 
 shinyServer<- function(input, output){
   # dodawanie nowego uczestnika
@@ -31,7 +32,10 @@ shinyServer<- function(input, output){
     else{
       sql <-paste0(sql, PESEL, "','", nr_telefonu, "');")
     }
-    try(dbSendQuery(con, sql))
+    tryCatch({dbSendQuery(con, sql)}, error = function(e){
+      error_to_show <- str_split(str_split(e, pattern = "ERROR: ")[[1]][2], "CONTEXT: ")[[1]][1]
+      showNotification(paste0(error_to_show), type = "error")
+    })
   })
   
   
