@@ -1,8 +1,7 @@
 --złóż zamówienie
 DROP FUNCTION zloz_zamowienie;
-CREATE FUNCTION zloz_zamowienie(klient INTEGER, wycieczka INTEGER, osoby INTEGER, klasa_zam INTEGER, platnosc VARCHAR(100)) RETURNS TEXT AS $$
+CREATE FUNCTION zloz_zamowienie(klient INTEGER, wycieczka INTEGER, klasa_zam INTEGER, platnosc VARCHAR(100)) RETURNS TEXT AS $$
 DECLARE
-	cena DECIMAL(10,2);
 	oferta INTEGER;
 	znajdz_wycieczka INTEGER;
 	znajdz_klient INTEGER;
@@ -18,25 +17,24 @@ BEGIN
 	ELSIF (znajdz_klasa IS NULL) THEN
 		RAISE EXCEPTION 'Niepoprawny numer klasy.';
 	END IF;
-	SELECT oferta_id INTO oferta FROM wycieczki WHERE wycieczka_id=wycieczka;
-	SELECT cena_podstawowa INTO cena FROM oferty WHERE oferta_id=oferta;
-	SELECT mnoznik*cena*osoby INTO cena FROM klasy_ofert WHERE klasa=klasa_zam;
-	INSERT INTO zamowienia(klient_id,wycieczka_id,liczba_osob,wartosc_zamowienia,klasa_oferty,sposob_platnosci) 
-		VALUES (klient,wycieczka,osoby,cena,klasa_zam,platnosc);
+	INSERT INTO zamowienia(klient_id,wycieczka_id,wartosc_zamowienia,klasa_oferty,sposob_platnosci) 
+		VALUES (klient,wycieczka,0,klasa_zam,platnosc);
 	RETURN 'Pomyslnie zlozono zamowienie.';
 END;
 $$ LANGUAGE 'plpgsql';
 
 
+--POPRAWIONE DO SPR
 --edycja zamowienia
 DROP FUNCTION edytuj_zamowienie;
-CREATE FUNCTION edytuj_zamowienie(id_zam INTEGER,osoby_nowe INTEGER,klasa_nowa INTEGER,platnosc_nowa VARCHAR(100)) RETURNS TEXT AS $$
+CREATE FUNCTION edytuj_zamowienie(id_zam INTEGER, klasa_nowa INTEGER, platnosc_nowa VARCHAR(100)) RETURNS TEXT AS $$
 DECLARE
 	znajdz_zam INTEGER;
 	cena DECIMAL(10,2);
 	oferta INTEGER;
 	znajdz_klasa INTEGER;
 	id_wyc INTEGER;
+	osoby_nowe INTEGER;
 BEGIN
 	SELECT klasa INTO znajdz_klasa FROM klasy_ofert WHERE klasa=klasa_nowa;
 	SELECT count(zamowienie_id) INTO znajdz_zam FROM zamowienia WHERE zamowienie_id=id_zam;
@@ -45,17 +43,19 @@ BEGIN
 	ELSIF (znajdz_zam=0) THEN
 		RAISE EXCEPTION 'Nie istnieje zamowienie o tym numerze.';
 	END IF;
+	SELECT count(u.uczestnik_id) INTO osoby_nowe FROM uczestnicy_w_zamowieniu u WHERE u.zamowienie_id=id_zam;
 	SELECT wycieczka_id INTO id_wyc FROM zamowienia WHERE zamowienie_id=id_zam;
 	SELECT oferta_id INTO oferta FROM wycieczki WHERE wycieczka_id=id_wyc;
 	SELECT cena_podstawowa INTO cena FROM oferty WHERE oferta_id=oferta;
 	SELECT mnoznik*cena*osoby_nowe INTO cena FROM klasy_ofert WHERE klasa=klasa_nowa;
-	UPDATE zamowienia SET liczba_osob=osoby_nowe, klasa_oferty=klasa_nowa,sposob_platnosci=platnosc_nowa,wartosc_zamowienia=cena WHERE zamowienie_id=id_zam;
+	UPDATE zamowienia SET klasa_oferty=klasa_nowa,sposob_platnosci=platnosc_nowa,wartosc_zamowienia=cena WHERE zamowienie_id=id_zam;
 	RETURN 'Pomyslnie zmodyfikowano zamowienie';
 END;
 $$ LANGUAGE 'plpgsql';
 SELECT edytuj_zamowienie(1,3,1,'przelew');
 
 
+--POPRAWIONE DO SPR
 --usun zamowienie
 DROP FUNCTION anuluj_zamowienie;
 CREATE FUNCTION anuluj_zamowienie(id_zam INTEGER) RETURNS TEXT AS $$
@@ -67,6 +67,7 @@ BEGIN
 		RAISE EXCEPTION 'Nie istnieje zamowienie o takim numerze ';
 	END IF;
 	DELETE FROM zamowienia WHERE zamowienie_id=id_zam;
+	DELETE FROM uczestnicy_w_zamowieniu WHERE zamowienie_id=id_zam;
 	RETURN 'Pomyslnie anulowano zamowienie';
 END;
 $$ LANGUAGE 'plpgsql';
@@ -141,16 +142,7 @@ SELECT edytuj_klienta(4,'Anna','Panna','Polska','Miasto','Ulica','dom','kod','te
 CREATE OR REPLACE FUNCTION wyszukaj_klienta(imie_nowe VARCHAR(100), nazwisko_nowe VARCHAR(100), kraj VARCHAR(100), miasto_nowe VARCHAR(100), ulica_nowa VARCHAR(100), dom VARCHAR(100), kod VARCHAR(6), telefon VARCHAR(20), urodzony DATE, pesel_nowy VARCHAR(11) DEFAULT NULL) RETURNS INTEGER AS $$
 DECLARE
 	klient INTEGER;
-	--iter VARCHAR(100);
 BEGIN
-	--FOR iter IN (imie_nowe, nazwisko_nowe, kraj, miasto_nowe, ulica_nowa, dom) LOOP
-		--IF (iter IS NULL) THEN
-			--RAISE EXCEPTION 'Brakuje informacji.';
-	--	END IF;
-	--END LOOP;
-	--IF (kod IS NULL OR telefon IS NULL OR urodzony IS NULL) THEN
-		--RAISE EXCEPTION 'Brakuje informacji.';
-	--END IF;
 	IF (pesel_nowy IS NOT NULL) THEN
 		SELECT uczestnik_id INTO klient FROM uczestnicy 
 			WHERE (imie=imie_nowe AND nazwisko=nazwisko_nowe AND kraj_zamieszkania=kraj 

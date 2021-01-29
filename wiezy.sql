@@ -44,8 +44,6 @@ ALTER TABLE uczestnicy ADD CHECK (nr_telefonu SIMILAR TO '[0-9+.-]{1,}');
 				-- klasa_oferty 		INTEGER,
 				-- sposob_platnosci 	VARCHAR(100))
 
-ALTER TABLE zamowienia ALTER COLUMN liczba_osob SET NOT NULL;
-
 ALTER TABLE zamowienia ALTER COLUMN wartosc_zamowienia SET NOT NULL;
 
 ALTER TABLE zamowienia ALTER COLUMN klasa_oferty SET NOT NULL;
@@ -55,8 +53,6 @@ ALTER TABLE zamowienia ALTER COLUMN sposob_platnosci SET NOT NULL;
 ALTER TABLE zamowienia ALTER COLUMN wycieczka_id SET NOT NULL;
 
 ALTER TABLE zamowienia ALTER COLUMN klient_id SET NOT NULL;
-
-ALTER TABLE zamowienia ADD CHECK (liczba_osob >= 0);
 
 ALTER TABLE zamowienia ADD PRIMARY KEY (zamowienie_id);
 

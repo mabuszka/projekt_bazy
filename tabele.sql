@@ -84,7 +84,6 @@ CREATE TABLE zamowienia(
 				zamowienie_id 		SERIAL,
 				klient_id 			INTEGER,
 				wycieczka_id 		INTEGER,
-				liczba_osob 		INTEGER,
 				wartosc_zamowienia 	DECIMAL(10,2),
 				klasa_oferty 		INTEGER,
 				sposob_platnosci 	VARCHAR(100)

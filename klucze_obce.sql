@@ -46,5 +46,5 @@ ALTER TABLE uczestnicy_w_zamowieniu ADD FOREIGN KEY (uczestnik_id)
 	REFERENCES uczestnicy(uczestnik_id) ON UPDATE CASCADE ON DELETE RESTRICT;
 	
 ALTER TABLE uczestnicy_w_zamowieniu ADD FOREIGN KEY (zamowienie_id)
-	REFERENCES zamowienia(zamowienie_id) ON UPDATE CASCADE ON DELETE RESTRICT;
+	REFERENCES zamowienia(zamowienie_id) ON UPDATE CASCADE ON DELETE CASCADE;
 	

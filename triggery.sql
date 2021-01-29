@@ -18,16 +18,18 @@ CREATE TRIGGER sprawdz_limit_osob_wycieczki BEFORE UPDATE OR INSERT ON wycieczki
 	FOR EACH ROW EXECUTE PROCEDURE limit_osob();
 
 
---trigger który update'uje liczbe uczestnikow na wycieczce po dodaniu/usunięciu/edycji zamówienia
+--POPRAWIONE DO SPR
+--trigger który update'uje liczbe uczestnikow na wycieczce po dodaniu/usunięciu/edycji uczestnictwa
 DROP FUNCTION aktualizacja_liczby_uczestnikow CASCADE;
 CREATE FUNCTION aktualizacja_liczby_uczestnikow() RETURNS TRIGGER AS $$
 DECLARE
 	stara_liczba INTEGER;
 	nowa_liczba INTEGER;
 	wycieczka INTEGER;
+	zamowienie INTEGER;
 BEGIN
-	SELECT OLD.liczba_osob INTO stara_liczba;
-	SELECT NEW.liczba_osob INTO nowa_liczba;
+	SELECT count(OLD.uczestnik_id) INTO stara_liczba;
+	SELECT count(NEW.uczestnik_id) INTO nowa_liczba;
 	wycieczka := NEW.wycieczka_id;
 	IF (stara_liczba IS NULL) THEN
 	stara_liczba := 0;
@@ -40,7 +42,7 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 
-CREATE TRIGGER aktualizacja_liczby_uczestnikow AFTER INSERT OR UPDATE OR DELETE ON zamowienia
+CREATE TRIGGER aktualizacja_liczby_uczestnikow AFTER INSERT OR DELETE ON uczestnicy_w_zamowieniu
 	FOR EACH ROW EXECUTE PROCEDURE aktualizacja_liczby_uczestnikow();
 
 
@@ -107,13 +109,17 @@ CREATE TRIGGER spr_kod_pocztowy_tr BEFORE INSERT OR UPDATE ON uczestnicy
 	FOR EACH ROW EXECUTE PROCEDURE spr_kod_pocztowy();
 
 
+--POPRAWIONE SPR
 --spr że w wycieczce jest tyle osób co trzeba
 DROP FUNCTION spr_ilosc_osob CASCADE; 
 CREATE FUNCTION spr_ilosc_osob() RETURNS TRIGGER AS $$
 DECLARE
 	osoby_licz INTEGER;
 BEGIN
-	SELECT sum(liczba_osob) INTO osoby_licz FROM zamowienia WHERE wycieczka_id=NEW.wycieczka_id;
+	SELECT count(uz.uczestnik_id) INTO osoby_licz 
+		FROM zamowienia z
+		JOIN uczestnicy_w_zamowieniu uz ON z.zamowienie_id=uz.zamowienie_id
+		WHERE wycieczka_id=NEW.wycieczka_id;
 	IF (osoby_licz IS NULL) THEN
 		osoby_licz:=0;
 	END IF;
@@ -147,16 +153,19 @@ CREATE TRIGGER spr_przewodnik_tr BEFORE INSERT OR UPDATE ON przewodnictwa
 	FOR EACH ROW EXECUTE PROCEDURE przewodnik_w_jednym_miejscu();
 
 
+--POPRAWIONE DO SPR
 --spr czy cena odpowiednia
 DROP FUNCTION spr_cena CASCADE;
 CREATE FUNCTION spr_cena() RETURNS TRIGGER AS $$
 DECLARE
 	oferta INTEGER;
 	cena DECIMAL(10,2);
+	liczba_osob INTEGER;
 BEGIN
 	SELECT oferta_id INTO oferta FROM wycieczki WHERE wycieczka_id=NEW.wycieczka_id;
 	SELECT cena_podstawowa INTO cena FROM oferty WHERE oferta_id=oferta;
-	SELECT mnoznik*cena*NEW.liczba_osob INTO cena FROM klasy_ofert WHERE klasa=NEW.klasa_oferty;
+	SELECT count(uczestnik_id) INTO liczba_osob FROM uczestnicy_w_zamowieniu u WHERE u.zamowienie_id=NEW.zamowienie_id;
+	SELECT mnoznik*cena*liczba_osob INTO cena FROM klasy_ofert WHERE klasa=NEW.klasa_oferty;
 	IF (NEW.wartosc_zamowienia=cena) THEN
 		RETURN NEW;
 	ELSE
@@ -168,3 +177,36 @@ $$ LANGUAGE 'plpgsql';
 CREATE TRIGGER spr_cena_tr BEFORE INSERT OR UPDATE ON zamowienia 
 	FOR EACH ROW EXECUTE PROCEDURE spr_cena();
 INSERT INTO zamowienia VALUES(21,5,3,5,37500.00,1,'karta');
+
+
+--NOWE DO SPR
+--trigger do aktualizacji ceny zamowienia po dodaniu uczestnictwa
+DROP FUNCTION aktualizacja_ceny CASCADE;
+CREATE FUNCTION aktualizacja_ceny() RETURNS TRIGGER AS $$
+DECLARE
+	cena DECIMAL(10,2);
+BEGIN
+	SELECT k.mnoznik*o.cena_podstawowa INTO cena FROM zamowienia z JOIN wycieczki w ON z.wycieczka_id=w.wycieczka_id 
+							JOIN oferty o ON o.oferta_id=w.oferta_id
+							JOIN klasy_ofert k ON k.klasa=z.klasa_oferty
+							WHERE z.zamowienie_id=NEW.zamowienie_id;
+	UPDATE zamowienia SET wartosc_zamowienia=wartosc_zamowienia+cena WHERE zamowienia.zamowienie_id=NEW.zamowienie_id;
+END;
+$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER aktualizacja_ceny_tr AFTER INSERT ON uczestnicy_w_zamowieniu
+	FOR EACH ROW EXECUTE PROCEDURE aktualizacja_ceny();
+
+
+--NOWE DO SPR
+--nie wolno aktualizować uczestnictwa
+DROP FUNCTION nie_wolno_update CASCADE;
+CREATE FUNCTION nie_wolno_update() RETURNS TRIGGER AS $$
+BEGIN
+	RAISE EXCEPTION "Uczestnictwa mozna jedynie usuwac i dodawac.";
+	RETURN NEW;
+END;
+$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER nie_wolno_update_tr BEFORE UPDATE ON uczestnicy_w_zamowieniu
+	FOR EACH ROW EXECUTE PROCEDURE nie_wolno_update();
