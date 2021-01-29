@@ -1,4 +1,4 @@
---złóż zamówienie
+﻿--złóż zamówienie
 DROP FUNCTION zloz_zamowienie;
 CREATE FUNCTION zloz_zamowienie(klient INTEGER, wycieczka INTEGER, klasa_zam INTEGER, platnosc VARCHAR(100)) RETURNS TEXT AS $$
 DECLARE
@@ -6,6 +6,7 @@ DECLARE
 	znajdz_wycieczka INTEGER;
 	znajdz_klient INTEGER;
 	znajdz_klasa INTEGER;
+	cena DECIMAL(10,2);
 BEGIN
 	SELECT wycieczka_id INTO znajdz_wycieczka FROM wycieczki WHERE wycieczka_id=wycieczka;
 	SELECT uczestnik_id INTO znajdz_klient FROM uczestnicy WHERE uczestnik_id=klient;
@@ -24,7 +25,6 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 
---POPRAWIONE DO SPR
 --edycja zamowienia
 DROP FUNCTION edytuj_zamowienie;
 CREATE FUNCTION edytuj_zamowienie(id_zam INTEGER, klasa_nowa INTEGER, platnosc_nowa VARCHAR(100)) RETURNS TEXT AS $$
@@ -52,10 +52,8 @@ BEGIN
 	RETURN 'Pomyslnie zmodyfikowano zamowienie';
 END;
 $$ LANGUAGE 'plpgsql';
-SELECT edytuj_zamowienie(1,3,1,'przelew');
 
 
---POPRAWIONE DO SPR
 --usun zamowienie
 DROP FUNCTION anuluj_zamowienie;
 CREATE FUNCTION anuluj_zamowienie(id_zam INTEGER) RETURNS TEXT AS $$
@@ -134,8 +132,6 @@ BEGIN
 	RETURN 'Pomyslnie dodano klienta.';
 END;
 $$ LANGUAGE 'plpgsql';
-
-SELECT edytuj_klienta(4,'Anna','Panna','Polska','Miasto','Ulica','dom','kod','telefon',current_date-1000);
 
 
 --znajdz klienta po danych 

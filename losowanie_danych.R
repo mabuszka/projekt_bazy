@@ -389,7 +389,7 @@ n_zamowien <- 250
 # limit<-wycieczki_rand["limit_uczestnikow"]
 # wycieczki<-wycieczki_rand
 set.seed(2021)
-
+n_zamowien<-250
 generator_zamowien <- function( n_zamowien){
   platnosci<-c("gotowka","karta","przelew internetowy","przelew tradycyjny","paypal","voucher")
 
@@ -445,25 +445,29 @@ zamowienia_rand<-generator_zamowien(250)
 zamowienia_z_datami <- left_join(zamowienia_rand, wycieczki_df, on = c("wycieczka" = "wycieczka_id"))
 
 
-
-
 # uczestnictwa
-# 
-# uczestnictwa_rand<-data.frame("wycieczka"=zamowienia_rand[,2],"uczestnik"=zamowienia_rand[,1]) # najpierw dodaje uczestnictwa klientow ktorzy kupili wycieczke
-# ile_osob_dodac<-0 # zlicze tu ile ludzi musze dolosowac jako klientow po tym co zrobie na dole
-# numer_nowego_uczestnika<-n_klientow #do tego b?d? dodawa? liczby jako kolejni uczestnicy nowi
-# 
-# for (k in unique(zamowienia_rand[,1])){ #przechodz? po klientach kt?rzy s? w jakimkolwiek zamowieniu jako kupujacy
-#   zamowienie<-zamowienia_rand[zamowienia_rand[,1]==k,c("wycieczka","liczba_osob")] # dla danego klienta wybieram numery wycieczek na jakie jedzie i ile osob chce na nie zabrac
-#   max_osob <- max(zamowienie[,2]) # max liczba osob jaka chce klient zabrac na jakas wycieczke
-#   ile_osob_dodac<-ile_osob_dodac+max_osob # tyle nowych uczestnikow musze wylosowac ze wzgl na tego klienta
-#   for (z in zamowienie){
-#     osoby_w_tym_zamowieniu<-zamowienie$liczba_osob
-#     nr_wycieczki<-zamowienie$wycieczka
-#     nowi_uczestnicy<-numer_nowego_uczestnika+seq(osoby_w_tym_zamowieniu)
-#     uczestnictwa_rand<-rbind(uczestnictwa_rand,data.frame("wycieczka"=rep(nr_wycieczki,length(osoby_w_tym_zamowieniu)),"uczestnik"=nowi_uczestnicy))
-#   }
-#   numer_nowego_uczestnika<-numer_nowego_uczestnika+max_osob #tyle osob dodaje i kolejnych dodaje od wyzszego numerka
-# }
 
-# teraz trzeba znowu przeprowadzic losowanie klientow tylko zamiast n_klientow wpisa? ile_osob_dodac i doklei? now? ramk? danych do tamtej
+#to tylko na potrzeby testowania
+# wycieczki_df<-wycieczki_rand
+# wycieczki_df<-cbind(data.frame("wycieczka_id"=1:length(wycieczki_df[,1])),wycieczki_df)
+# zamowienia_df<-zamowienia
+# zamowienia_df<-cbind(data.frame("zamowienie_id"=1:length(zamowienia_df[,1])),zamowienia_df)
+
+
+uczestnictwa_rand<-data.frame("zamowienie"=zamowienia_df$zamowienie_id,"uczestnik"=zamowienia_df$klient) # najpierw dodaje uczestnictwa klientow ktorzy kupili wycieczke
+daty<-c("2019-12-31","2020-04-30","2020-08-31","2020-12-31","2021-04-30","2021-08-31","2021-12-31")
+
+for (n in 1:(length(daty)-1)){
+  wycieczka<-wycieczki_df[wycieczki_df$data_zakonczenia<=daty[n+1] & wycieczki_df$data_rozpoczecia>daty[n],]
+  for (w_id in wycieczka$wycieczka_id){
+    ludzie<-1:300 ###trzeba zamienić na id klientów ale nie wiem jak to wygląda w klienci_df, chyba że zakładamy że i tak są po kolei
+    ludzie<-ludzie[-c(zamowienia_df$klient[zamowienia_df$wycieczka==w_id])]
+    nr_zamowienia<-zamowienia_df$zamowienie_id[zamowienia_df$wycieczka==w_id]
+    wylosowani<-sample(ludzie,3*length(nr_zamowienia))
+    i<-1
+    for (nr in nr_zamowienia){
+      uczestnictwa_rand<-rbind(uczestnictwa_rand,data.frame("zamowienie"=nr,"uczestnik"=wylosowani[i:(i+2)]))
+      i<-i+3
+    }
+  }
+}

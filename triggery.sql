@@ -1,4 +1,4 @@
---trigger który rzuca wyjątkiem jeśli chcemy złożyć/zmodyfikować zamówienie na wycieczkę 
+﻿--trigger który rzuca wyjątkiem jeśli chcemy złożyć/zmodyfikować zamówienie na wycieczkę 
 --tak że przekroczylibyśmy maksa liczby osób
 DROP FUNCTION limit_osob CASCADE;
 CREATE FUNCTION limit_osob() RETURNS TRIGGER AS $$
@@ -18,7 +18,6 @@ CREATE TRIGGER sprawdz_limit_osob_wycieczki BEFORE UPDATE OR INSERT ON wycieczki
 	FOR EACH ROW EXECUTE PROCEDURE limit_osob();
 
 
---POPRAWIONE DO SPR
 --trigger który update'uje liczbe uczestnikow na wycieczce po dodaniu/usunięciu/edycji uczestnictwa
 DROP FUNCTION aktualizacja_liczby_uczestnikow CASCADE;
 CREATE FUNCTION aktualizacja_liczby_uczestnikow() RETURNS TRIGGER AS $$
@@ -30,12 +29,12 @@ DECLARE
 BEGIN
 	SELECT count(OLD.uczestnik_id) INTO stara_liczba;
 	SELECT count(NEW.uczestnik_id) INTO nowa_liczba;
-	wycieczka := NEW.wycieczka_id;
+	SELECT z.wycieczka_id INTO wycieczka FROM zamowienia z WHERE z.zamowienie_id=NEW.zamowienie_id;
 	IF (stara_liczba IS NULL) THEN
 	stara_liczba := 0;
 	ELSIF (nowa_liczba IS NULL) THEN
 	nowa_liczba := 0;
-	wycieczka := OLD.wycieczka_id;
+	SELECT z.wycieczka_id INTO wycieczka FROM zamowienia z WHERE z.zamowienie_id=OLD.zamowienie_id;
 	END IF;
 	UPDATE wycieczki SET liczba_uczestnikow=liczba_uczestnikow+nowa_liczba-stara_liczba WHERE wycieczka_id=wycieczka;
 	RETURN NEW;
@@ -109,7 +108,6 @@ CREATE TRIGGER spr_kod_pocztowy_tr BEFORE INSERT OR UPDATE ON uczestnicy
 	FOR EACH ROW EXECUTE PROCEDURE spr_kod_pocztowy();
 
 
---POPRAWIONE SPR
 --spr że w wycieczce jest tyle osób co trzeba
 DROP FUNCTION spr_ilosc_osob CASCADE; 
 CREATE FUNCTION spr_ilosc_osob() RETURNS TRIGGER AS $$
@@ -153,7 +151,6 @@ CREATE TRIGGER spr_przewodnik_tr BEFORE INSERT OR UPDATE ON przewodnictwa
 	FOR EACH ROW EXECUTE PROCEDURE przewodnik_w_jednym_miejscu();
 
 
---POPRAWIONE DO SPR
 --spr czy cena odpowiednia
 DROP FUNCTION spr_cena CASCADE;
 CREATE FUNCTION spr_cena() RETURNS TRIGGER AS $$
@@ -176,10 +173,21 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE TRIGGER spr_cena_tr BEFORE INSERT OR UPDATE ON zamowienia 
 	FOR EACH ROW EXECUTE PROCEDURE spr_cena();
-INSERT INTO zamowienia VALUES(21,5,3,5,37500.00,1,'karta');
 
 
---NOWE DO SPR
+--trigger do dodania klienta do uczestnictw jak zlozy zamowienie
+DROP FUNCTION dodaj_klienta_do_uczestnictw CASCADE;
+CREATE FUNCTION dodaj_klienta_do_uczestnictw() RETURNS TRIGGER AS $$
+BEGIN
+	INSERT INTO uczestnicy_w_zamowieniu VALUES(NEW.klient_id,NEW.zamowienie_id);
+	RETURN NEW;
+END;
+$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER dodaj_klienta_do_uczestnictw_tr AFTER INSERT ON zamowienia
+	FOR EACH ROW EXECUTE PROCEDURE dodaj_klienta_do_uczestnictw();
+
+
 --trigger do aktualizacji ceny zamowienia po dodaniu uczestnictwa
 DROP FUNCTION aktualizacja_ceny CASCADE;
 CREATE FUNCTION aktualizacja_ceny() RETURNS TRIGGER AS $$
@@ -191,6 +199,7 @@ BEGIN
 							JOIN klasy_ofert k ON k.klasa=z.klasa_oferty
 							WHERE z.zamowienie_id=NEW.zamowienie_id;
 	UPDATE zamowienia SET wartosc_zamowienia=wartosc_zamowienia+cena WHERE zamowienia.zamowienie_id=NEW.zamowienie_id;
+	RETURN NEW;
 END;
 $$ LANGUAGE 'plpgsql';
 
@@ -198,12 +207,11 @@ CREATE TRIGGER aktualizacja_ceny_tr AFTER INSERT ON uczestnicy_w_zamowieniu
 	FOR EACH ROW EXECUTE PROCEDURE aktualizacja_ceny();
 
 
---NOWE DO SPR
 --nie wolno aktualizować uczestnictwa
 DROP FUNCTION nie_wolno_update CASCADE;
 CREATE FUNCTION nie_wolno_update() RETURNS TRIGGER AS $$
 BEGIN
-	RAISE EXCEPTION "Uczestnictwa mozna jedynie usuwac i dodawac.";
+	RAISE EXCEPTION 'Uczestnictwa mozna jedynie usuwac i dodawac.';
 	RETURN NEW;
 END;
 $$ LANGUAGE 'plpgsql';
