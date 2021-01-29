@@ -70,7 +70,21 @@ body = dashboardBody(
                 box(width = NULL,
                     status = "primary",
                     title = "Dodaj uczestnika",
-                    solidHeader = TRUE
+                    solidHeader = TRUE,
+                    collapsible = TRUE,
+                    textInput(inputId = "ud_imie_input", label = "Wpisz imię"),
+                    textInput(inputId = "ud_nazwisko_input", label = "Wpisz nazwisko"),
+                    textInput(inputId = "ud_kraj_input", label = "Wpisz kraj zamieszkania"),
+                    textInput(inputId = "ud_miasto_input", label = "Wpisz miasto zamieszkania"),
+                    textInput(inputId = "ud_kod_input", label = "Wpisz kod pocztowy"),
+                    textInput(inputId = "ud_ulica_input", label = "Wpisz ulicę"),
+                    textInput(inputId = "ud_nr_domu_input", label = "Wpisz numer domu"),
+                    textInput(inputId = "ud_data_input", label = "Wpisz datę urodzenia"),
+                    textInput(inputId = "ud_pesel_input", label = "Wpisz PESEL"),
+                    textInput(inputId = "ud_nr_tel_input", label = "Wpisz numer telefonu"),
+                    
+                    
+                    actionButton(inputId = "uczestnik_dodaj_id", label = "Dodaj ksiazke")
                     
                 ),
                 box(width = NULL,
