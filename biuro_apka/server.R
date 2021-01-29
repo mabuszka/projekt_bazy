@@ -58,6 +58,11 @@ shinyServer<- function(input, output){
   )
   ## dodawanie nowego uczestnika koniec
   
+  # wyświetlanie tabeli z uczestnikami
+  output$uczestnicy_tbl <- DT::renderDataTable({
+    return(dbGetQuery(con, "SELECT * FROM uczestnicy;"))
+  }, options = list(scrollX = TRUE))
+  
   
   
 }

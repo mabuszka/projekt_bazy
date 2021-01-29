@@ -1,5 +1,6 @@
 library(shiny)
 library(shinydashboard)
+library(DT)
 
 
 
@@ -57,6 +58,9 @@ sidebar = dashboardSidebar(
     )
 )
 
+# zakładka uczestnicy 
+## przeglądaj i modyfikuj
+
 box_dodaj_uczestnika = box(width = NULL,
                            status = "primary",
                            title = "Dodaj uczestnika",
@@ -65,7 +69,9 @@ box_dodaj_uczestnika = box(width = NULL,
                            collapsed = TRUE,
                            textInput(inputId = "ud_imie_input", label = "Wpisz imię"),
                            textInput(inputId = "ud_nazwisko_input", label = "Wpisz nazwisko"),
-                           textInput(inputId = "ud_kraj_input", label = "Wpisz kraj zamieszkania"),
+                           selectInput(inputId = "ud_kraj_input", label = "Wybierz kraj zamieszkania",
+                                       choices = list("Polska" = "Polska", "Niemcy" = "Niemcy", "Francja" = "Francja"), 
+                                       selected = "Polska"),
                            textInput(inputId = "ud_miasto_input", label = "Wpisz miasto zamieszkania"),
                            textInput(inputId = "ud_kod_input", label = "Wpisz kod pocztowy"),
                            textInput(inputId = "ud_ulica_input", label = "Wpisz ulicę"),
@@ -78,7 +84,7 @@ box_dodaj_uczestnika = box(width = NULL,
                            actionButton(inputId = "uczestnik_dodaj_id", label = "Dodaj uczestnika")
 )
                            
-
+## NIESKONCZONE
 box_modyfikuj_uczestnika <- box(width = NULL,
     status = "primary",
     title = "Modyfikuj uczestnika",
@@ -86,7 +92,15 @@ box_modyfikuj_uczestnika <- box(width = NULL,
     
 )
 
-
+## wyświetla tabelę z uczestnikami 
+box_tabela_uczestnicy = box(width = NULL,
+                            status = "primary",
+                            title = "Uczestnicy",
+                            solidHeader = TRUE, 
+                            collapsible = TRUE,
+                            DT::dataTableOutput(outputId = "uczestnicy_tbl")
+                            
+)
 
 
 
@@ -110,12 +124,7 @@ body = dashboardBody(
                 box_modyfikuj_uczestnika
                 ),
                 column(8,
-                       box(width = NULL,
-                           status = "primary",
-                           title = "Uczestnicy",
-                           solidHeader = TRUE
-                           
-                       ),
+                       box_tabela_uczestnicy ,
                        box(width = NULL,
                            status = "primary",
                            title = "Wyszukani",
