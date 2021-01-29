@@ -32,11 +32,32 @@ shinyServer<- function(input, output){
     else{
       sql <-paste0(sql, PESEL, "','", nr_telefonu, "');")
     }
-    tryCatch({dbSendQuery(con, sql)}, error = function(e){
-      error_to_show <- str_split(str_split(e, pattern = "ERROR: ")[[1]][2], "CONTEXT: ")[[1]][1]
+    tryCatch({res <-dbSendQuery(con, sql)
+    dbHasCompleted(res)
+    dbClearResult(res)
+    },
+    error = function(e){
+      error_to_show <- str_split(e, pattern = "ERROR: ")[[1]][2]
+      if (str_detect(error_to_show, "CONTEXT: ")){
+        error_to_show <- str_split(error_to_show, "CONTEXT: ")[[1]][1]
+      }
+      if (str_detect(error_to_show, "DETAIL: ")){
+        error_to_show <- str_split(error_to_show, "DETAIL: ")[[1]][1]
+      }
+      if (str_detect(error_to_show, "check constraint")){
+        # ogolnie to trzeba ogarnąć te case'y błędów które checki mogą zwracać
+        switch (str_split(error_to_show, '"')[[1]][4],
+                "pesel" = (error_to_show <- "Niepoprawny PESEL"),
+                "kraj" = (error_to_show <- "Niepoprawny kraj zamieszkania")
+        )
+      }
       showNotification(paste0(error_to_show), type = "error")
+      
     })
-  })
+  }
+  )
+  ## dodawanie nowego uczestnika koniec
+  
   
   
 }

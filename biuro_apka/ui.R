@@ -57,6 +57,39 @@ sidebar = dashboardSidebar(
     )
 )
 
+box_dodaj_uczestnika = box(width = NULL,
+                           status = "primary",
+                           title = "Dodaj uczestnika",
+                           solidHeader = TRUE,
+                           collapsible = TRUE,
+                           collapsed = TRUE,
+                           textInput(inputId = "ud_imie_input", label = "Wpisz imię"),
+                           textInput(inputId = "ud_nazwisko_input", label = "Wpisz nazwisko"),
+                           textInput(inputId = "ud_kraj_input", label = "Wpisz kraj zamieszkania"),
+                           textInput(inputId = "ud_miasto_input", label = "Wpisz miasto zamieszkania"),
+                           textInput(inputId = "ud_kod_input", label = "Wpisz kod pocztowy"),
+                           textInput(inputId = "ud_ulica_input", label = "Wpisz ulicę"),
+                           textInput(inputId = "ud_nr_domu_input", label = "Wpisz numer domu"),
+                           textInput(inputId = "ud_data_input", label = "Wpisz datę urodzenia"),
+                           textInput(inputId = "ud_pesel_input", label = "Wpisz PESEL"),
+                           textInput(inputId = "ud_nr_tel_input", label = "Wpisz numer telefonu"),
+                           
+                           
+                           actionButton(inputId = "uczestnik_dodaj_id", label = "Dodaj uczestnika")
+)
+                           
+
+box_modyfikuj_uczestnika <- box(width = NULL,
+    status = "primary",
+    title = "Modyfikuj uczestnika",
+    solidHeader = TRUE
+    
+)
+
+
+
+
+
 body = dashboardBody(
     shinyjs::useShinyjs(),
     tags$head(
@@ -67,38 +100,14 @@ body = dashboardBody(
     tabItems(
         tabItem(tabName = "uczestnicy",
                 column(4,
-                box(width = NULL,
-                    status = "primary",
-                    title = "Dodaj uczestnika",
-                    solidHeader = TRUE,
-                    collapsible = TRUE,
-                    textInput(inputId = "ud_imie_input", label = "Wpisz imię"),
-                    textInput(inputId = "ud_nazwisko_input", label = "Wpisz nazwisko"),
-                    textInput(inputId = "ud_kraj_input", label = "Wpisz kraj zamieszkania"),
-                    textInput(inputId = "ud_miasto_input", label = "Wpisz miasto zamieszkania"),
-                    textInput(inputId = "ud_kod_input", label = "Wpisz kod pocztowy"),
-                    textInput(inputId = "ud_ulica_input", label = "Wpisz ulicę"),
-                    textInput(inputId = "ud_nr_domu_input", label = "Wpisz numer domu"),
-                    textInput(inputId = "ud_data_input", label = "Wpisz datę urodzenia"),
-                    textInput(inputId = "ud_pesel_input", label = "Wpisz PESEL"),
-                    textInput(inputId = "ud_nr_tel_input", label = "Wpisz numer telefonu"),
-                    
-                    
-                    actionButton(inputId = "uczestnik_dodaj_id", label = "Dodaj ksiazke")
-                    
-                ),
+                       box_dodaj_uczestnika,
                 box(width = NULL,
                     status = "primary",
                     title = "Wyszukaj uczestników",
                     solidHeader = TRUE
                     
                 ),
-                box(width = NULL,
-                    status = "primary",
-                    title = "Modyfikuj uczestnika",
-                    solidHeader = TRUE
-                    
-                )
+                box_modyfikuj_uczestnika
                 ),
                 column(8,
                        box(width = NULL,
