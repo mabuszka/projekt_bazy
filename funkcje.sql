@@ -415,7 +415,8 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION dodaj_zamowienie_z_klientami(wycieczka INTEGER, klasa_zam INTEGER, platnosc VARCHAR(100), VARIADIC uczestnicy_do_zamowienia TEXT[]) RETURNS TEXT AS $$
 DECLARE
-	oferta INTEGER;
+	oferta_limit INTEGER;
+	liczba_ludzi INTEGER;
 	znajdz_wycieczka INTEGER;
 	znajdz_klasa INTEGER;
 	liczba_uczestnikow INTEGER;
@@ -437,8 +438,14 @@ DECLARE
 	
 BEGIN
 	SELECT array_upper(uczestnicy_do_zamowienia, 1) INTO liczba_uczestnikow;
-	SELECT oferty(oferta_id)
-	SELECT wycieczka_id INTO znajdz_wycieczka FROM wycieczki WHERE wycieczka_id=wycieczka;
+	SELECT wycieczka_id INTO znajdz_wycieczka FROM wycieczki WHERE wycieczka_id=wycieczka;SELECT o.limit_uczestnikow FROM oferty o JOIN wycieczki w ON (w.oferta_id = o.oferta_id) INTO oferta_limit;
+	SELECT w.liczba_uczestnikow FROM wycieczki w WHERE w.wycieczka_id = znajdz_wycieczka INTO liczba_ludzi;
+	IF (liczba_ludzi IS NULL) THEN
+		liczba_ludzi := 0;
+	END IF;
+	IF (oferta_limit < (liczba_ludzi + liczba_uczestnikow)) THEN
+		RAISE EXCEPTION 'Nie ma juz tyle wolnych miejsc na tej wycieczce!';
+	END IF;
 	SELECT klasa INTO znajdz_klasa FROM klasy_ofert WHERE klasa=klasa_zam;
 	IF (znajdz_wycieczka IS NULL) THEN
 		RAISE EXCEPTION 'Nie istnieje wycieczka o takim numerze.';
@@ -499,7 +506,7 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 
-SELECT dodaj_zamowienie_z_klientami(1,1,'a','{"Mike", "Fredson",  "Polska", "Kwidzyn","44-752","Rycerska", "178", "1963-06-7", "63060781605","149700779" }', '{"Mona", "Lisa",  "Niemcy", "Kwidzyn","44-752","Rycerska", "178","1963-06-7", NULL, "149700779"}');
+SELECT dodaj_zamowienie_z_klientami(2,1,'a','{"Mike", "Fredson",  "Polska", "Kwidzyn","44-752","Rycerska", "178", "1963-06-7", "63060781605","149700779" }', '{"Mona", "Lisa",  "Niemcy", "Kwidzyn","44-752","Rycerska", "178","1963-06-7", NULL, "149700779"}');
 
 -- '{"Mona", "Lisa",  "Niemcy", "Rycerska", "178", "Kwidzyn", "44-752","1963-06-7", "149700779", NULL}'
 
