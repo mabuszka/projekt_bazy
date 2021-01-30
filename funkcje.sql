@@ -409,3 +409,98 @@ SELECT 	o.oferta_id,
 	HAVING array_agg(t.tag)::TEXT[] @> szukane_tagi;
 END;
 $$ LANGUAGE 'plpgsql';
+
+--- tworzenie zamowienia na podstwie danych uczestnikow i klienta
+-- przyjmuje ileś stringów które można przerobic na krotki z danymi klienta w postaci '{"imie", "nazwisko","kraj", "miasto", "kod_pocztowy", "ulica", "numer_domu", "rrrr-mm-dd", "pesel"/NULL,"telefon"}'
+
+CREATE OR REPLACE FUNCTION dodaj_zamowienie_z_klientami(wycieczka INTEGER, klasa_zam INTEGER, platnosc VARCHAR(100), VARIADIC uczestnicy_do_zamowienia TEXT[]) RETURNS TEXT AS $$
+DECLARE
+	oferta INTEGER;
+	znajdz_wycieczka INTEGER;
+	znajdz_klasa INTEGER;
+	liczba_uczestnikow INTEGER;
+	dane_uczestnika TEXT[];
+	imie_uczestnika TEXT;
+	nazwisko_uczestnika TEXT;
+	kraj_uczestnika  TEXT;
+	miasto_uczestnika TEXT;
+	data_uczestnika DATE;
+	kod_pocztowy_uczestnika TEXT;
+	numer_domu_uczestnika TEXT;
+	telefon_uczestnika TEXT;
+	pesel_uczestnika TEXT;
+	ulica_uczestnika TEXT;
+	nowy_uczestnik_id INTEGER;
+	nowy_klient_id INTEGER;
+	zlozone_zamowienie_id INTEGER;
+	
+	
+BEGIN
+	SELECT array_upper(uczestnicy_do_zamowienia, 1) INTO liczba_uczestnikow;
+	SELECT oferty(oferta_id)
+	SELECT wycieczka_id INTO znajdz_wycieczka FROM wycieczki WHERE wycieczka_id=wycieczka;
+	SELECT klasa INTO znajdz_klasa FROM klasy_ofert WHERE klasa=klasa_zam;
+	IF (znajdz_wycieczka IS NULL) THEN
+		RAISE EXCEPTION 'Nie istnieje wycieczka o takim numerze.';
+	ELSIF (znajdz_klasa IS NULL) THEN
+		RAISE EXCEPTION 'Niepoprawny numer klasy.';
+	END IF;
+	
+	-- szukamy i dodajemy klienta do bazy jesli go nie ma
+	dane_uczestnika := uczestnicy_do_zamowienia[1]::TEXT[];
+	imie_uczestnika := dane_uczestnika[1];
+	nazwisko_uczestnika := dane_uczestnika[2];
+	kraj_uczestnika  := dane_uczestnika[3];
+	miasto_uczestnika := dane_uczestnika[4];
+	kod_pocztowy_uczestnika := dane_uczestnika[5]::VARCHAR(6);
+	ulica_uczestnika := dane_uczestnika[6];
+	numer_domu_uczestnika := dane_uczestnika[7];
+	data_uczestnika := dane_uczestnika[8]::DATE;
+	pesel_uczestnika := dane_uczestnika[9];
+	telefon_uczestnika := dane_uczestnika[10];
+	
+	SELECT wyszukaj_klienta(imie_uczestnika, nazwisko_uczestnika, kraj_uczestnika, miasto_uczestnika,
+	ulica_uczestnika, numer_domu_uczestnika, kod_pocztowy_uczestnika, telefon_uczestnika , data_uczestnika, pesel_uczestnika) INTO nowy_klient_id;
+	IF (nowy_klient_id IS NULL) THEN 
+	PERFORM dodaj_klienta(imie_uczestnika, nazwisko_uczestnika, kraj_uczestnika, miasto_uczestnika, ulica_uczestnika, numer_domu_uczestnika, kod_pocztowy_uczestnika, telefon_uczestnika, data_uczestnika, pesel_uczestnika);
+	SELECT wyszukaj_klienta(imie_uczestnika, nazwisko_uczestnika, kraj_uczestnika, miasto_uczestnika, ulica_uczestnika, numer_domu_uczestnika, kod_pocztowy_uczestnika, telefon_uczestnika , data_uczestnika, pesel_uczestnika) INTO nowy_klient_id;
+	END IF;
+
+	-- tworzymy nowe puste zamowienie 	
+	PERFORM zloz_zamowienie(nowy_klient_id, wycieczka, klasa_zam, platnosc);
+	
+	SELECT max(zamowienie_id) FROM zamowienia WHERE klient_id = nowy_klient_id INTO zlozone_zamowienie_id;
+	
+	IF (liczba_uczestnikow > 1) THEN
+	FOR i in 2 .. liczba_uczestnikow LOOP
+    dane_uczestnika := uczestnicy_do_zamowienia[i]::TEXT[];
+	imie_uczestnika := dane_uczestnika[1];
+	nazwisko_uczestnika := dane_uczestnika[2];
+	kraj_uczestnika  := dane_uczestnika[3];
+	miasto_uczestnika := dane_uczestnika[4];
+	kod_pocztowy_uczestnika := dane_uczestnika[5];
+	ulica_uczestnika := dane_uczestnika[6];
+	numer_domu_uczestnika := dane_uczestnika[7];
+	data_uczestnika := dane_uczestnika[8]::DATE;
+	pesel_uczestnika := dane_uczestnika[9];
+	telefon_uczestnika := dane_uczestnika[10];
+	
+	SELECT wyszukaj_klienta(imie_uczestnika, nazwisko_uczestnika, kraj_uczestnika, miasto_uczestnika,ulica_uczestnika, numer_domu_uczestnika, kod_pocztowy_uczestnika, telefon_uczestnika , data_uczestnika, pesel_uczestnika) INTO nowy_uczestnik_id;
+	IF (nowy_uczestnik_id IS NULL) THEN
+	PERFORM dodaj_klienta(imie_uczestnika, nazwisko_uczestnika, kraj_uczestnika, miasto_uczestnika, ulica_uczestnika, numer_domu_uczestnika, kod_pocztowy_uczestnika, telefon_uczestnika, data_uczestnika, pesel_uczestnika);
+	SELECT wyszukaj_klienta(imie_uczestnika::VARCHAR(100), nazwisko_uczestnika::VARCHAR(100), kraj_uczestnika::VARCHAR(100), miasto_uczestnika::VARCHAR(100), ulica_uczestnika::VARCHAR(100), numer_domu_uczestnika::VARCHAR(100), kod_pocztowy_uczestnika::VARCHAR(6), telefon_uczestnika::VARCHAR(20) , data_uczestnika::DATE, pesel_uczestnika::VARCHAR(11)) INTO nowy_uczestnik_id;
+	END IF;
+	
+	INSERT INTO uczestnicy_w_zamowieniu(zamowienie_id, uczestnik_id) VALUES (zlozone_zamowienie_id, nowy_uczestnik_id);
+
+  END LOOP;
+	END IF;
+	RETURN 'Pomyslnie zlozono zamowienie.';
+END;
+$$ LANGUAGE 'plpgsql';
+
+SELECT dodaj_zamowienie_z_klientami(1,1,'a','{"Mike", "Fredson",  "Polska", "Kwidzyn","44-752","Rycerska", "178", "1963-06-7", "63060781605","149700779" }', '{"Mona", "Lisa",  "Niemcy", "Kwidzyn","44-752","Rycerska", "178","1963-06-7", NULL, "149700779"}');
+
+-- '{"Mona", "Lisa",  "Niemcy", "Rycerska", "178", "Kwidzyn", "44-752","1963-06-7", "149700779", NULL}'
+
+-- SELECT wyszukaj_klienta('i', 'n', 'p', 'm', 'u', '1', '33-333', '888999777', '2000-09-09'::DATE, '12345678900')
