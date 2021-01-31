@@ -5,6 +5,26 @@ library(stringi)
 library(stringr)
 
 shinyServer<- function(input, output){
+  
+  options(DT.options = list(language = list(processing=     "Przetwarzanie...",
+                                            search=         "Szukaj:",
+                                            lengthMenu=     "Pokaż _MENU_ pozycji",
+                                            info=           "Pozycje od _START_ do _END_ z _TOTAL_ łącznie",
+                                            infoEmpty=      "Pozycji 0 z 0 dostępnych",
+                                            infoFiltered=   "(filtrowanie spośród _MAX_ dostępnych pozycji)",
+                                            infoPostFix=    "",
+                                            loadingRecords= "Wczytywanie...",
+                                            zeroRecords=    "Nie znaleziono pasujących pozycji",
+                                            emptyTable=     "Brak danych",
+                                            paginate = list(first=      "Pierwsza",
+                                                            previous=   "Poprzednia",
+                                                            `next`=       "Następna",
+                                                            last=       "Ostatnia"),
+                                            scrollX=TRUE
+                                            )
+    # search = 'Wyszukaj:', info = 'Wyświetla _START_ do _END_, z _TOTAL_',
+    #                                         paginate = list(previous = 'Poprzednia', `next` = 'Następna')
+    ))
   #### UCZESTNICY
   # dodawanie nowego uczestnika
   observeEvent(input$uczestnik_dodaj_id, {
