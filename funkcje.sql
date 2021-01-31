@@ -410,7 +410,7 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 --- tworzenie zamowienia na podstwie danych uczestnikow i klienta
--- przyjmuje ileś stringów które można przerobic na krotki z danymi klienta w postaci '{"imie", "nazwisko","kraj", "miasto", "kod_pocztowy", "ulica", "numer_domu", "rrrr-mm-dd", "pesel"/NULL,"telefon"}'
+-- przyjmuje iles stringow które mozna przerobic na krotki z danymi klienta w postaci '{"imie", "nazwisko","kraj", "miasto", "kod_pocztowy", "ulica", "numer_domu", "rrrr-mm-dd", "pesel"/NULL,"telefon"}'
 
 CREATE OR REPLACE FUNCTION dodaj_zamowienie_z_klientami(wycieczka INTEGER, klasa_zam INTEGER, platnosc VARCHAR(100), VARIADIC uczestnicy_do_zamowienia TEXT[]) RETURNS TEXT AS $$
 DECLARE
