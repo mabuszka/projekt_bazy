@@ -56,7 +56,7 @@ ALTER TABLE zamowienia ALTER COLUMN klient_id SET NOT NULL;
 
 ALTER TABLE zamowienia ADD PRIMARY KEY (zamowienie_id);
 
-ALTER TABLE zamowienia ADD CHECK (sposob_platnosci IN ('karta','gotowka','przelew_internetowy','przelew_tradycyjny','paypal','voucher'));
+ALTER TABLE zamowienia ADD CHECK (sposob_platnosci IN ('karta','gotowka','przelew internetowy','przelew tradycyjny','paypal','voucher'));
 
 -- przewodnicy (przewodnik_id 		SERIAL
 				-- imie 				VARCHAR(100),
