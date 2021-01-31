@@ -2,6 +2,7 @@ source("db_con.R")
 library(shiny)
 library(DT)
 library(stringi)
+library(stringr)
 
 shinyServer<- function(input, output){
   #### UCZESTNICY
@@ -60,9 +61,13 @@ shinyServer<- function(input, output){
   ## dodawanie nowego uczestnika koniec
   
   # wyświetlanie tabeli z uczestnikami
-  output$uczestnicy_tbl <- DT::renderDataTable({
-    return(dbGetQuery(con, "SELECT * FROM uczestnicy;"))
-  }, options = list(scrollX = TRUE))
+  output$uczestnicy_tbl <- DT::renderDataTable(
+    {tryCatch({dbGetQuery(con,"SELECT * FROM uczestnicy;")},
+              error = function(e){
+                return(data.frame())
+              })
+    }, options = list(scrollX=TRUE)
+  )
   #### UCZESTNICY KONIEC
   
   #### OFERTY
@@ -72,15 +77,15 @@ shinyServer<- function(input, output){
               error = function(e){
                 return(data.frame())
               })
-  }, options = list(scrollX = TRUE))
+    }, options = list(scrollX = TRUE))
   
   ## najbardziej oblegane miejsca docelowe
   output$najbardziej_oblegane_tbl <- DT::renderDataTable(
-  {tryCatch({dbGetQuery(con, "SELECT * FROM najwiecej_odwiedzane_cele;")},
-            error = function(e){
-              return(data.frame())
-            })
-  }, options = list(scrollX = TRUE))
+    {tryCatch({dbGetQuery(con, "SELECT * FROM najwiecej_odwiedzane_cele;")},
+              error = function(e){
+                return(data.frame())
+              })
+    }, options = list(scrollX = TRUE))
   
   
   ## statystyki ofert 
@@ -119,7 +124,9 @@ shinyServer<- function(input, output){
   
   output$info_zwolnij <- renderPrint({ 
     id<-input$zwolnij
-    tryCatch({dbGetQuery(con, paste0("SELECT * FROM przewodnicy WHERE przewodnik_id=",id,";"))
+    tryCatch({res <- dbGetQuery(con, paste0("SELECT * FROM przewodnicy WHERE przewodnik_id=",id,";"))
+    str_c(str_replace_all(unname(res), c("TRUE" = "aktywny", "FALSE" = "nieaktywny")), sep = "", collapse = " ")
+    
     })
   })
   
