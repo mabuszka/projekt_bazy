@@ -127,10 +127,10 @@ LIMIT 5;
 CREATE VIEW najbardziej_doswiadczeni_przewodnicy AS
 SELECT p.przewodnik_id, p.imie, p.nazwisko, COUNT(p.przewodnik_id) AS ile_wycieczek
 FROM przewodnicy p
-	JOIN wycieczki w
-		ON (p.przewodnik_id = w.przewodnik_id)
+	JOIN przewodnictwa pa
+		ON (p.przewodnik_id = pa.przewodnik_id)
 GROUP BY (p.przewodnik_id, p.imie, p.nazwisko)
-ORDER BY COUNT(przewodnik_id) DESC
+ORDER BY COUNT(p.przewodnik_id) DESC
 LIMIT 10;
 
 -- dane do sprawdzenia 
