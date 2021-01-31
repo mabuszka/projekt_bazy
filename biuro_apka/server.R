@@ -122,10 +122,10 @@ shinyServer<- function(input, output){
                   }
   }))
   
-  output$info_zwolnij <- renderPrint({ 
+  output$info_zwolnij <- renderText({ 
     id<-input$zwolnij
     tryCatch({res <- dbGetQuery(con, paste0("SELECT * FROM przewodnicy WHERE przewodnik_id=",id,";"))
-    str_c(str_replace_all(unname(res), c("TRUE" = "aktywny", "FALSE" = "nieaktywny")), sep = "", collapse = " ")
+    str_c(c("ID:", ", Imię:", ", Nazwisko:", ", Email:", ", Telefon:", ", Status:"),str_replace_all(unname(res), c("TRUE" = "aktywny", "FALSE" = "nieaktywny")), sep = " ", collapse = "")
     
     })
   })
