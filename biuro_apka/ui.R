@@ -181,7 +181,7 @@ box_zwolnij <- box(width=NULL,
                   solidHeader = TRUE,
                   collapsible = TRUE,
                   selectInput("zwolnij",label='Wybierz przewodnika do zwolnienia',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
-                  fluidRow(column(3, textOutput("info_zwolnij"))),
+                  textOutput("info_zwolnij"),
                   actionButton(inputId = "zwolnij_button", label = "Zwolnij")
 )
 
