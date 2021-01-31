@@ -140,7 +140,8 @@ shinyServer<- function(input, output){
                             return(data.frame())
                           })
                   }
-  }))
+  }), 
+  options = list(scrollX = TRUE))
   
   output$info_zwolnij <- renderText({ 
     id<-input$zwolnij
@@ -214,11 +215,14 @@ shinyServer<- function(input, output){
     tryCatch({res <-dbSendQuery(con, sql)
     dbHasCompleted(res)
     dbClearResult(res)
-    })
+    }
+    )
   })
   
   output$kolidujace_wycieczki <- DT::renderDataTable(
     tryCatch({dbGetQuery(con, paste0("SELECT * FROM kolidujace_wycieczki_przewodnikow WHERE przewodnik_id=",input$p_zlec_wycieczke_select,";"))
+    },error = function(e){
+      return(data.frame())
     }), options = list(scrollX=TRUE)
   )
   

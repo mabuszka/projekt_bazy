@@ -140,6 +140,60 @@ box_statystyki_ofert <- box(width = NULL,
 )
 
 
+############ zakładka WYCIECZKI
+# przegladaj
+
+box_przegladaj_wycieczki <- box(width = NULL,
+                                status = "primary",
+                                title = "Przeglądaj",
+                                solidHeader = TRUE,
+                                DT::dataTableOutput(outputId = "przegladaj_wycieczki_tbl")
+                                
+)
+
+box_sprawdz_przewodnikow_do_wycieczki <- box(width = NULL,
+                                             status = "primary",
+                                             title = "Sprawdź przewodników wycieczek",
+                                             solidHeader = TRUE,
+                                             DT::dataTableOutput(outputId = "sprawdz_przewodnictwa_wycieczek_tbl")
+                                             
+)
+
+box_zblizajace_sie_wycieczki <- box(width = NULL,
+                                    status = "primary",
+                                    title = "Zbliżające się wycieczki",
+                                    solidHeader = TRUE,
+                                    DT::dataTableOutput(outputId = "zblizajace_sie_wycieczki_tbl")
+                                    
+)
+
+#modyfikuj
+
+box_stworz_wycieczke <- box(width = NULL,
+                            status = "primary",
+                            title = "Utwórz wycieczkę",
+                            solidHeader = TRUE
+                            
+)
+
+box_modyfikuj_wycieczke <- box(width = NULL,
+                               status = "primary",
+                               title = "Modyfikuj wycieczkę",
+                               solidHeader = TRUE
+                               
+)
+
+box_usun_wycieczke <- box(width = NULL,
+                          status = "primary",
+                          title = "Usuń wycieczkę",
+                          solidHeader = TRUE
+                          
+)
+
+#box_zlec_wycieczke_ww
+#box_odwolaj_z_wycieczki
+
+
 ############# zakładka PRZEWODNICY
 # przeglądaj: przewodnicy, widok najbardziej doświadczeni
 
@@ -174,7 +228,6 @@ box_zatrudnij <- box(width=NULL,
                      actionButton('zatrudnij',label='Zatrudnij')
 )
 
-# jakoś inaczej wyświetlać dane przewodnika
 box_zwolnij <- box(width=NULL,
                   status='primary',
                   title='Zwolnij przewodnika',
@@ -204,6 +257,7 @@ box_zlec_wycieczke <- box(width=NULL,
                          solidHeader = TRUE,
                          collapsible = TRUE,
                          selectInput("p_zlec_wycieczke_select",label='Wybierz przewodnika',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
+                         h4('Wycieczki kolidujące z wycieczkami wybranego przewodnika:'),
                          DT::dataTableOutput(outputId = 'kolidujace_wycieczki'),
                          selectInput("w_zlec_wycieczke_select",label='Wybierz wycieczkę',choices=dbGetQuery(con,"SELECT wycieczka_id FROM wycieczki;")$wycieczka_id),
                          actionButton('p_zlec_wycieczke_button',label='Zleć wycieczkę przewodnikowi')
@@ -279,20 +333,22 @@ body = dashboardBody(
         ),
         # zarządzanie wycieczkami 
         tabItem(tabName = "zarzadzaj_wycieczki",
-                box(width = NULL,
-                    status = "primary",
-                    title = "cos",
-                    solidHeader = TRUE
-                    
+                column(6,
+                       box_stworz_wycieczke,
+                       box_usun_wycieczke
+                ),
+                column(6,
+                       box_modyfikuj_wycieczke
                 )
         ),
         # przeglądaj wycieczki
         tabItem(tabName = "przegladaj_wycieczki",
-                box(width = NULL,
-                    status = "primary",
-                    title = "cos",
-                    solidHeader = TRUE
-                    
+                column(6,
+                       box_przegladaj_wycieczki
+                ),
+                column(6,
+                       box_sprawdz_przewodnikow_do_wycieczki,
+                       box_zblizajace_sie_wycieczki
                 )
         ),
         # statystyki wycieczek 
