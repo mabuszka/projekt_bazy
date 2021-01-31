@@ -148,6 +148,7 @@ box_przegladaj_przewodnikow <- box(width=NULL,
                                     title='Przewodnicy',
                                     solidHeader = TRUE,
                                     collapsible = TRUE,
+                                    selectInput('aktywnosc',label='Aktywność',choices=list("aktywni"=1,"wszyscy"=3,"nieaktywni"=2)),
                                     DT::dataTableOutput(outputId = 'przewodnicy')
                                    )
 
@@ -160,6 +161,63 @@ box_doswiadczeni_przewodnicy <- box(width=NULL,
 )
 
 # modyfikuj: zwolnij, zatrudnij, aktualizuj informacje, zleć wycieczkę + kolidujące wycieczki
+#wszędzie dodać powiadomienie że się udało
+
+box_zatrudnij <- box(width=NULL,
+                     status='primary',
+                     title='Zatrudnij',
+                     solidHeader = TRUE,
+                     collapsible = TRUE,
+                     textInput('p_imie_input',label="Imię"),
+                     textInput('p_nazwisko_input',label='Nazwisko'),
+                     textInput('p_telefon_input',label='Telefon'),
+                     actionButton('zatrudnij',label='Zatrudnij')
+)
+
+# jakoś inaczej wyświetlać dane przewodnika
+box_zwolnij <- box(width=NULL,
+                  status='primary',
+                  title='Zwolnij przewodnika',
+                  solidHeader = TRUE,
+                  collapsible = TRUE,
+                  selectInput("zwolnij",label='Wybierz przewodnika do zwolnienia',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
+                  fluidRow(column(3, textOutput("info_zwolnij"))),
+                  actionButton(inputId = "zwolnij_button", label = "Zwolnij")
+)
+
+# dodać defaultowe wpisywanie się dotychczasowych danych
+box_aktualizuj_przewodnika <- box(width=NULL,
+                     status='primary',
+                     title='Zaktualizuj informacje',
+                     solidHeader = TRUE,
+                     collapsible = TRUE,
+                     selectInput("przewodnik_do_akt_select",label='Wybierz przewodnika',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
+                     textInput('p_akt_imie_input',label="Imię"),
+                     textInput('p_akt_nazwisko_input',label='Nazwisko'),
+                     textInput('p_akt_telefon_input',label='Telefon'),
+                     actionButton('p_aktualizuj_id',label='Zaktualizuj informacje')
+)
+
+box_zlec_wycieczke <- box(width=NULL,
+                         status='primary',
+                         title='Zleć wycieczkę przewodnikowi',
+                         solidHeader = TRUE,
+                         collapsible = TRUE,
+                         selectInput("p_zlec_wycieczke_select",label='Wybierz przewodnika',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
+                         DT::dataTableOutput(outputId = 'kolidujace_wycieczki'),
+                         selectInput("w_zlec_wycieczke_select",label='Wybierz wycieczkę',choices=dbGetQuery(con,"SELECT wycieczka_id FROM wycieczki;")$wycieczka_id),
+                         actionButton('p_zlec_wycieczke_button',label='Zleć wycieczkę przewodnikowi')
+)
+
+box_wycieczki_przewodnikow <- box(width=NULL,
+                                  status='primary',
+                                  title='Wycieczki przewodników',
+                                  solidHeader = TRUE,
+                                  collapsible = TRUE,
+                                  collapsed = TRUE,
+                                  DT::dataTableOutput(outputId = 'wycieczki_przewodnikow')
+)
+
 
 
 
@@ -268,11 +326,14 @@ body = dashboardBody(
         # zakładki do przewodników
         # zarządzanie przewodnikami
         tabItem(tabName = "zarzadzaj_przewodnicy",
-                box(width = NULL,
-                    status = "primary",
-                    title = "cos",
-                    solidHeader = TRUE
-                    
+                column(6,
+                       box_zlec_wycieczke,
+                       box_zatrudnij
+                       
+                ),
+                column(6,
+                       box_aktualizuj_przewodnika,
+                       box_zwolnij
                 )
         ),
         # przeglądanie przewodników 
@@ -281,12 +342,12 @@ body = dashboardBody(
                        box_przegladaj_przewodnikow
                 ),
                 column(6,
-                       box_doswiadczeni_przewodnicy
+                       box_doswiadczeni_przewodnicy,
+                       box_wycieczki_przewodnikow
                 )
         )
     )
 )
-
 
 dashboardPage(
     skin = "blue",
