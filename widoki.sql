@@ -62,14 +62,15 @@ WHERE (CASE
 		);
 									
 			
-
+drop view if exists stali_klienci;
 CREATE VIEW stali_klienci AS
-SELECT z.klient_id, MAX(u.imie) AS imie, MAX(u.nazwisko) AS nazwisko 
+SELECT z.klient_id, MAX(u.imie) AS imie, MAX(u.nazwisko) AS nazwisko, count(*) AS ile_kupil 
 FROM uczestnicy u 
 	JOIN zamowienia z 
 			ON (z.klient_id = u.uczestnik_id)
 GROUP BY z.klient_id
-HAVING COUNT(*) > 5;
+HAVING COUNT(*) > 3
+ORDER BY count(*);
 
 -- dane do testu widoku stali klienci
 -- INSERT INTO zamowienia(zamowienie_id, klient_id) VALUES (1,1);

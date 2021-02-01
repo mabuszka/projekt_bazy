@@ -1,6 +1,6 @@
-﻿--złóż zamówienie
-DROP FUNCTION zloz_zamowienie;
-CREATE FUNCTION zloz_zamowienie(klient INTEGER, wycieczka INTEGER, klasa_zam INTEGER, platnosc VARCHAR(100)) RETURNS TEXT AS $$
+﻿
+-- zloz zamowienie
+CREATE OR REPLACE FUNCTION zloz_zamowienie(klient INTEGER, wycieczka INTEGER, klasa_zam INTEGER, platnosc VARCHAR(100)) RETURNS TEXT AS $$
 DECLARE
 	oferta INTEGER;
 	znajdz_wycieczka INTEGER;
@@ -26,8 +26,7 @@ $$ LANGUAGE 'plpgsql';
 
 
 --edycja zamowienia
-DROP FUNCTION edytuj_zamowienie;
-CREATE FUNCTION edytuj_zamowienie(id_zam INTEGER, klasa_nowa INTEGER, platnosc_nowa VARCHAR(100)) RETURNS TEXT AS $$
+CREATE OR REPLACE FUNCTION edytuj_zamowienie(id_zam INTEGER, klasa_nowa INTEGER, platnosc_nowa VARCHAR(100)) RETURNS TEXT AS $$
 DECLARE
 	znajdz_zam INTEGER;
 	cena DECIMAL(10,2);
@@ -55,8 +54,7 @@ $$ LANGUAGE 'plpgsql';
 
 
 --usun zamowienie
-DROP FUNCTION anuluj_zamowienie;
-CREATE FUNCTION anuluj_zamowienie(id_zam INTEGER) RETURNS TEXT AS $$
+CREATE OR REPLACE FUNCTION anuluj_zamowienie(id_zam INTEGER) RETURNS TEXT AS $$
 DECLARE
 	znajdz_zam INTEGER;
 BEGIN
@@ -72,7 +70,7 @@ $$ LANGUAGE 'plpgsql';
 
 
 --usun przewodnika z wycieczki
-CREATE FUNCTION usun_przewodnika(id_przewodnika INTEGER, id_wycieczki INTEGER) RETURNS TEXT AS $$
+CREATE OR REPLACE FUNCTION usun_przewodnika(id_przewodnika INTEGER, id_wycieczki INTEGER) RETURNS TEXT AS $$
 DECLARE
 	znajdz_przew INTEGER;
 	wycieczka INTEGER;
@@ -96,7 +94,7 @@ $$ LANGUAGE 'plpgsql';
 
 
 --dodaj przewodnika do wycieczki
-CREATE FUNCTION dodaj_przewodnika(id_przewodnika INTEGER, id_wycieczki INTEGER) RETURNS TEXT AS $$
+CREATE OR REPLACE FUNCTION dodaj_przewodnika(id_przewodnika INTEGER, id_wycieczki INTEGER) RETURNS TEXT AS $$
 DECLARE
 	wycieczka INTEGER;
 	aktywnosc BOOLEAN;
@@ -156,7 +154,7 @@ $$ LANGUAGE 'plpgsql';
 
 
 --modyfikuj uczestnika 
-CREATE FUNCTION edytuj_klienta(id INTEGER, imie_nowe VARCHAR(100), nazwisko_nowe VARCHAR(100), kraj VARCHAR(100), miasto_nowe VARCHAR(100), ulica_nowa VARCHAR(100), dom VARCHAR(100), kod VARCHAR(6), telefon VARCHAR(20), urodzony DATE, pesel_nowy VARCHAR(100) DEFAULT NULL) RETURNS TEXT AS $$
+CREATE OR REPLACE FUNCTION edytuj_klienta(id INTEGER, imie_nowe VARCHAR(100), nazwisko_nowe VARCHAR(100), kraj VARCHAR(100), miasto_nowe VARCHAR(100), ulica_nowa VARCHAR(100), dom VARCHAR(100), kod VARCHAR(6), telefon VARCHAR(20), urodzony DATE, pesel_nowy VARCHAR(100) DEFAULT NULL) RETURNS TEXT AS $$
 BEGIN
 	IF ((SELECT uczestnik_id FROM uczestnicy WHERE uczestnik_id=id) IS NULL) THEN
 		RAISE EXCEPTION 'Nie istnieje taki klient.';
@@ -168,7 +166,7 @@ $$ LANGUAGE 'plpgsql';
 
 
 --modyfikuj wycieczkę
-CREATE FUNCTION modyfikuj_wycieczke(id INTEGER, poczatek DATE) RETURNS TEXT AS $$
+CREATE OR REPLACE FUNCTION modyfikuj_wycieczke(id INTEGER, poczatek DATE) RETURNS TEXT AS $$
 DECLARE
 	oferta INTEGER;
 	trwanie INTEGER;
@@ -185,7 +183,7 @@ $$ LANGUAGE 'plpgsql';
 
 
 --przedstaw cene
-CREATE FUNCTION przedstaw_cene(wycieczka INTEGER, klasa_zam INTEGER, osoby INTEGER) RETURNS DECIMAL(10,2) AS $$
+CREATE OR REPLACE FUNCTION przedstaw_cene(wycieczka INTEGER, klasa_zam INTEGER, osoby INTEGER) RETURNS DECIMAL(10,2) AS $$
 DECLARE
 	oferta INTEGER;
 	cena DECIMAL(10,2);
@@ -199,7 +197,7 @@ $$ LANGUAGE 'plpgsql';
 
 
 --zatrudnij przewodnika
-CREATE FUNCTION zatrudnij(imie_nowe VARCHAR(100), nazwisko_nowe VARCHAR(100), telefon VARCHAR(20), znam BOOLEAN DEFAULT FALSE) RETURNS TEXT AS $$
+CREATE OR REPLACE FUNCTION zatrudnij(imie_nowe VARCHAR(100), nazwisko_nowe VARCHAR(100), telefon VARCHAR(20), znam BOOLEAN DEFAULT FALSE) RETURNS TEXT AS $$
 DECLARE
 	znajdz INTEGER;
 	aktywny_czy BOOLEAN;
@@ -222,7 +220,7 @@ $$ LANGUAGE 'plpgsql';
 
 
 --zwolnij przewodnika
-CREATE FUNCTION zwolnij(id INTEGER) RETURNS TEXT AS $$
+CREATE OR REPLACE FUNCTION zwolnij(id INTEGER) RETURNS TEXT AS $$
 DECLARE
 	znajdz INTEGER;
 BEGIN
@@ -239,7 +237,7 @@ $$ LANGUAGE 'plpgsql';
 
 
 --dodaj wycieczke
-CREATE FUNCTION dodaj_wycieczke(oferta INTEGER, poczatek DATE) RETURNS TEXT AS $$
+CREATE OR REPLACE FUNCTION dodaj_wycieczke(oferta INTEGER, poczatek DATE) RETURNS TEXT AS $$
 DECLARE
 	trwanie INTEGER;
 BEGIN
@@ -251,7 +249,7 @@ $$ LANGUAGE 'plpgsql';
 
 
 -- sprawdz zblizajace sie wycieczki
-CREATE FUNCTION zblizajace_sie_wycieczki(dni INTEGER) 
+CREATE OR REPLACE FUNCTION zblizajace_sie_wycieczki(dni INTEGER) 
 RETURNS TABLE ( wycieczka_id 		INTEGER,
 				miejsce_wyjazdu  	VARCHAR(100),
 				liczba_uczestnikow 	INTEGER,
@@ -410,7 +408,7 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 --- tworzenie zamowienia na podstwie danych uczestnikow i klienta
--- przyjmuje iles stringow które mozna przerobic na krotki z danymi klienta w postaci '{"imie", "nazwisko","kraj", "miasto", "kod_pocztowy", "ulica", "numer_domu", "rrrr-mm-dd", "pesel"/NULL,"telefon"}'
+-- przyjmuje iles stringow ktore mozna przerobic na krotki z danymi klienta w postaci '{"imie", "nazwisko","kraj", "miasto", "kod_pocztowy", "ulica", "numer_domu", "rrrr-mm-dd", "pesel"/NULL,"telefon"}'
 
 CREATE OR REPLACE FUNCTION dodaj_zamowienie_z_klientami(wycieczka INTEGER, klasa_zam INTEGER, platnosc VARCHAR(100), VARIADIC uczestnicy_do_zamowienia TEXT[]) RETURNS TEXT AS $$
 DECLARE
