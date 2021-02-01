@@ -9,9 +9,9 @@ require("RPostgres")
 
 
 set.seed(1)
-con <- dbConnect(RPostgres::Postgres(), dbname = "projekt_bazy",
+con <- dbConnect(RPostgres::Postgres(), dbname = "projekt_bazy_test",
                  host = "localhost", port = 5432, 
-                 user = "Magda", pass = "tajnehaslo")
+                 user = "studentka", pass = "tajnehaslo")
 
 
 
@@ -465,8 +465,7 @@ zamowienia_df <- dbGetQuery(con, "SELECT * FROM zamowienia;")
 zamowienia_z_datami <- left_join(zamowienia_rand, wycieczki_df, on = c("wycieczka" = "wycieczka_id"))
 
 
-klasy_ofert
-klasy_ofert_to_sql <- function()
+
 
 # uczestnictwa
 
@@ -476,14 +475,14 @@ klasy_ofert_to_sql <- function()
 # zamowienia_df<-zamowienia
 # zamowienia_df<-cbind(data.frame("zamowienie_id"=1:length(zamowienia_df[,1])),zamowienia_df)
 
-
+set.seed(2021)
 uczestnictwa_rand<-data.frame("zamowienie"=zamowienia_df$zamowienie_id,"uczestnik"=zamowienia_df$klient) # najpierw dodaje uczestnictwa klientow ktorzy kupili wycieczke
 daty<-c("2019-12-31","2020-04-30","2020-08-31","2020-12-31","2021-04-30","2021-08-31","2021-12-31")
 
 for (n in 1:(length(daty)-1)){
   wycieczka<-wycieczki_df[wycieczki_df$data_zakonczenia<=daty[n+1] & wycieczki_df$data_rozpoczecia>daty[n],]
   for (w_id in wycieczka$wycieczka_id){
-    ludzie<-1:300 ###trzeba zamienić na id klientów ale nie wiem jak to wygląda w klienci_df, chyba że zakładamy że i tak są po kolei
+    ludzie<-1:300 
     ludzie<-ludzie[-c(zamowienia_df$klient[zamowienia_df$wycieczka==w_id])]
     nr_zamowienia<-zamowienia_df$zamowienie_id[zamowienia_df$wycieczka==w_id]
     wylosowani<-sample(ludzie,3*length(nr_zamowienia))
@@ -494,3 +493,14 @@ for (n in 1:(length(daty)-1)){
     }
   }
 }
+
+
+uczestnictwa_to_sql <- function(uczestnictwo){
+  paste0("INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES (", uczestnictwo[2], ",", uczestnictwo[1],");")
+}
+
+uczestnictwa_sql <- apply(uczestnictwa_rand, 1, uczestnictwa_to_sql)
+
+write.table(uczestnictwa_sql, file = "uczestnictwa_rand.sql", quote = FALSE, row.names = FALSE, col.names = FALSE)
+
+
