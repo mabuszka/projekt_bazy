@@ -238,4 +238,41 @@ shinyServer<- function(input, output){
 
   #### PRZEWODNICY KONIEC
   
+  #### WYCIECZKI POCZATEK
+  
+  output$przegladaj_wycieczki_tbl <- DT::renderDataTable(
+    tryCatch({dbGetQuery(con, "SELECT * FROM wycieczki;")},
+             error = function(e){
+               return(data.frame())
+             }), options = list(scrollX = TRUE))#,editable=list(target='row',disable=list(columns=c(1,2)))
+  
+  # proxy = dataTableProxy('przegladaj_wycieczki_tbl')
+  # observeEvent(input$przegladaj_wycieczki_tbl_row_edit, {
+  #   info = input$przegladaj_wycieczki_tbl_row_edit
+  #   str(info)
+  #   i = info$row
+  #   j = info$col
+  #   v = info$value
+  #   x[i, j] <<- DT::coerceValue(v, x[i, j])
+  #   replaceData(proxy, x, resetPaging = FALSE)
+  # })
+  
+  output$sprawdz_przewodnictwa_wycieczek_tbl <- DT::renderDataTable(
+    tryCatch({dbGetQuery(con, "SELECT wycieczka_id,przewodnik_id FROM przewodnictwa;")},
+             error = function(e){
+               return(data.frame())
+             }), options = list(scrollX = TRUE))
+  
+  output$zblizajace_sie_wycieczki_tbl <- DT::renderDataTable(
+    tryCatch({dbGetQuery(con, "SELECT * FROM zblizajace_sie_wycieczki(7);")},
+             error = function(e){
+               return(data.frame())
+             }), options = list(scrollX = TRUE))
+  
+  #### WYCIECZKI KONIEC
+  
+  #### START
+  
+  output$start <- renderPlot({plot(c(0,0,1,0,1,0,2,2.5,3,3.5,2.5,3,3.5,4,5,7,5,7,5,9,9,8,9,10,9,9),c(0,2,1.5,1,0.5,0,0,1,2,1,1,2,1,0,0,2,2,2,0,0,1,2,1,2,1,0),type="l",col='blue',xaxt='n',yaxt='n',ann=FALSE)})
+  
 }

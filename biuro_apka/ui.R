@@ -9,7 +9,8 @@ sidebar = dashboardSidebar(
     shinyjs::useShinyjs(),
     width = 320,
     sidebarMenu(
-        menuItem("Oferty", tabName = "oferty_tab", icon = icon("fas fa-upload"),
+        menuItem("Strona startowa", tabName="start_tab", icon=icon("fas fa-globe")),
+        menuItem("Oferty", tabName = "oferty_tab", icon = icon("fas fa-road"),
                  menuSubItem(
                      "Zarządzaj", "zarzadzaj_oferty", icon = icon("fas fa-search")
                  ),
@@ -20,18 +21,15 @@ sidebar = dashboardSidebar(
                      "Statystyki", "statystyki_oferty", icon = icon("fas fa-search")
                  )
         ),
-        menuItem("Wycieczki", tabName = "wycieczki_tab", icon = icon("fas fa-upload"),
+        menuItem("Wycieczki", tabName = "wycieczki_tab", icon = icon("fas fa-calendar"),
                  menuSubItem(
                      "Zarządzaj", "zarzadzaj_wycieczki", icon = icon("fas fa-search")
                  ),
                  menuSubItem(
                      "Przeglądaj", "przegladaj_wycieczki", icon = icon("fas fa-search")
-                 ),
-                 menuSubItem(
-                     "Statystyki", "statystyki_wycieczki", icon = icon("fas fa-search")
                  )
         ),
-        menuItem("Klienci i uczestnicy", tabName = "uczestnicy_tab", icon = icon("fas fa-table"),
+        menuItem("Klienci i uczestnicy", tabName = "uczestnicy_tab", icon = icon("fas fa-user"),
                  menuSubItem(
                      "Stali klienci", "stali_klienci", icon = icon("fas fa-search")
                  ),
@@ -39,7 +37,7 @@ sidebar = dashboardSidebar(
                      "Przegladaj i modyfikuj", "uczestnicy", icon = icon("fas fa-search")
                  )
         ),
-        menuItem("Zamówienia", tabName = "zamowienia_tab", icon = icon("fas fa-chart-bar"),
+        menuItem("Zamówienia", tabName = "zamowienia_tab", icon = icon("fas fa-list-alt"),
                  menuSubItem(
                      "Przeglądaj", "przegladaj_zamowienia", icon = icon("fas fa-search")
                  ),
@@ -47,7 +45,7 @@ sidebar = dashboardSidebar(
                      "Złóż lub modyfikuj", "modyfikuj_zamowienie", icon = icon("fas fa-search")
                  )
         ),
-        menuItem("Przewodnicy", tabName = "przewodnicy_tab", icon = icon("fas fa-upload"),
+        menuItem("Przewodnicy", tabName = "przewodnicy_tab", icon = icon("fas fa-briefcase"),
                  menuSubItem(
                      "Zarządzaj", "zarzadzaj_przewodnicy", icon = icon("fas fa-search")
                  ),
@@ -159,6 +157,7 @@ box_sprawdz_przewodnikow_do_wycieczki <- box(width = NULL,
                                              
 )
 
+# trzeba rozkleić wyniki na kolumny
 box_zblizajace_sie_wycieczki <- box(width = NULL,
                                     status = "primary",
                                     title = "Zbliżające się wycieczki",
@@ -280,9 +279,11 @@ body = dashboardBody(
     tags$head(
         tags$style(HTML(".main-sidebar { font-size: 18px; }")) #change the font size to 20
     ),
-    # 
     # zakładka przeglądaj i modyfikuj uczestników
     tabItems(
+        tabItem(tabName = "start_tab",
+                plotOutput("start")
+        ),
         tabItem(tabName = "uczestnicy",
                 column(4,
                        box_dodaj_uczestnika,
