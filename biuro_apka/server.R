@@ -1,12 +1,12 @@
 library(RPostgres)
-source("db_con.R")
 library(shiny)
 library(DT)
 library(stringi)
 library(stringr)
 
+
 shinyServer<- function(input, output){
-  
+
   options(DT.options = list(language = list(processing=     "Przetwarzanie...",
                                             search=         "Szukaj:",
                                             lengthMenu=     "Pokaż _MENU_ pozycji",
