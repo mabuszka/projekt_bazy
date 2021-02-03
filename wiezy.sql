@@ -34,7 +34,7 @@ ALTER TABLE uczestnicy ALTER COLUMN nr_telefonu SET NOT NULL;
 
 ALTER TABLE uczestnicy ADD PRIMARY KEY (uczestnik_id);
 
-ALTER TABLE uczestnicy ADD CHECK (nr_telefonu SIMILAR TO '[0-9+.-]{1,}');
+ALTER TABLE uczestnicy ADD CHECK (nr_telefonu SIMILAR TO '[0-9+-]{1,}');
 
 -- zamowienia (zamowienie_id 		SERIAL,
 				-- klient_id 			INTEGER,

@@ -1,5 +1,5 @@
-﻿--trigger który rzuca wyjątkiem jeśli chcemy złożyć/zmodyfikować zamówienie na wycieczkę 
---tak że przekroczylibyśmy maksa liczby osób
+﻿--trigger ktory rzuca wyjatkiem jesli chcemy zlozyc/zmodyfikowac zamowienie na wycieczke 
+--tak ze przekroczylibysmy maksa liczby osob
 DROP FUNCTION limit_osob CASCADE;
 CREATE FUNCTION limit_osob() RETURNS TRIGGER AS $$
 DECLARE
@@ -18,7 +18,7 @@ CREATE TRIGGER sprawdz_limit_osob_wycieczki BEFORE UPDATE OR INSERT ON wycieczki
 	FOR EACH ROW EXECUTE PROCEDURE limit_osob();
 
 
---trigger który update'uje liczbe uczestnikow na wycieczce po dodaniu/usunięciu/edycji uczestnictwa
+--trigger ktory update'uje liczbe uczestnikow na wycieczce po dodaniu/usunieciu/edycji uczestnictwa
 DROP FUNCTION aktualizacja_liczby_uczestnikow CASCADE;
 CREATE FUNCTION aktualizacja_liczby_uczestnikow() RETURNS TRIGGER AS $$
 DECLARE
@@ -45,30 +45,30 @@ CREATE TRIGGER aktualizacja_liczby_uczestnikow AFTER INSERT OR DELETE ON uczestn
 	FOR EACH ROW EXECUTE PROCEDURE aktualizacja_liczby_uczestnikow();
 
 
---nie można edytować starych zamówień i wycieczek
-DROP FUNCTION zostaw_stare CASCADE;
-CREATE FUNCTION zostaw_stare() RETURNS TRIGGER AS $$
-DECLARE
-	koniec DATE;
-BEGIN
-	SELECT data_zakonczenia INTO koniec FROM wycieczki WHERE wycieczka_id=NEW.wycieczka_id;
-	IF (NEW.wycieczka_id IS NULL) THEN
-		SELECT data_zakonczenia INTO koniec FROM wycieczki WHERE wycieczka_id=OLD.wycieczka_id;
-	END IF;
-	IF (OLD.wycieczka_id IS NULL AND NEW.wycieczka_id IS NULL) THEN
-		SELECT NEW.data_zakonczenia INTO koniec;
-	END IF;
-	IF (koniec<current_date) THEN
-		RAISE EXCEPTION 'Nie wolno edytowac wycieczek ktore juz sie odbyly, ani zamowien zwiazanych z nimi.';
-	END IF;
-	RETURN NEW;
-END;
-$$ LANGUAGE 'plpgsql';
+--nie mozna edytowac starych zamowień i wycieczek
+-- DROP FUNCTION zostaw_stare CASCADE;
+-- CREATE FUNCTION zostaw_stare() RETURNS TRIGGER AS $$
+-- DECLARE
+	-- koniec DATE;
+-- BEGIN
+	-- SELECT data_zakonczenia INTO koniec FROM wycieczki WHERE wycieczka_id=NEW.wycieczka_id;
+	-- IF (NEW.wycieczka_id IS NULL) THEN
+		-- SELECT data_zakonczenia INTO koniec FROM wycieczki WHERE wycieczka_id=OLD.wycieczka_id;
+	-- END IF;
+	-- IF (OLD.wycieczka_id IS NULL AND NEW.wycieczka_id IS NULL) THEN
+		-- SELECT NEW.data_zakonczenia INTO koniec;
+	-- END IF;
+	-- IF (koniec<current_date) THEN
+		-- RAISE EXCEPTION 'Nie wolno edytowac wycieczek ktore juz sie odbyly, ani zamowien zwiazanych z nimi.';
+	-- END IF;
+	-- RETURN NEW;
+-- END;
+-- $$ LANGUAGE 'plpgsql';
 
-CREATE TRIGGER zostaw_stare_zamowienia_tr BEFORE INSERT OR UPDATE OR DELETE ON zamowienia
-	FOR EACH ROW EXECUTE PROCEDURE zostaw_stare();
-CREATE TRIGGER zostaw_stare_wycieczki_tr BEFORE INSERT OR UPDATE OR DELETE ON wycieczki
-	FOR EACH ROW EXECUTE PROCEDURE zostaw_stare();
+-- CREATE TRIGGER zostaw_stare_zamowienia_tr BEFORE INSERT OR UPDATE OR DELETE ON zamowienia
+	-- FOR EACH ROW EXECUTE PROCEDURE zostaw_stare();
+-- CREATE TRIGGER zostaw_stare_wycieczki_tr BEFORE INSERT OR UPDATE OR DELETE ON wycieczki
+	-- FOR EACH ROW EXECUTE PROCEDURE zostaw_stare();
 
 
 --spr data zakonczenia odpowiednio po rozpoczeciu
@@ -108,7 +108,7 @@ CREATE TRIGGER spr_kod_pocztowy_tr BEFORE INSERT OR UPDATE ON uczestnicy
 	FOR EACH ROW EXECUTE PROCEDURE spr_kod_pocztowy();
 
 
---spr że w wycieczce jest tyle osób co trzeba
+--spr ze w wycieczce jest tyle osob co trzeba
 DROP FUNCTION spr_ilosc_osob CASCADE; 
 CREATE FUNCTION spr_ilosc_osob() RETURNS TRIGGER AS $$
 DECLARE
@@ -133,8 +133,8 @@ CREATE TRIGGER spr_ilosc_osob_tr BEFORE INSERT OR UPDATE ON wycieczki
 	FOR EACH ROW EXECUTE PROCEDURE spr_ilosc_osob();
 
 
---spr zeby przewodnik się nie bilokował
-CREATE FUNCTION przewodnik_w_jednym_miejscu() RETURNS TRIGGER AS $$
+--spr zeby przewodnik sie nie bilokował
+CREATE OR REPLACE FUNCTION przewodnik_w_jednym_miejscu() RETURNS TRIGGER AS $$
 DECLARE
 BEGIN
 	IF (NEW.wycieczka_id IN (SELECT wycieczka_z_kolizja 
@@ -207,7 +207,7 @@ CREATE TRIGGER aktualizacja_ceny_tr AFTER INSERT ON uczestnicy_w_zamowieniu
 	FOR EACH ROW EXECUTE PROCEDURE aktualizacja_ceny();
 
 
---nie wolno aktualizować uczestnictwa
+--nie wolno aktualizowac uczestnictwa
 DROP FUNCTION nie_wolno_update CASCADE;
 CREATE FUNCTION nie_wolno_update() RETURNS TRIGGER AS $$
 BEGIN

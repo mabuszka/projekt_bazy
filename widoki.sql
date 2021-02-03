@@ -62,14 +62,15 @@ WHERE (CASE
 		);
 									
 			
-
+drop view if exists stali_klienci;
 CREATE VIEW stali_klienci AS
-SELECT z.klient_id, MAX(u.imie) AS imie, MAX(u.nazwisko) AS nazwisko 
+SELECT z.klient_id, MAX(u.imie) AS imie, MAX(u.nazwisko) AS nazwisko, count(*) AS ile_kupil 
 FROM uczestnicy u 
 	JOIN zamowienia z 
 			ON (z.klient_id = u.uczestnik_id)
 GROUP BY z.klient_id
-HAVING COUNT(*) > 5;
+HAVING COUNT(*) > 3
+ORDER BY count(*);
 
 -- dane do testu widoku stali klienci
 -- INSERT INTO zamowienia(zamowienie_id, klient_id) VALUES (1,1);
@@ -155,13 +156,13 @@ FROM przewodnicy p
 			OR 
 			((w.data_rozpoczecia >= w2.data_rozpoczecia) 
 				AND (w.data_zakonczenia <= w2.data_zakonczenia)))
-EXCEPT 
-	SELECT DISTINCT p.przewodnik_id, w.wycieczka_id
-FROM przewodnicy p 
-	JOIN przewodnictwa pa
-		ON (p.przewodnik_id = pa.przewodnik_id)
-	JOIN wycieczki w 
-		ON (w.wycieczka_id = pa.wycieczka_id)
+-- EXCEPT 
+	-- SELECT DISTINCT p.przewodnik_id, w.wycieczka_id
+-- FROM przewodnicy p 
+	-- JOIN przewodnictwa pa
+		-- ON (p.przewodnik_id = pa.przewodnik_id)
+	-- JOIN wycieczki w 
+		-- ON (w.wycieczka_id = pa.wycieczka_id)
 ORDER BY przewodnik_id ASC;
 				
 -- INSERT INTO przewodnicy(imie) VALUES ('Adam'); --1
