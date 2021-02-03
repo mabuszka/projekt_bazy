@@ -6,7 +6,7 @@ library(stringr)
 
 
 shinyServer<- function(input, output, session){
-
+  
   options(DT.options = list(language = list(processing=     "Przetwarzanie...",
                                             search=         "Szukaj:",
                                             lengthMenu=     "Pokaż _MENU_ pozycji",
@@ -22,10 +22,10 @@ shinyServer<- function(input, output, session){
                                                             `next`=       "Następna",
                                                             last=       "Ostatnia")
                                             
-                                            ),scrollX=TRUE
-    # search = 'Wyszukaj:', info = 'Wyświetla _START_ do _END_, z _TOTAL_',
-    #                                         paginate = list(previous = 'Poprzednia', `next` = 'Następna')
-    ))
+  ),scrollX=TRUE
+  # search = 'Wyszukaj:', info = 'Wyświetla _START_ do _END_, z _TOTAL_',
+  #                                         paginate = list(previous = 'Poprzednia', `next` = 'Następna')
+  ))
   
   #### UCZESTNICY
   # dodawanie nowego uczestnika
@@ -40,31 +40,21 @@ shinyServer<- function(input, output, session){
     data_urodzenia  <- input$ud_data_input
     PESEL  <- input$ud_pesel_input
     nr_telefonu  <- input$ud_nr_tel_input
-    
-    # sql <- paste0("INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, miasto, kod_pocztowy, ulica, numer_domu, data_urodzenia, PESEL, nr_telefonu) VALUES('", imie, "', '",
-    #               nazwisko, "','",
-    #               kraj_zamieszkania, "','",
-    #               miasto, "','",
-    #               kod_pocztowy, "','",
-    #               ulica, "','",
-    #               numer_domu, "','",
-    #               data_urodzenia, "','")
-    # if (is.na(PESEL)){
-    #   sql <- paste0(sql,nr_telefonu ,"');")
-    # 
-    # }
-    # else{
-    #   sql <-paste0(sql, PESEL, "','", nr_telefonu, "');")}
-    sql <- paste0("SELECT dodaj_klienta('", imie,"','", nazwisko,"','", kraj_zamieszkania,"','", miasto,"','", ulica,"','", numer_domu,"','", kod_pocztowy,"','", nr_telefonu,"','",  data_urodzenia,"','", PESEL, "');")
-
+    if (kraj_zamieszkania == 'Polska'){
+      sql <- paste0("SELECT dodaj_klienta('", imie,"','", nazwisko,"','", kraj_zamieszkania,"','", miasto,"','", ulica,"','", numer_domu,"','", kod_pocztowy,"','", nr_telefonu,"','",  data_urodzenia,"','", PESEL, "');")
+    }
+    else{
+      sql <- paste0("SELECT dodaj_klienta('", imie,"','", nazwisko,"','", kraj_zamieszkania,"','", miasto,"','", ulica,"','", numer_domu,"','", kod_pocztowy,"','", nr_telefonu,"','",  data_urodzenia,"');")
+      
+    }
     tryCatch({
       res <-dbSendQuery(con, sql)
       dbFetch(res)
       if(dbHasCompleted(res)){
-      showNotification("Pomyślnie dodano uczestnika do bazy",type = "message")
-
-    }
-    dbClearResult(res)
+        showNotification("Pomyślnie dodano uczestnika do bazy",type = "message")
+        
+      }
+      dbClearResult(res)
     },
     error = function(e){
       error_to_show <- str_split(e, pattern = "ERROR: ")[[1]][2]
@@ -85,6 +75,19 @@ shinyServer<- function(input, output, session){
       
       
     })
+    
+    #update tabeli z uczestnikami
+    output$uczestnicy_tbl <- DT::renderDataTable(
+      {tryCatch({dbGetQuery(con,"SELECT * FROM uczestnicy;")},
+                error = function(e){
+                  return(data.frame())
+                })
+      }, options = list(scrollX=TRUE)
+    )
+    # update inputu do modyfikacji uczestników
+    uczestnicy <- dbGetQuery(con, "SELECT uczestnik_id FROM uczestnicy ORDER BY uczestnik_id ASC;")
+    updateSelectInput(session, "um_id_input", choices = uczestnicy$uczestnik_id)
+    
   }
   )
   ## dodawanie nowego uczestnika koniec
@@ -95,8 +98,92 @@ shinyServer<- function(input, output, session){
               error = function(e){
                 return(data.frame())
               })
-    }, options = list(scrollX=TRUE)
+    }
   )
+  
+  # tabela ze stałymi klientami
+  output$stali_klienci_tbl <- DT::renderDataTable(
+    {tryCatch({dbGetQuery(con,"SELECT * FROM stali_klienci;")},
+              error = function(e){
+                return(data.frame())
+              })
+    }
+  )
+  
+  ## update inputu do modyfikacji
+  tryCatch({
+    uczestnicy <- dbGetQuery(con, "SELECT uczestnik_id FROM uczestnicy ORDER BY uczestnik_id ASC;")
+    updateSelectInput(session, "um_id_input", choices = uczestnicy$uczestnik_id)
+  }, error = function(e){})
+  
+  ## modyfikacja klienta
+  
+  observeEvent(input$uczestnik_mod_id, {
+    id <- input$um_id_input
+    imie <- input$ud_imie_input
+    nazwisko  <- input$ud_nazwisko_input 
+    kraj_zamieszkania <- input$ud_kraj_input
+    miasto <- input$ud_miasto_input
+    kod_pocztowy  <- input$ud_kod_input
+    ulica  <- input$ud_ulica_input
+    numer_domu  <- input$ud_nr_domu_input
+    data_urodzenia  <- input$ud_data_input
+    PESEL  <- input$ud_pesel_input
+    nr_telefonu  <- input$ud_nr_tel_input
+    
+    if (kraj_zamieszkania == 'Polska'){
+      sql <- paste0("SELECT modyfikuj_klienta(",id, ",'", imie,"','", nazwisko,"','", kraj_zamieszkania,"','", miasto,"','", ulica,"','", numer_domu,"','", kod_pocztowy,"','", nr_telefonu,"','",  data_urodzenia,"','", PESEL, "');")
+    }
+    else{
+      sql <- paste0("SELECT modyfikuj_klienta(",id, ",'", imie,"','", nazwisko,"','", kraj_zamieszkania,"','", miasto,"','", ulica,"','", numer_domu,"','", kod_pocztowy,"','", nr_telefonu,"','",  data_urodzenia,"');")
+      
+    }
+    tryCatch({
+      res <-dbSendQuery(con, sql)
+      dbFetch(res)
+      if(dbHasCompleted(res)){
+        showNotification("Pomyślnie zmodyfikowane dane uczestnika",type = "message")
+        
+      }
+      dbClearResult(res)
+    },
+    error = function(e){
+      error_to_show <- str_split(e, pattern = "ERROR: ")[[1]][2]
+      if (str_detect(error_to_show, "CONTEXT: ")){
+        error_to_show <- str_split(error_to_show, "CONTEXT: ")[[1]][1]
+      }
+      if (str_detect(error_to_show, "DETAIL: ")){
+        error_to_show <- str_split(error_to_show, "DETAIL: ")[[1]][1]
+      }
+      if (str_detect(error_to_show, "check constraint")){
+        # ogolnie to trzeba ogarnąć te case'y błędów które checki mogą zwracać
+        switch (str_split(error_to_show, '"')[[1]][4],
+                "pesel" = (error_to_show <- "Niepoprawny PESEL"),
+                "kraj" = (error_to_show <- "Niepoprawny kraj zamieszkania")
+        )
+      }
+      showModal(modalDialog(title = "Błąd w modyfikacji",error_to_show ,easyClose = TRUE,footer = NULL))
+      
+      
+    })
+    
+    #update tabeli z uczestnikami
+    output$uczestnicy_tbl <- DT::renderDataTable(
+      {tryCatch({dbGetQuery(con,"SELECT * FROM uczestnicy;")},
+                error = function(e){
+                  return(data.frame())
+                })
+      }
+    )
+    
+  }
+  )
+  
+  
+  
+  
+  
+  
   #### UCZESTNICY KONIEC
   
   #### OFERTY
@@ -145,10 +232,10 @@ shinyServer<- function(input, output, session){
       sql <- "SELECT * FROM przewodnicy WHERE aktywny=FALSE;"
     }else{sql <- "SELECT * FROM przewodnicy;"}
     {tryCatch({dbGetQuery(con,sql)},
-                          error = function(e){
-                            return(data.frame())
-                          })
-                  }
+              error = function(e){
+                return(data.frame())
+              })
+    }
   }))
   
   #informacje o zwalinianym
@@ -231,7 +318,7 @@ shinyServer<- function(input, output, session){
       }, options = list(scrollX=TRUE)
     )
     
-    }
+  }
   )
   
   observeEvent(input$zatrudnij, {
@@ -264,7 +351,7 @@ shinyServer<- function(input, output, session){
     #   showNotification(paste0(error_to_show), type = "error")
     #   
     # }
-  })
+    })
     # update wybierania przewodników do zlecania wycieczek
     przewodnicy_aktywni <- dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE ORDER BY przewodnik_id ASC;")$przewodnik_id
     updateSelectInput(session, "p_zlec_wycieczke_select", choices = przewodnicy_aktywni )
@@ -313,7 +400,7 @@ shinyServer<- function(input, output, session){
     sql <- paste0("UPDATE przewodnicy SET imie='",imie,"',nazwisko='",nazwisko,"',nr_telefonu='",nr_telefonu,"' WHERE przewodnik_id=",id,";")
     tryCatch({res <-dbSendQuery(con, sql)
     if(dbHasCompleted(res)){
-      showNotification("Zaktualizowano informacje o przewodniku")
+      showNotification("Zaktualizowano informacje o przewodniku", type = "message")
     }
     dbClearResult(res)
     }
@@ -347,9 +434,9 @@ shinyServer<- function(input, output, session){
   observeEvent(input$p_zlec_wycieczke_select, {
     wycieczki_do_zlecania <- tryCatch({dbGetQuery(con, paste0("SELECT wycieczka_id FROM wycieczki EXCEPT
                                      (SELECT wycieczka_z_kolizja FROM kolidujace_wycieczki_przewodnikow WHERE przewodnik_id=",input$p_zlec_wycieczke_select,") ORDER BY wycieczka_id ASC;"))
-  },error = function(e){
-    return(data.frame(wycieczka_id = c(1)))
-  })
+    },error = function(e){
+      return(data.frame(wycieczka_id = c(1)))
+    })
     updateSelectInput(session, "w_zlec_wycieczke_select", choices = wycieczki_do_zlecania$wycieczka_id)
   })
   
@@ -408,7 +495,7 @@ shinyServer<- function(input, output, session){
     
     
   })
-
+  
   #### PRZEWODNICY KONIEC
   
   #### WYCIECZKI POCZATEK
@@ -419,16 +506,7 @@ shinyServer<- function(input, output, session){
                return(data.frame())
              }), options = list(scrollX = TRUE))#,editable=list(target='row',disable=list(columns=c(1,2)))
   
-  # proxy = dataTableProxy('przegladaj_wycieczki_tbl')
-  # observeEvent(input$przegladaj_wycieczki_tbl_row_edit, {
-  #   info = input$przegladaj_wycieczki_tbl_row_edit
-  #   str(info)
-  #   i = info$row
-  #   j = info$col
-  #   v = info$value
-  #   x[i, j] <<- DT::coerceValue(v, x[i, j])
-  #   replaceData(proxy, x, resetPaging = FALSE)
-  # })
+  
   
   output$sprawdz_przewodnictwa_wycieczek_tbl <- DT::renderDataTable(
     tryCatch({dbGetQuery(con, "SELECT wycieczka_id,przewodnik_id FROM przewodnictwa;")},
@@ -437,10 +515,20 @@ shinyServer<- function(input, output, session){
              }), options = list(scrollX = TRUE))
   
   output$zblizajace_sie_wycieczki_tbl <- DT::renderDataTable(
-    tryCatch({dbGetQuery(con, "SELECT * FROM zblizajace_sie_wycieczki(7);")},
+    tryCatch({dbGetQuery(con, "SELECT * FROM zblizajace_sie_wycieczki(30);")},
              error = function(e){
                return(data.frame())
-             }), options = list(scrollX = TRUE))
+             }))
+  
+  observeEvent(input$zbw_dni_input, {
+    output$zblizajace_sie_wycieczki_tbl <- DT::renderDataTable(
+      tryCatch({
+        dbGetQuery(con, paste0("SELECT * FROM zblizajace_sie_wycieczki(",as.integer(input$zbw_dni_input), ");"))},
+        error = function(e){
+          return(data.frame())
+        })
+    )
+  })
   
   #### WYCIECZKI KONIEC
   
