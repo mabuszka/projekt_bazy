@@ -156,13 +156,13 @@ FROM przewodnicy p
 			OR 
 			((w.data_rozpoczecia >= w2.data_rozpoczecia) 
 				AND (w.data_zakonczenia <= w2.data_zakonczenia)))
-EXCEPT 
-	SELECT DISTINCT p.przewodnik_id, w.wycieczka_id
-FROM przewodnicy p 
-	JOIN przewodnictwa pa
-		ON (p.przewodnik_id = pa.przewodnik_id)
-	JOIN wycieczki w 
-		ON (w.wycieczka_id = pa.wycieczka_id)
+-- EXCEPT 
+	-- SELECT DISTINCT p.przewodnik_id, w.wycieczka_id
+-- FROM przewodnicy p 
+	-- JOIN przewodnictwa pa
+		-- ON (p.przewodnik_id = pa.przewodnik_id)
+	-- JOIN wycieczki w 
+		-- ON (w.wycieczka_id = pa.wycieczka_id)
 ORDER BY przewodnik_id ASC;
 				
 -- INSERT INTO przewodnicy(imie) VALUES ('Adam'); --1

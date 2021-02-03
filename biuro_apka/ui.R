@@ -10,28 +10,28 @@ sidebar = dashboardSidebar(
     width = 320,
     sidebarMenu(
         menuItem("Strona startowa", tabName="start_tab", icon=icon("fas fa-globe")),
-        menuItem("Oferty", tabName = "oferty_tab", icon = icon("fas fa-road"),
+        menuItem("Oferty", tabName = "oferty_tab", icon = icon("fas fa-compass"),
                  menuSubItem(
-                     "Zarządzaj", "zarzadzaj_oferty", icon = icon("fas fa-search")
+                     "Zarządzaj", "zarzadzaj_oferty", icon = icon("fas fa-edit")
                  ),
                  menuSubItem(
                      "Przeglądaj", "przegladaj_oferty", icon = icon("fas fa-search")
                  ),
                  menuSubItem(
-                     "Statystyki", "statystyki_oferty", icon = icon("fas fa-search")
+                     "Statystyki", "statystyki_oferty", icon = icon("fas fa-chart-bar")
                  )
         ),
         menuItem("Wycieczki", tabName = "wycieczki_tab", icon = icon("fas fa-calendar"),
                  menuSubItem(
-                     "Zarządzaj", "zarzadzaj_wycieczki", icon = icon("fas fa-search")
+                     "Zarządzaj", "zarzadzaj_wycieczki", icon = icon("fas fa-edit")
                  ),
                  menuSubItem(
                      "Przeglądaj", "przegladaj_wycieczki", icon = icon("fas fa-search")
                  )
         ),
-        menuItem("Klienci i uczestnicy", tabName = "uczestnicy_tab", icon = icon("fas fa-user"),
+        menuItem("Klienci i uczestnicy", tabName = "uczestnicy_tab", icon = icon("fas fa-user-friends"),
                  menuSubItem(
-                     "Stali klienci", "stali_klienci", icon = icon("fas fa-search")
+                     "Stali klienci", "stali_klienci", icon = icon("fas fa-star")
                  ),
                  menuSubItem(
                      "Przegladaj i modyfikuj", "uczestnicy", icon = icon("fas fa-search")
@@ -39,15 +39,16 @@ sidebar = dashboardSidebar(
         ),
         menuItem("Zamówienia", tabName = "zamowienia_tab", icon = icon("fas fa-list-alt"),
                  menuSubItem(
-                     "Przeglądaj", "przegladaj_zamowienia", icon = icon("fas fa-search")
+                     "Złóż lub modyfikuj", "modyfikuj_zamowienie", icon = icon("fas fa-edit")
                  ),
                  menuSubItem(
-                     "Złóż lub modyfikuj", "modyfikuj_zamowienie", icon = icon("fas fa-search")
+                     "Przeglądaj", "przegladaj_zamowienia", icon = icon("fas fa-search")
                  )
+                 
         ),
-        menuItem("Przewodnicy", tabName = "przewodnicy_tab", icon = icon("fas fa-briefcase"),
+        menuItem("Przewodnicy", tabName = "przewodnicy_tab", icon = icon("fas fa-address-card"),
                  menuSubItem(
-                     "Zarządzaj", "zarzadzaj_przewodnicy", icon = icon("fas fa-search")
+                     "Zarządzaj", "zarzadzaj_przewodnicy", icon = icon("fas fa-edit")
                  ),
                  menuSubItem(
                      "Przeglądaj", "przegladaj_przewodnicy", icon = icon("fas fa-search")
@@ -250,18 +251,22 @@ box_aktualizuj_przewodnika <- box(width=NULL,
                      actionButton('p_aktualizuj_id',label='Zaktualizuj informacje')
 )
 
+
 box_zlec_wycieczke <- box(width=NULL,
                          status='primary',
                          title='Zleć wycieczkę przewodnikowi',
                          solidHeader = TRUE,
                          collapsible = TRUE,
                          selectInput("p_zlec_wycieczke_select",label='Wybierz przewodnika',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
-                         h4('Wycieczki kolidujące z wycieczkami wybranego przewodnika:'),
-                         DT::dataTableOutput(outputId = 'kolidujace_wycieczki'),
-                         selectInput("w_zlec_wycieczke_select",label='Wybierz wycieczkę',choices=dbGetQuery(con,"SELECT wycieczka_id FROM wycieczki;")$wycieczka_id),
+                         # h4('Wycieczki kolidujące z wycieczkami wybranego przewodnika:'),
+                         # DT::dataTableOutput(outputId = 'kolidujace_wycieczki'),
+                         h4("Wycieczki możliwe do zlecenia - bez kolizji w terminach z innymi wycieczkami tego przewodnika:"),
+                         selectInput("w_zlec_wycieczke_select",label='Wybierz wycieczkę',
+                                     # choices=dbGetQuery(con,"SELECT wycieczka_id FROM wycieczki;")$wycieczka_id)
+                                     choices = (DT::dataTableOutput(outputId = "wycieczki_do_zlecania"))$wycieczka_id)
+                         ,
                          actionButton('p_zlec_wycieczke_button',label='Zleć wycieczkę przewodnikowi')
 )
-
 box_wycieczki_przewodnikow <- box(width=NULL,
                                   status='primary',
                                   title='Wycieczki przewodników',

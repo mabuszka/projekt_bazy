@@ -5,7 +5,7 @@ library(stringi)
 library(stringr)
 
 
-shinyServer<- function(input, output){
+shinyServer<- function(input, output, session){
 
   options(DT.options = list(language = list(processing=     "Przetwarzanie...",
                                             search=         "Szukaj:",
@@ -20,12 +20,13 @@ shinyServer<- function(input, output){
                                             paginate = list(first=      "Pierwsza",
                                                             previous=   "Poprzednia",
                                                             `next`=       "Następna",
-                                                            last=       "Ostatnia"),
-                                            scrollX=TRUE
-                                            )
+                                                            last=       "Ostatnia")
+                                            
+                                            ),scrollX=TRUE
     # search = 'Wyszukaj:', info = 'Wyświetla _START_ do _END_, z _TOTAL_',
     #                                         paginate = list(previous = 'Poprzednia', `next` = 'Następna')
     ))
+  
   #### UCZESTNICY
   # dodawanie nowego uczestnika
   observeEvent(input$uczestnik_dodaj_id, {
@@ -40,23 +41,29 @@ shinyServer<- function(input, output){
     PESEL  <- input$ud_pesel_input
     nr_telefonu  <- input$ud_nr_tel_input
     
-    sql <- paste0("INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, miasto, kod_pocztowy, ulica, numer_domu, data_urodzenia, PESEL, nr_telefonu) VALUES('", imie, "', '",
-                  nazwisko, "','",
-                  kraj_zamieszkania, "','",
-                  miasto, "','",
-                  kod_pocztowy, "','",
-                  ulica, "','",
-                  numer_domu, "','",
-                  data_urodzenia, "','")
-    if (is.na(PESEL)){
-      sql <- paste0(sql,nr_telefonu ,"');")
-      
+    # sql <- paste0("INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, miasto, kod_pocztowy, ulica, numer_domu, data_urodzenia, PESEL, nr_telefonu) VALUES('", imie, "', '",
+    #               nazwisko, "','",
+    #               kraj_zamieszkania, "','",
+    #               miasto, "','",
+    #               kod_pocztowy, "','",
+    #               ulica, "','",
+    #               numer_domu, "','",
+    #               data_urodzenia, "','")
+    # if (is.na(PESEL)){
+    #   sql <- paste0(sql,nr_telefonu ,"');")
+    # 
+    # }
+    # else{
+    #   sql <-paste0(sql, PESEL, "','", nr_telefonu, "');")}
+    sql <- paste0("SELECT dodaj_klienta('", imie,"','", nazwisko,"','", kraj_zamieszkania,"','", miasto,"','", ulica,"','", numer_domu,"','", kod_pocztowy,"','", nr_telefonu,"','",  data_urodzenia,"','", PESEL, "');")
+
+    tryCatch({
+      res <-dbSendQuery(con, sql)
+      dbFetch(res)
+      if(dbHasCompleted(res)){
+      showNotification("Pomyślnie dodano uczestnika do bazy",type = "message")
+
     }
-    else{
-      sql <-paste0(sql, PESEL, "','", nr_telefonu, "');")
-    }
-    tryCatch({res <-dbSendQuery(con, sql)
-    dbHasCompleted(res)
     dbClearResult(res)
     },
     error = function(e){
@@ -74,7 +81,8 @@ shinyServer<- function(input, output){
                 "kraj" = (error_to_show <- "Niepoprawny kraj zamieszkania")
         )
       }
-      showNotification(paste0(error_to_show), type = "error")
+      showModal(modalDialog(title = "Błąd dodawania",error_to_show ,easyClose = TRUE,footer = NULL))
+      
       
     })
   }
@@ -129,7 +137,7 @@ shinyServer<- function(input, output){
   #             })
   #     }, options = list(scrollX=TRUE)
   # )
-  
+  # tabela z info o przewodnikach
   output$przewodnicy <- DT::renderDataTable(DT::datatable({
     if (input$aktywnosc == 1) {
       sql <- "SELECT * FROM przewodnicy WHERE aktywny=TRUE;"
@@ -141,9 +149,9 @@ shinyServer<- function(input, output){
                             return(data.frame())
                           })
                   }
-  }), 
-  options = list(scrollX = TRUE))
+  }))
   
+  #informacje o zwalinianym
   output$info_zwolnij <- renderText({ 
     id<-input$zwolnij
     tryCatch({res <- dbGetQuery(con, paste0("SELECT * FROM przewodnicy WHERE przewodnik_id=",id,";"))
@@ -151,6 +159,7 @@ shinyServer<- function(input, output){
     
     })
   })
+  
   
   output$doswiadczeni_przewodnicy <- DT::renderDataTable(
     {tryCatch({dbGetQuery(con,"SELECT * FROM najbardziej_doswiadczeni_przewodnicy;")},
@@ -168,12 +177,61 @@ shinyServer<- function(input, output){
     }, options = list(scrollX=TRUE)
   )
   
+  # zwolnienie przewodnika
   observeEvent(input$zwolnij_button,{
     id <- input$zwolnij
     sql <- paste0("SELECT zwolnij(",id,");")
     tryCatch({res <-dbGetQuery(con, sql)
+    }, error = function(e){
+      error_to_show <- str_split(e, pattern = "ERROR: ")[[1]][2]
+      if (str_detect(error_to_show, "CONTEXT: ")){
+        error_to_show <- str_split(error_to_show, "CONTEXT: ")[[1]][1]
+      }
+      if (str_detect(error_to_show, "DETAIL: ")){
+        error_to_show <- str_split(error_to_show, "DETAIL: ")[[1]][1]
+      }
+      showModal(modalDialog(title = "Nie można zwolnić tego przewodnika", error_to_show, easyClose = TRUE, footer = NULL))
+      
     }
-  )}
+    )
+    # update wybierania przewodników do zlecania wycieczek
+    przewodnicy_aktywni <- dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE ORDER BY przewodnik_id ASC;")$przewodnik_id
+    updateSelectInput(session, "p_zlec_wycieczke_select", choices = przewodnicy_aktywni )
+    #update przewodników do zwolnienia
+    updateSelectInput(session, "zwolnij", choices = przewodnicy_aktywni )
+    # update przewodników do wyboru do aktualizowania ich info
+    updateSelectInput(session, "przewodnik_do_akt_select", choices = przewodnicy_aktywni)
+    # update tabeli z przewodnikami 
+    output$przewodnicy <- DT::renderDataTable(DT::datatable({
+      if (input$aktywnosc == 1) {
+        sql <- "SELECT * FROM przewodnicy WHERE aktywny=TRUE;"
+      }else if(input$aktywnosc == 2){
+        sql <- "SELECT * FROM przewodnicy WHERE aktywny=FALSE;"
+      }else{sql <- "SELECT * FROM przewodnicy;"}
+      {tryCatch({dbGetQuery(con,sql)},
+                error = function(e){
+                  return(data.frame())
+                })
+      }
+    }))
+    # update doświadczonych przewodników
+    output$doswiadczeni_przewodnicy <- DT::renderDataTable(
+      {tryCatch({dbGetQuery(con,"SELECT * FROM najbardziej_doswiadczeni_przewodnicy;")},
+                error = function(e){
+                  return(data.frame())
+                })
+      }, options = list(scrollX=TRUE)
+    )
+    # update wycieczek przewodników 
+    output$wycieczki_przewodnikow <- DT::renderDataTable(
+      {tryCatch({dbGetQuery(con,"SELECT * FROM przewodnictwa;")},
+                error = function(e){
+                  return(data.frame())
+                })
+      }, options = list(scrollX=TRUE)
+    )
+    
+    }
   )
   
   observeEvent(input$zatrudnij, {
@@ -182,7 +240,10 @@ shinyServer<- function(input, output){
     nr_telefonu  <- input$p_telefon_input
     sql <- paste0("SELECT zatrudnij('",imie,"','",nazwisko,"','",nr_telefonu,"');")
     tryCatch({res <-dbSendQuery(con, sql)
-    dbHasCompleted(res)
+    dbFetch(res)
+    if(dbHasCompleted(res)){
+      showNotification("Pomyslnie zatrudniono nowego przewodnika", type = "message")
+    }
     dbClearResult(res)
     # },
     # error = function(e){
@@ -204,6 +265,43 @@ shinyServer<- function(input, output){
     #   
     # }
   })
+    # update wybierania przewodników do zlecania wycieczek
+    przewodnicy_aktywni <- dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE ORDER BY przewodnik_id ASC;")$przewodnik_id
+    updateSelectInput(session, "p_zlec_wycieczke_select", choices = przewodnicy_aktywni )
+    #update przewodników do zwolnienia
+    updateSelectInput(session, "zwolnij", choices = przewodnicy_aktywni )
+    # update przewodników do wyboru do aktualizowania ich info
+    updateSelectInput(session, "przewodnik_do_akt_select", choices = przewodnicy_aktywni)
+    # update tabeli z przewodnikami 
+    output$przewodnicy <- DT::renderDataTable(DT::datatable({
+      if (input$aktywnosc == 1) {
+        sql <- "SELECT * FROM przewodnicy WHERE aktywny=TRUE;"
+      }else if(input$aktywnosc == 2){
+        sql <- "SELECT * FROM przewodnicy WHERE aktywny=FALSE;"
+      }else{sql <- "SELECT * FROM przewodnicy;"}
+      {tryCatch({dbGetQuery(con,sql)},
+                error = function(e){
+                  return(data.frame())
+                })
+      }
+    }))
+    # update doświadczonych przewodników
+    output$doswiadczeni_przewodnicy <- DT::renderDataTable(
+      {tryCatch({dbGetQuery(con,"SELECT * FROM najbardziej_doswiadczeni_przewodnicy;")},
+                error = function(e){
+                  return(data.frame())
+                })
+      }, options = list(scrollX=TRUE)
+    )
+    # update wycieczek przewodników 
+    output$wycieczki_przewodnikow <- DT::renderDataTable(
+      {tryCatch({dbGetQuery(con,"SELECT * FROM przewodnictwa;")},
+                error = function(e){
+                  return(data.frame())
+                })
+      }, options = list(scrollX=TRUE)
+    )
+    
   })
   
   
@@ -214,27 +312,101 @@ shinyServer<- function(input, output){
     id <- input$przewodnik_do_akt_select
     sql <- paste0("UPDATE przewodnicy SET imie='",imie,"',nazwisko='",nazwisko,"',nr_telefonu='",nr_telefonu,"' WHERE przewodnik_id=",id,";")
     tryCatch({res <-dbSendQuery(con, sql)
-    dbHasCompleted(res)
+    if(dbHasCompleted(res)){
+      showNotification("Zaktualizowano informacje o przewodniku")
+    }
     dbClearResult(res)
     }
     )
+    
+    # update tabeli z przewodnikami 
+    output$przewodnicy <- DT::renderDataTable(DT::datatable({
+      if (input$aktywnosc == 1) {
+        sql <- "SELECT * FROM przewodnicy WHERE aktywny=TRUE;"
+      }else if(input$aktywnosc == 2){
+        sql <- "SELECT * FROM przewodnicy WHERE aktywny=FALSE;"
+      }else{sql <- "SELECT * FROM przewodnicy;"}
+      {tryCatch({dbGetQuery(con,sql)},
+                error = function(e){
+                  return(data.frame())
+                })
+      }
+    }))
+    # update doświadczonych przewodników
+    output$doswiadczeni_przewodnicy <- DT::renderDataTable(
+      {tryCatch({dbGetQuery(con,"SELECT * FROM najbardziej_doswiadczeni_przewodnicy;")},
+                error = function(e){
+                  return(data.frame())
+                })
+      }, options = list(scrollX=TRUE)
+    )
+    
   })
   
-  output$kolidujace_wycieczki <- DT::renderDataTable(
-    tryCatch({dbGetQuery(con, paste0("SELECT * FROM kolidujace_wycieczki_przewodnikow WHERE przewodnik_id=",input$p_zlec_wycieczke_select,";"))
-    },error = function(e){
-      return(data.frame())
-    }), options = list(scrollX=TRUE)
-  )
+  ## odświeża wycieczki do wyboru dla danego przewodnika po jego wyborze
+  observeEvent(input$p_zlec_wycieczke_select, {
+    wycieczki_do_zlecania <- tryCatch({dbGetQuery(con, paste0("SELECT wycieczka_id FROM wycieczki EXCEPT
+                                     (SELECT wycieczka_z_kolizja FROM kolidujace_wycieczki_przewodnikow WHERE przewodnik_id=",input$p_zlec_wycieczke_select,") ORDER BY wycieczka_id ASC;"))
+  },error = function(e){
+    return(data.frame(wycieczka_id = c(1)))
+  })
+    updateSelectInput(session, "w_zlec_wycieczke_select", choices = wycieczki_do_zlecania$wycieczka_id)
+  })
+  
+  
+  
+  
+  # output$kolidujace_wycieczki <- DT::renderDataTable(
+  #   tryCatch({dbGetQuery(con, paste0("SELECT * FROM kolidujace_wycieczki_przewodnikow WHERE przewodnik_id=",input$p_zlec_wycieczke_select,";"))
+  #   },error = function(e){
+  #     return(data.frame())
+  #   }), options = list(scrollX=TRUE)
+  # )
+  
   
   observeEvent(input$p_zlec_wycieczke_button, {
     id_p <- input$p_zlec_wycieczke_select
     id_w <- input$w_zlec_wycieczke_select
     sql <- paste0("SELECT dodaj_przewodnika(",id_p,",",id_w,");")
     tryCatch({res <-dbSendQuery(con, sql)
-    dbHasCompleted(res)
+    dbFetch(res)
+    if (dbHasCompleted(res)){
+      showNotification("Zlecono przewodnikowi nową wycieczkę")
+    }
     dbClearResult(res)
     })
+    # odświeżenie listy kolidujących wycieczek po zleceniu wycieczki
+    # output$kolidujace_wycieczki <- DT::renderDataTable(
+    #   tryCatch({dbGetQuery(con, paste0("SELECT * FROM kolidujace_wycieczki_przewodnikow WHERE przewodnik_id=",input$p_zlec_wycieczke_select,";"))
+    #   },error = function(e){
+    #     return(data.frame())
+    #   }), options = list(scrollX=TRUE)
+    # )
+    # odświeża wybór wycieczek mozliwych do zlecania po zleceniu wycieczki
+    wycieczki_do_zlecania <- tryCatch({dbGetQuery(con, paste0("SELECT wycieczka_id FROM wycieczki EXCEPT
+                                     (SELECT wycieczka_z_kolizja FROM kolidujace_wycieczki_przewodnikow WHERE przewodnik_id=",input$p_zlec_wycieczke_select,") ORDER BY wycieczka_id ASC;"))
+    },error = function(e){
+      return(data.frame(wycieczka_id = c(1)))
+    })
+    updateSelectInput(session, "w_zlec_wycieczke_select", choices = wycieczki_do_zlecania$wycieczka_id)
+    # update doświadczonych przewodników
+    output$doswiadczeni_przewodnicy <- DT::renderDataTable(
+      {tryCatch({dbGetQuery(con,"SELECT * FROM najbardziej_doswiadczeni_przewodnicy;")},
+                error = function(e){
+                  return(data.frame())
+                })
+      }, options = list(scrollX=TRUE)
+    )
+    # update wycieczek przewodników 
+    output$wycieczki_przewodnikow <- DT::renderDataTable(
+      {tryCatch({dbGetQuery(con,"SELECT * FROM przewodnictwa;")},
+                error = function(e){
+                  return(data.frame())
+                })
+      }, options = list(scrollX=TRUE)
+    )
+    
+    
   })
 
   #### PRZEWODNICY KONIEC
