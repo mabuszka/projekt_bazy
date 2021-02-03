@@ -129,7 +129,7 @@ shinyServer<- function(input, output){
   #     }, options = list(scrollX=TRUE)
   # )
   
-  output$przewodnicy <- DT::renderDataTable(DT::datatable({
+  output$przewodnicy <- DT::renderDataTable({
     if (input$aktywnosc == 1) {
       sql <- "SELECT * FROM przewodnicy WHERE aktywny=TRUE;"
     }else if(input$aktywnosc == 2){
@@ -140,7 +140,7 @@ shinyServer<- function(input, output){
                             return(data.frame())
                           })
                   }
-  }), 
+  }, 
   options = list(scrollX = TRUE))
   
   output$info_zwolnij <- renderText({ 

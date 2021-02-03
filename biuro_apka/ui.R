@@ -157,7 +157,6 @@ box_sprawdz_przewodnikow_do_wycieczki <- box(width = NULL,
                                              
 )
 
-# trzeba rozkleić wyniki na kolumny
 box_zblizajace_sie_wycieczki <- box(width = NULL,
                                     status = "primary",
                                     title = "Zbliżające się wycieczki",
