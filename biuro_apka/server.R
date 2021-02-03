@@ -238,14 +238,6 @@ shinyServer<- function(input, output, session){
     }
   }))
   
-  #informacje o zwalinianym
-  output$info_zwolnij <- renderText({ 
-    id<-input$zwolnij
-    tryCatch({res <- dbGetQuery(con, paste0("SELECT * FROM przewodnicy WHERE przewodnik_id=",id,";"))
-    str_c(c("ID:", ", Imię:", ", Nazwisko:", ", Email:", ", Telefon:", ", Status:"),str_replace_all(unname(res), c("TRUE" = "aktywny", "FALSE" = "nieaktywny")), sep = " ", collapse = "")
-    
-    })
-  })
   
   
   output$doswiadczeni_przewodnicy <- DT::renderDataTable(
@@ -265,6 +257,15 @@ shinyServer<- function(input, output, session){
   )
   
   # zwolnienie przewodnika
+  #informacje o zwalnianym
+  output$info_zwolnij <- renderText({ 
+    id<-input$zwolnij
+    tryCatch({res <- dbGetQuery(con, paste0("SELECT * FROM przewodnicy WHERE przewodnik_id=",id,";"))
+    str_c(c("ID:", ", Imię:", ", Nazwisko:", ", Email:", ", Telefon:", ", Status:"),str_replace_all(unname(res), c("TRUE" = "aktywny", "FALSE" = "nieaktywny")), sep = " ", collapse = "")
+    
+    })
+  })
+  #zwolnienie
   observeEvent(input$zwolnij_button,{
     id <- input$zwolnij
     sql <- paste0("SELECT zwolnij(",id,");")
@@ -490,7 +491,7 @@ shinyServer<- function(input, output, session){
                 error = function(e){
                   return(data.frame())
                 })
-      }, options = list(scrollX=TRUE)
+      }
     )
     
     

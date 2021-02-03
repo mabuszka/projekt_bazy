@@ -342,10 +342,7 @@ body = dashboardBody(
                    box_wyszukaj_uczestnikow
             )
     ),
-    # zakładka stali klienci 
-    tabItem(tabName = "stali_klienci"
-            # box_stali_klienci
-    ),
+
     # zakładki od ofert
     # zarządzanie ofertami
     tabItem(tabName = "zarzadzaj_oferty",

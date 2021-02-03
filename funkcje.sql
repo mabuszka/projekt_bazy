@@ -272,7 +272,8 @@ BEGIN
 	FROM oferty o
 		JOIN wycieczki w
 			ON (w.oferta_id = o.oferta_id)
-	WHERE w.data_rozpoczecia < CURRENT_DATE + dni;
+	WHERE w.data_rozpoczecia BETWEEN CURRENT_DATE AND CURRENT_DATE + dni
+	ORDER BY data_rozpoczecia ASC;
 END;
 $$ LANGUAGE 'plpgsql';
 
