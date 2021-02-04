@@ -257,8 +257,8 @@ tabbox_przewodnicy_zarzadzaj <- tabBox(title = span(icon("fas fa-cog"), "Zarząd
                                                selectInput("p_zlec_wycieczke_select",label='Wybierz przewodnika',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
                                                h4("Wycieczki możliwe do zlecenia - bez kolizji w terminach z innymi wycieczkami tego przewodnika:"),
                                                selectInput("w_zlec_wycieczke_select",label='Wybierz wycieczkę',
-                                                           # choices=dbGetQuery(con,"SELECT wycieczka_id FROM wycieczki;")$wycieczka_id)
-                                                           choices = (DT::dataTableOutput(outputId = "wycieczki_do_zlecania"))$wycieczka_id)
+                                                           choices=dbGetQuery(con,"SELECT wycieczka_id FROM wycieczki;")$wycieczka_id)
+                                                           # choices = (DT::dataTableOutput(outputId = "wycieczki_do_zlecania"))$wycieczka_id)
                                                ,
                                                actionButton('p_zlec_wycieczke_button',label='Zleć wycieczkę przewodnikowi')
                                       ),

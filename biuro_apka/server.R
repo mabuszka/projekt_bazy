@@ -234,7 +234,7 @@ shinyServer<- function(input, output, session){
                           error = function(e){
                             return(data.frame())
                           })
-    }}, options = list(scrollX=TRUE)
+    }}
   )
   
   
@@ -244,7 +244,7 @@ shinyServer<- function(input, output, session){
               error = function(e){
                 return(data.frame())
               })
-    }, options = list(scrollX=TRUE)
+    }
   )
   
   output$wycieczki_przewodnikow <- DT::renderDataTable(
@@ -252,7 +252,7 @@ shinyServer<- function(input, output, session){
               error = function(e){
                 return(data.frame())
               })
-    }, options = list(scrollX=TRUE)
+    }
   )
   
   # zwolnienie przewodnika
@@ -264,6 +264,7 @@ shinyServer<- function(input, output, session){
     
     })
   })
+  
   #zwolnienie
   observeEvent(input$zwolnij_button,{
     id <- input$zwolnij
@@ -282,7 +283,8 @@ shinyServer<- function(input, output, session){
     }
     )
     # update wybierania przewodników do zlecania wycieczek
-    przewodnicy_aktywni <- dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE ORDER BY przewodnik_id ASC;")$przewodnik_id
+    przewodnicy_aktywni <- dbGetQuery(con,paste0("SELECT przewodnik_id FROM przewodnicy EXCEPT
+                                     (SELECT przewodnik_id FROM kolidujace_wycieczki_przewodnikow WHERE wycieczka_z_kolizja=",input$w_zlec_wycieczke_select,") ORDER BY przewodnik_id ASC;"))$przewodnik_id
     updateSelectInput(session, "p_zlec_wycieczke_select", choices = przewodnicy_aktywni )
     #update przewodników do zwolnienia
     updateSelectInput(session, "zwolnij", choices = przewodnicy_aktywni )
@@ -353,7 +355,8 @@ shinyServer<- function(input, output, session){
     # }
     })
     # update wybierania przewodników do zlecania wycieczek
-    przewodnicy_aktywni <- dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE ORDER BY przewodnik_id ASC;")$przewodnik_id
+    przewodnicy_aktywni <- dbGetQuery(con,paste0("SELECT przewodnik_id FROM przewodnicy EXCEPT
+                                     (SELECT przewodnik_id FROM kolidujace_wycieczki_przewodnikow WHERE wycieczka_z_kolizja=",input$w_zlec_wycieczke_select,") ORDER BY przewodnik_id ASC;"))$przewodnik_id
     updateSelectInput(session, "p_zlec_wycieczke_select", choices = przewodnicy_aktywni )
     #update przewodników do zwolnienia
     updateSelectInput(session, "zwolnij", choices = przewodnicy_aktywni )
@@ -430,14 +433,14 @@ shinyServer<- function(input, output, session){
     
   })
   
-  ## odświeża wycieczki do wyboru dla danego przewodnika po jego wyborze
-  observeEvent(input$p_zlec_wycieczke_select, {
-    wycieczki_do_zlecania <- tryCatch({dbGetQuery(con, paste0("SELECT wycieczka_id FROM wycieczki EXCEPT
-                                     (SELECT wycieczka_z_kolizja FROM kolidujace_wycieczki_przewodnikow WHERE przewodnik_id=",input$p_zlec_wycieczke_select,") ORDER BY wycieczka_id ASC;"))
+  ## odświeża przewodnikow do wyboru dla danej wycieczki  po jej wyborze
+  observeEvent(input$w_zlec_wycieczke_select, {
+    przewodnicy_do_zlecania <- tryCatch({dbGetQuery(con, paste0("SELECT przewodnik_id FROM przewodnicy EXCEPT
+                                     (SELECT przewodnik_id FROM kolidujace_wycieczki_przewodnikow WHERE wycieczka_z_kolizja=",input$w_zlec_wycieczke_select,") ORDER BY przewodnik_id ASC;"))
     },error = function(e){
       return(data.frame(wycieczka_id = c(1)))
     })
-    updateSelectInput(session, "w_zlec_wycieczke_select", choices = wycieczki_do_zlecania$wycieczka_id)
+    updateSelectInput(session, "p_zlec_wycieczke_select", choices = przewodnicy_do_zlecania$przewodnik_id)
   })
   
   
@@ -509,9 +512,9 @@ shinyServer<- function(input, output, session){
   
   
   output$przegladaj_wycieczki_tbl <- DT::renderDataTable({
-    sql<-paste0('SELECT * FROM wycieczki WHERE data_rozpoczecia>=',input$wyc_data_input[1],'::DATE AND data_zakonczenia<=',input$wyc_data_input[2],'::DATE;')
+    sql<-paste0("SELECT * FROM wycieczki WHERE data_rozpoczecia>='",input$wyc_data_input[1],"'::DATE AND data_zakonczenia<='",input$wyc_data_input[2],"'::DATE;")
     if (input$wyc_oferta_select != 'all'){
-    sql<-paste0('SELECT * FROM wycieczki WHERE data_rozpoczecia>=',input$wyc_data_input[1],'::DATE AND data_zakonczenia<=',input$wyc_data_input[2],'::DATE AND oferta_id=',input$wyc_oferta_select,';')}
+    sql<-paste0("SELECT * FROM wycieczki WHERE data_rozpoczecia>='",input$wyc_data_input[1],"'::DATE AND data_zakonczenia<='",input$wyc_data_input[2],"'::DATE AND oferta_id=",input$wyc_oferta_select,";")}
     
     ####### coś nie działa z datą :/
     
@@ -547,7 +550,7 @@ shinyServer<- function(input, output, session){
   output$w_info_oferta <- renderText({ 
     id<-input$w_stworz_oferta_input
     tryCatch({res <- dbGetQuery(con, paste0("SELECT oferta_id,miejsce_wyjazdu,limit_uczestnikow,dlugosc_wyjazdu,cena_podstawowa FROM oferty WHERE oferta_id=",id,";"))
-    str_c(c("ID:", ", Miejsce wyjazdu:", ", Limit uczestników:", ", Dlługość wyjazdu:", ", Cena podstawowa:"), sep = " ", collapse = "")
+    str_c(c("ID:", ", Miejsce wyjazdu:", ", Limit uczestników:", ", Dlługość wyjazdu:", ", Cena podstawowa:"),as.character(unname(res)), sep = " ", collapse = "")
     
     })
   })
@@ -628,7 +631,7 @@ shinyServer<- function(input, output, session){
   output$w_info_usun <- renderText({ 
     id<-input$w_usun_select
     tryCatch({res <- dbGetQuery(con, paste0("SELECT * FROM wycieczki WHERE oferta_id=",id,";"))
-    str_c(c("ID:", ", Liczba uczestnków:", ", Data rozpoczęcia:", ", Data zakończenia:", ", Numer oferty:"), sep = " ", collapse = "")
+    str_c(c("ID:", ", Liczba uczestnków:", ", Data rozpoczęcia:", ", Data zakończenia:", ", Numer oferty:"), c(unname(res)), sep = " ", collapse = "")
     
     })
   })
