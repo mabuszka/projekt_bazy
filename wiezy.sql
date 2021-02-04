@@ -1,4 +1,4 @@
--- klasy_ofert
+﻿-- klasy_ofert
 ALTER TABLE klasy_ofert ADD CHECK (mnoznik > 0);
 
 ALTER TABLE klasy_ofert ADD PRIMARY KEY (klasa);
