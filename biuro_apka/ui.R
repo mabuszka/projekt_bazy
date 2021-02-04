@@ -33,13 +33,7 @@ sidebar = dashboardSidebar(
              )
              
     ),
-    menuItem("Przewodnicy", tabName = "przewodnicy_tab", icon = icon("fas fa-address-card"),
-             menuSubItem(
-               "Zarządzaj", "zarzadzaj_przewodnicy", icon = icon("fas fa-edit")
-             ),
-             menuSubItem(
-               "Przeglądaj", "przegladaj_przewodnicy", icon = icon("fas fa-search")
-             )
+    menuItem("Przewodnicy", tabName = "przewodnicy_tab", icon = icon("fas fa-address-card")
     )
   )
 )
@@ -171,37 +165,29 @@ box_statystyki_ofert <- box(width = NULL,
 
 
 ############ zakładka WYCIECZKI
-# przegladaj
 
-# box_przegladaj_wycieczki <- box(width = NULL,
-#                                 status = "primary",
-#                                 title = "Przeglądaj",
-#                                 solidHeader = TRUE,
-#                                 DT::dataTableOutput(outputId = "przegladaj_wycieczki_tbl")
-#                                 
-# )
-# 
-# box_sprawdz_przewodnikow_do_wycieczki <- box(width = NULL,
-#                                              status = "primary",
-#                                              title = "Sprawdź przewodników wycieczek",
-#                                              solidHeader = TRUE,
-#                                              DT::dataTableOutput(outputId = "sprawdz_przewodnictwa_wycieczek_tbl")
-#                                              
-# )
-
+# dodać aktualizacje
 tabbox_wycieczki_zarzadzaj <- tabBox(title = span(icon("fas fa-clipboard-list"), "Zarządzaj wycieczkami"),
                                      width = NULL,
                                      side = "right",
                                      tabPanel(title = span(icon("fas fa-calendar-plus"),"Utwórz"),
-                                              
+                                              dateInput('w_stworz_data_input',label='Początek wycieczki'),
+                                              selectInput(inputId = "w_stworz_oferta_input", label = "Wybierz ofertę", choices = dbGetQuery(con,'SELECT oferta_id FROM oferty;')$oferta_id),
+                                              textOutput("w_info_oferta"),
+                                              actionButton('w_utworz',label='Utwórz wycieczkę')
                                      ),
                                      
                                      tabPanel(title = span(icon("fas fa-edit"),"Modyfikuj"),
-
+                                              selectInput(inputId = "w_modyfikuj_select", label = "Wybierz wycieczkę", choices = dbGetQuery(con,'SELECT wycieczka_id FROM wycieczki;')$wycieczka_id),
+                                              textOutput("w_info_modyfikuj"),
+                                              dateInput('w_modyfikuj_data_input',label='Nowy początek wycieczki'),
+                                              actionButton('w_modyfikuj',label='Modyfikuj wycieczkę')
                                      ),
                                      
-                                     tabPanel(title = span(icon("fas fa-calendar-minus"),"Usuń")
-                                              
+                                     tabPanel(title = span(icon("fas fa-calendar-minus"),"Usuń"),
+                                              selectInput(inputId = "w_usun_select", label = "Wybierz wycieczkę do usunięcia", choices = dbGetQuery(con,'SELECT wycieczka_id FROM wycieczki;')$wycieczka_id),
+                                              textOutput("w_info_usun"),
+                                              actionButton('w_usun',label='Usuń wycieczkę')
                                      )
 )
 
@@ -212,113 +198,71 @@ tabbox_wycieczki_przegladaj <- tabBox(title = span(icon("fas fa-window-restore")
                                       tabPanel(title = span(icon("fas fa-calendar-plus"),"Zbliżające się wycieczki"),
                                                numericInput(inputId = "zbw_dni_input", label = "Wybierz w ciągu ilu dni wycieczka ma się rozpocząć", value =  30),
                                                DT::dataTableOutput(outputId = "zblizajace_sie_wycieczki_tbl")
-                                               
                                       ),
                                       tabPanel(title = span(icon("fas fa-search-plus"),"Sprawdź przewodników"),
                                                solidHeader = TRUE,
                                                DT::dataTableOutput(outputId = "sprawdz_przewodnictwa_wycieczek_tbl")
                                       ),
                                       tabPanel(title = span(icon("fas fa-table"), "Wycieczki"),
-                                               DT::dataTableOutput(outputId = "przegladaj_wycieczki_tbl"))
+                                               dateRangeInput("wyc_data_input", label='Wybierz przedział czasowy wycieczki', language = "pl", separator = " do "),
+                                               selectInput("wyc_oferta_select",label='Wybierz ofertę',choices=list('Wszystkie'='all',dbGetQuery(con,"SELECT oferta_id FROM oferty;")$oferta_id)),
+                                               DT::dataTableOutput(outputId = "przegladaj_wycieczki_tbl")
+                                      )
                                       
 )
 
-# box_zblizajace_sie_wycieczki <- box(width = NULL,
-#                                     status = "primary",
-#                                     title = span(icon("fas fa-buisness-time"),"Zbliżające się wycieczki"),
-#                                     solidHeader = TRUE,
-#                                     numericInput(inputId = "zbw_dni_input", label = "Wybierz w ciągu ilu dni wycieczka ma się rozpocząć", value =  30),
-#                                     # actionButton("zbw_button", "Wyszukaj"),
-#                                     DT::dataTableOutput(outputId = "zblizajace_sie_wycieczki_tbl")
-#                                     
-# )
-
-#modyfikuj
-
-
 
 ############# zakładka PRZEWODNICY
-# przeglądaj: przewodnicy, widok najbardziej doświadczeni
 
-box_przegladaj_przewodnikow <- box(width=NULL,
-                                   status='primary',
-                                   title='Przewodnicy',
-                                   solidHeader = TRUE,
-                                   collapsible = TRUE,
-                                   selectInput('aktywnosc',label='Aktywność',choices=list("aktywni"=1,"wszyscy"=3,"nieaktywni"=2)),
-                                   DT::dataTableOutput(outputId = 'przewodnicy')
+tabbox_przewodnicy_przegladaj <- tabBox(title = span(icon("fas fa-window-restore"), "Przeglądaj"),
+                                      width = NULL,
+                                      side = "right",
+                                      tabPanel(title = span(icon("fas fa-table"), "Przewodnicy"),
+                                               selectInput('aktywnosc',label='Aktywność',choices=list("aktywni"=1,"wszyscy"=3,"nieaktywni"=2)),
+                                               DT::dataTableOutput(outputId = 'przewodnicy')
+                                      ),
+                                      tabPanel(title = span(icon("fas fa-search-plus"),"Najbardziej doświadczeni przewodnicy"),
+                                               solidHeader = TRUE,
+                                               DT::dataTableOutput(outputId = 'doswiadczeni_przewodnicy')
+                                      ),
+                                      tabPanel(title = span(icon("fas fa-table"), "Wycieczki przewodników"),
+                                               DT::dataTableOutput(outputId = 'wycieczki_przewodnikow')
+                                      )
+                                      
 )
 
-box_doswiadczeni_przewodnicy <- box(width=NULL,
-                                    status='primary',
-                                    title='Najbardziej doświadczeni przewodnicy',
-                                    solidHeader = TRUE,
-                                    collapsible = TRUE,
-                                    DT::dataTableOutput(outputId = 'doswiadczeni_przewodnicy')
+tabbox_przewodnicy_zarzadzaj <- tabBox(title = span(icon("fas fa-clipboard-list"), "Przeglądaj"),
+                                      width = NULL,
+                                      side = "right",
+                                      tabPanel(title = span(icon("fas fa-calendar-plus"),"Zleć wycieczkę przewodnikowi"),
+                                               selectInput("p_zlec_wycieczke_select",label='Wybierz przewodnika',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
+                                               h4("Wycieczki możliwe do zlecenia - bez kolizji w terminach z innymi wycieczkami tego przewodnika:"),
+                                               selectInput("w_zlec_wycieczke_select",label='Wybierz wycieczkę',
+                                                           # choices=dbGetQuery(con,"SELECT wycieczka_id FROM wycieczki;")$wycieczka_id)
+                                                           choices = (DT::dataTableOutput(outputId = "wycieczki_do_zlecania"))$wycieczka_id)
+                                               ,
+                                               actionButton('p_zlec_wycieczke_button',label='Zleć wycieczkę przewodnikowi')
+                                      ),
+                                      tabPanel(title = span(icon("fas fa-search-plus"),"Zaktualizuj informacje"),
+                                               solidHeader = TRUE,
+                                               selectInput("przewodnik_do_akt_select",label='Wybierz przewodnika',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
+                                               textInput('p_akt_imie_input',label="Imię"),
+                                               textInput('p_akt_nazwisko_input',label='Nazwisko'),
+                                               textInput('p_akt_telefon_input',label='Telefon'),
+                                               actionButton('p_aktualizuj_id',label='Zaktualizuj informacje')
+                                      ),
+                                      tabPanel(title = span(icon("fas fa-table"), "Zwolnij"),
+                                               selectInput("zwolnij",label='Wybierz przewodnika do zwolnienia',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
+                                               textOutput("info_zwolnij"),
+                                               actionButton(inputId = "zwolnij_button", label = "Zwolnij")
+                                      ),
+                                      tabPanel(title = span(icon("fas fa-table"), "Zatrudnij"),
+                                               textInput('p_imie_input',label="Imię"),
+                                               textInput('p_nazwisko_input',label='Nazwisko'),
+                                               textInput('p_telefon_input',label='Telefon'),
+                                               actionButton('zatrudnij',label='Zatrudnij')
+                                      )
 )
-
-# modyfikuj: zwolnij, zatrudnij, aktualizuj informacje, zleć wycieczkę + kolidujące wycieczki
-#wszędzie dodać powiadomienie że się udało
-
-box_zatrudnij <- box(width=NULL,
-                     status='primary',
-                     title='Zatrudnij',
-                     solidHeader = TRUE,
-                     collapsible = TRUE,
-                     textInput('p_imie_input',label="Imię"),
-                     textInput('p_nazwisko_input',label='Nazwisko'),
-                     textInput('p_telefon_input',label='Telefon'),
-                     actionButton('zatrudnij',label='Zatrudnij')
-)
-
-box_zwolnij <- box(width=NULL,
-                   status='primary',
-                   title='Zwolnij przewodnika',
-                   solidHeader = TRUE,
-                   collapsible = TRUE,
-                   selectInput("zwolnij",label='Wybierz przewodnika do zwolnienia',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
-                   textOutput("info_zwolnij"),
-                   actionButton(inputId = "zwolnij_button", label = "Zwolnij")
-)
-
-# dodać defaultowe wpisywanie się dotychczasowych danych
-box_aktualizuj_przewodnika <- box(width=NULL,
-                                  status='primary',
-                                  title='Zaktualizuj informacje',
-                                  solidHeader = TRUE,
-                                  collapsible = TRUE,
-                                  selectInput("przewodnik_do_akt_select",label='Wybierz przewodnika',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
-                                  textInput('p_akt_imie_input',label="Imię"),
-                                  textInput('p_akt_nazwisko_input',label='Nazwisko'),
-                                  textInput('p_akt_telefon_input',label='Telefon'),
-                                  actionButton('p_aktualizuj_id',label='Zaktualizuj informacje')
-)
-
-
-box_zlec_wycieczke <- box(width=NULL,
-                          status='primary',
-                          title='Zleć wycieczkę przewodnikowi',
-                          solidHeader = TRUE,
-                          collapsible = TRUE,
-                          selectInput("p_zlec_wycieczke_select",label='Wybierz przewodnika',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
-                          # h4('Wycieczki kolidujące z wycieczkami wybranego przewodnika:'),
-                          # DT::dataTableOutput(outputId = 'kolidujace_wycieczki'),
-                          h4("Wycieczki możliwe do zlecenia - bez kolizji w terminach z innymi wycieczkami tego przewodnika:"),
-                          selectInput("w_zlec_wycieczke_select",label='Wybierz wycieczkę',
-                                      # choices=dbGetQuery(con,"SELECT wycieczka_id FROM wycieczki;")$wycieczka_id)
-                                      choices = (DT::dataTableOutput(outputId = "wycieczki_do_zlecania"))$wycieczka_id)
-                          ,
-                          actionButton('p_zlec_wycieczke_button',label='Zleć wycieczkę przewodnikowi')
-)
-box_wycieczki_przewodnikow <- box(width=NULL,
-                                  status='primary',
-                                  title='Wycieczki przewodników',
-                                  solidHeader = TRUE,
-                                  collapsible = TRUE,
-                                  collapsed = TRUE,
-                                  DT::dataTableOutput(outputId = 'wycieczki_przewodnikow')
-)
-
 
 
 
@@ -409,27 +353,14 @@ body = dashboardBody(
                 
             )
     ),
-    # zakładki do przewodników
-    # zarządzanie przewodnikami
-    tabItem(tabName = "zarzadzaj_przewodnicy",
+    # zakładka do przewodników
+    tabItem(tabName = "przewodnicy_tab",
             column(6,
-                   box_zlec_wycieczke,
-                   box_zatrudnij
+                   tabbox_przewodnicy_zarzadzaj
                    
             ),
             column(6,
-                   box_aktualizuj_przewodnika,
-                   box_zwolnij
-            )
-    ),
-    # przeglądanie przewodników 
-    tabItem(tabName = "przegladaj_przewodnicy",
-            column(6,
-                   box_przegladaj_przewodnikow
-            ),
-            column(6,
-                   box_doswiadczeni_przewodnicy,
-                   box_wycieczki_przewodnikow
+                   tabbox_przewodnicy_przegladaj
             )
     )
   )

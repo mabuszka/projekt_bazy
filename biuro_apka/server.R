@@ -232,6 +232,10 @@ shinyServer<- function(input, output, session){
     }else{sql <- "SELECT * FROM przewodnicy;"}
     {tryCatch({dbGetQuery(con,sql)},
                           error = function(e){
+                            return(data.frame())
+                          })
+    }}, options = list(scrollX=TRUE)
+  )
   
   
   
@@ -496,13 +500,25 @@ shinyServer<- function(input, output, session){
   
   #### WYCIECZKI POCZATEK
   
-  output$przegladaj_wycieczki_tbl <- DT::renderDataTable(
-    tryCatch({dbGetQuery(con, "SELECT * FROM wycieczki;")},
-             error = function(e){
-               return(data.frame())
-             }), options = list(scrollX = TRUE))#,editable=list(target='row',disable=list(columns=c(1,2)))
-  
-  
+  # output$przegladaj_wycieczki_tbl <- DT::renderDataTable(
+  #   tryCatch({dbGetQuery(con, "SELECT * FROM wycieczki;")},
+  #            error = function(e){
+  #              return(data.frame())
+  #            }), options = list(scrollX = TRUE))#,editable=list(target='row',disable=list(columns=c(1,2)))
+  # 
+  output$pprzegladaj_wycieczki_tbl <- DT::renderDataTable({
+    sql<-paste('SELECT * FROM wycieczki WHERE data_rozpoczecia>=',input$wyc_data_input[1],' AND data_zakonczenia<=',input$wyc_data_input[2],';')
+    if (input$wyc_oferta_select != 'all'){
+    sql<-paste('SELECT * FROM wycieczki WHERE data_rozpoczecia>=',input$wyc_data_input[1],' AND data_zakonczenia<=',input$wyc_data_input[2],' AND oferta_id=',input$wyc_oferta_select,';')}
+    
+    ####### coś nie działa z datą :/
+    
+    {tryCatch({dbGetQuery(con,sql)},
+              error = function(e){
+                return(data.frame())
+              })
+    }}, options = list(scrollX=TRUE)
+  )
   
   output$sprawdz_przewodnictwa_wycieczek_tbl <- DT::renderDataTable(
     tryCatch({dbGetQuery(con, "SELECT wycieczka_id,przewodnik_id FROM przewodnictwa;")},
@@ -524,6 +540,134 @@ shinyServer<- function(input, output, session){
           return(data.frame())
         })
     )
+  })
+  
+  output$w_info_oferta <- renderText({ 
+    id<-input$w_stworz_oferta_input
+    tryCatch({res <- dbGetQuery(con, paste0("SELECT oferta_id,miejsce_wyjazdu,limit_uczestnikow,dlugosc_wyjazdu,cena_podstawowa FROM oferty WHERE oferta_id=",id,";"))
+    str_c(c("ID:", ", Miejsce wyjazdu:", ", Limit uczestników:", ", Dlługość wyjazdu:", ", Cena podstawowa:"), sep = " ", collapse = "")
+    
+    })
+  })
+  
+  output$info_zwolnij <- renderText({ 
+    id<-input$zwolnij
+    tryCatch({res <- dbGetQuery(con, paste0("SELECT * FROM przewodnicy WHERE przewodnik_id=",id,";"))
+    str_c(c("ID:", ", Imię:", ", Nazwisko:", ", Email:", ", Telefon:", ", Status:"),str_replace_all(unname(res), c("TRUE" = "aktywny", "FALSE" = "nieaktywny")), sep = " ", collapse = "")
+    
+    })
+  })
+  
+  observeEvent(input$w_utworz, {
+    data <- input$w_stworz_data_input
+    id_o <- input$w_stworz_oferta_input
+    sql <- paste0("SELECT dodaj_wycieczke(",id_o,",",data,");")
+    tryCatch({res <-dbSendQuery(con, sql)
+    dbFetch(res)
+    if (dbHasCompleted(res)){
+      showNotification("Utworzono nową wycieczkę")
+    }
+    dbClearResult(res)
+    })
+    #updateSelectInput(session, "w_zlec_wycieczke_select", choices = wycieczki_do_zlecania$wycieczka_id)
+    # update doświadczonych przewodników
+    # output$doswiadczeni_przewodnicy <- DT::renderDataTable(
+    #   {tryCatch({dbGetQuery(con,"SELECT * FROM najbardziej_doswiadczeni_przewodnicy;")},
+    #             error = function(e){
+    #               return(data.frame())
+    #             })
+    #   }, options = list(scrollX=TRUE)
+    # )
+    # # update wycieczek przewodników 
+    # output$wycieczki_przewodnikow <- DT::renderDataTable(
+    #   {tryCatch({dbGetQuery(con,"SELECT * FROM przewodnictwa;")},
+    #             error = function(e){
+    #               return(data.frame())
+    #             })
+    #   }
+    # )
+    
+    
+  })
+  
+  output$w_info_modyfikuj <- renderText({ 
+    id<-input$w_modyfikuj_select
+    tryCatch({res <- dbGetQuery(con, paste0("SELECT * FROM wycieczki WHERE oferta_id=",id,";"))
+    str_c(c("ID:", ", Liczba uczestnków:", ", Data rozpoczęcia:", ", Data zakończenia:", ", Numer oferty:"), sep = " ", collapse = "")
+    
+    })
+  })
+  
+  observeEvent(input$w_modyfikuj, {
+    data <- input$w_modyfikuj_data_input
+    id_w <- input$w_modyfikuj_select
+    sql <- paste0("SELECT modyfikuj_wycieczke(",id_w,",",data,");")
+    tryCatch({res <-dbSendQuery(con, sql)
+    dbFetch(res)
+    if (dbHasCompleted(res)){
+      showNotification("Zmodyfikowano wycieczkę")
+    }
+    dbClearResult(res)
+    })
+    #updateSelectInput(session, "w_zlec_wycieczke_select", choices = wycieczki_do_zlecania$wycieczka_id)
+    # update doświadczonych przewodników
+    # output$doswiadczeni_przewodnicy <- DT::renderDataTable(
+    #   {tryCatch({dbGetQuery(con,"SELECT * FROM najbardziej_doswiadczeni_przewodnicy;")},
+    #             error = function(e){
+    #               return(data.frame())
+    #             })
+    #   }, options = list(scrollX=TRUE)
+    # )
+    # # update wycieczek przewodników 
+    # output$wycieczki_przewodnikow <- DT::renderDataTable(
+    #   {tryCatch({dbGetQuery(con,"SELECT * FROM przewodnictwa;")},
+    #             error = function(e){
+    #               return(data.frame())
+    #             })
+    #   }
+    # )
+    
+    
+  })
+  
+  
+  output$w_info_usun <- renderText({ 
+    id<-input$w_usun_select
+    tryCatch({res <- dbGetQuery(con, paste0("SELECT * FROM wycieczki WHERE oferta_id=",id,";"))
+    str_c(c("ID:", ", Liczba uczestnków:", ", Data rozpoczęcia:", ", Data zakończenia:", ", Numer oferty:"), sep = " ", collapse = "")
+    
+    })
+  })
+  
+  observeEvent(input$w_usun, {
+    id_w <- input$w_usun_select
+    sql <- paste0("DELETE FROM wycieczki WHERE wycieczka_id=",id_w,";")
+    tryCatch({res <-dbSendQuery(con, sql)
+    dbFetch(res)
+    if (dbHasCompleted(res)){
+      showNotification("Usunięto wycieczkę")
+    }
+    dbClearResult(res)
+    })
+    #updateSelectInput(session, "w_zlec_wycieczke_select", choices = wycieczki_do_zlecania$wycieczka_id)
+    # update doświadczonych przewodników
+    # output$doswiadczeni_przewodnicy <- DT::renderDataTable(
+    #   {tryCatch({dbGetQuery(con,"SELECT * FROM najbardziej_doswiadczeni_przewodnicy;")},
+    #             error = function(e){
+    #               return(data.frame())
+    #             })
+    #   }, options = list(scrollX=TRUE)
+    # )
+    # # update wycieczek przewodników 
+    # output$wycieczki_przewodnikow <- DT::renderDataTable(
+    #   {tryCatch({dbGetQuery(con,"SELECT * FROM przewodnictwa;")},
+    #             error = function(e){
+    #               return(data.frame())
+    #             })
+    #   }
+    # )
+    
+    
   })
   
   #### WYCIECZKI KONIEC
