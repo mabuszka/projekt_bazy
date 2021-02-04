@@ -506,10 +506,12 @@ shinyServer<- function(input, output, session){
   #              return(data.frame())
   #            }), options = list(scrollX = TRUE))#,editable=list(target='row',disable=list(columns=c(1,2)))
   # 
-  output$pprzegladaj_wycieczki_tbl <- DT::renderDataTable({
-    sql<-paste('SELECT * FROM wycieczki WHERE data_rozpoczecia>=',input$wyc_data_input[1],' AND data_zakonczenia<=',input$wyc_data_input[2],';')
+  
+  
+  output$przegladaj_wycieczki_tbl <- DT::renderDataTable({
+    sql<-paste0('SELECT * FROM wycieczki WHERE data_rozpoczecia>=',input$wyc_data_input[1],'::DATE AND data_zakonczenia<=',input$wyc_data_input[2],'::DATE;')
     if (input$wyc_oferta_select != 'all'){
-    sql<-paste('SELECT * FROM wycieczki WHERE data_rozpoczecia>=',input$wyc_data_input[1],' AND data_zakonczenia<=',input$wyc_data_input[2],' AND oferta_id=',input$wyc_oferta_select,';')}
+    sql<-paste0('SELECT * FROM wycieczki WHERE data_rozpoczecia>=',input$wyc_data_input[1],'::DATE AND data_zakonczenia<=',input$wyc_data_input[2],'::DATE AND oferta_id=',input$wyc_oferta_select,';')}
     
     ####### coś nie działa z datą :/
     
@@ -679,7 +681,7 @@ shinyServer<- function(input, output, session){
     },error = function(e){
       return(data.frame(wycieczka_id = c(1)))
     })
-    # updateSelectInput(session, "w_zlec_wycieczke_select", choices = wycieczki_do_zlecania$wycieczka_id)
+    updateSelectInput(session, "wp_zlec_wycieczke_select", choices = przewodnicy_do_zlecania$przewodnik_id)
     # # update doświadczonych przewodników
     # output$doswiadczeni_przewodnicy <- DT::renderDataTable(
     #   {tryCatch({dbGetQuery(con,"SELECT * FROM najbardziej_doswiadczeni_przewodnicy;")},
@@ -708,8 +710,15 @@ shinyServer<- function(input, output, session){
     }, options = list(scrollX=TRUE)
   )
   
+  output$selectedrow <- DT::renderDataTable({
+    selectedrowindex <<-     input$w_odwolaj_tbl_rows_selected[length(input$w_odwolaj_tbl_rows_selected)]
+    selectedrowindex <<- as.numeric(selectedrowindex)
+    selectedrow <- (w_odwolaj_tbl[selectedrowindex,])
+    selectedrow
+  })
+  
   observeEvent(input$w_odwolaj, {
-    row <- input$w_odwolaj_tbl_row_last_clicked
+    row <- selectedrow
     if (length(row)) {
       tryCatch({res <-dbSendQuery(con, paste0("SELECT usun_przewodnika(",w_odwolaj_tbl[row,],");"))
       dbFetch(res)

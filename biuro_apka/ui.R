@@ -224,7 +224,7 @@ tabbox_wycieczki_przegladaj <- tabBox(title = span(icon("fas fa-window-restore")
                                       ),
                                       tabPanel(title = span(icon("fas fa-table"), "Wycieczki"),
                                                dateRangeInput("wyc_data_input", label='Wybierz przedział czasowy wycieczki', language = "pl", separator = " do "),
-                                               selectInput("wyc_oferta_select",label='Wybierz ofertę',choices=list('Wszystkie'='all',dbGetQuery(con,"SELECT oferta_id FROM oferty;")$oferta_id)),
+                                               selectInput("wyc_oferta_select",label='Wybierz ofertę',choices=(dbGetQuery(con,"SELECT oferta_id FROM oferty;")$oferta_id),multiple=TRUE,selected = 1),
                                                DT::dataTableOutput(outputId = "przegladaj_wycieczki_tbl")
                                       )
                                       
