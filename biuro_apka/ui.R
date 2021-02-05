@@ -24,15 +24,9 @@ sidebar = dashboardSidebar(
     menuItem("Wycieczki", tabName = "wycieczki_tab", icon = icon("fas fa-calendar")),
     menuItem("Klienci i uczestnicy", tabName = "uczestnicy_tab", icon = icon("fas fa-user-friends")
     ),
-    menuItem("Zamówienia", tabName = "zamowienia_tab", icon = icon("fas fa-list-alt"),
-             menuSubItem(
-               "Złóż lub modyfikuj", "modyfikuj_zamowienie", icon = icon("fas fa-edit")
-             ),
-             menuSubItem(
-               "Przeglądaj", "przegladaj_zamowienia", icon = icon("fas fa-search")
-             )
-             
-    ),
+    menuItem("Zamówienia", tabName = "zamowienia_tab", icon = icon("fas fa-list-alt")),
+
+
     menuItem("Przewodnicy", tabName = "przewodnicy_tab", icon = icon("fas fa-address-card")
     )
   )
@@ -378,18 +372,7 @@ body = dashboardBody(
     ),
     # zakładki do zamówień
     #przeglądanie zamówień
-    tabItem(tabName = "przegladaj_zamowienia",
-            column(6,
-                   box(width = NULL,
-                       status = "primary",
-                       title = "cos",
-                       solidHeader = TRUE
-                   )
-                   
-            )
-    ),
-    #modyfikacja zamówień
-    tabItem(tabName = "modyfikuj_zamowienie",
+    tabItem(tabName = "zamowienia_tab",
             column(6,
                    box_zloz_mod_zamowienie
             )
