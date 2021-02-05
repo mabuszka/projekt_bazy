@@ -130,38 +130,56 @@ box_wyszukaj_uczestnikow <- box(width = NULL,
                                 solidHeader = TRUE   
 )
 
-## stali klienci
-# box_stali_klienci <-
+
 
 ############ zakładka OFERTY
 
-##statystyki
+####statystyki
+tabbox_statystyki_oferty <- tabBox(width = NULL,
+                                   title = span( icon("fas fa-chart-bar"), "Statystyki ofert"),
+                                   id = "uczestnicy_tabbox",
+                                   side = "right",
+                                   tabPanel(title = span( icon("fas fa-list"),"Statystyki uczestników"),
+                                            h3("Statystyki uczestników, którzy pojechali na wyjazdy w ramach danych ofert"),
+                                            DT::dataTableOutput('statystyki_ofert_tbl')
+                                            
+                                   ),
+                                   tabPanel(title = span(icon("fas fa-list-ol"), "Najczęstsze cele podróży"),
+                                            radioButtons("najczestsze_sele_tab_select", label = NULL, choices = list("Najwięcej wycieczek" = "najczestsze_cele_w", "Najwięcej odwiedzających"  = "najczestsze_cele_u")),
+                                            tabsetPanel(id = "najczestsze_cele_tabs", selected = "najczestsze_cele_w", type = "hidden",
+                                                        tabPanel("najczestsze_cele_w",
+                                                                 h4("Miejsca, do których pojechało najwięcej wycieczek"),
+                                                                 DT::dataTableOutput(outputId = "najczestsze_docelowe_tbl")
+                                                                 
+                                                        ),
+                                                        
+                                                        tabPanel("najczestsze_cele_u",
+                                                                 h4("Miejsca, które odwiedziło najwięcej uczestników"),
+                                                                 DT::dataTableOutput(outputId = "najbardziej_oblegane_tbl")
+                                                                 
+                                                        )
+                                            )
+                                   ))
 
-box_najczestsze_docelowe <- box(width = NULL,
-                                status = "primary",
-                                title = "Najczęściej odwiedzane miejsca wyjazdów",
-                                solidHeader = TRUE,
-                                collapsible = TRUE,
-                                "Miasta, do których pojechało najwięcej wycieczek",
-                                DT::dataTableOutput(outputId = "najczestsze_docelowe_tbl")
-)
+# box_najczestsze_docelowe <- box(width = NULL,
+#                                 status = "primary",
+#                                 title = "Najczęściej odwiedzane miejsca wyjazdów",
+#                                 solidHeader = TRUE,
+#                                 collapsible = TRUE,
+#                                 "Miasta, do których pojechało najwięcej wycieczek",
+#                                 DT::dataTableOutput(outputId = "najczestsze_docelowe_tbl")
+# )
+# 
+# box_najbardziej_oblegane_docelowe <- box(width = NULL,
+#                                          status = "primary",
+#                                          title = "Najczęściej odwiedzane miejsca wyjazdów",
+#                                          solidHeader = TRUE,
+#                                          collapsible = TRUE,
+#                                          "Miasta, które odwiedziło najwięcej uczestników",
+#                                          DT::dataTableOutput(outputId = "najbardziej_oblegane_tbl")
+# )
 
-box_najbardziej_oblegane_docelowe <- box(width = NULL,
-                                         status = "primary",
-                                         title = "Najczęściej odwiedzane miejsca wyjazdów",
-                                         solidHeader = TRUE,
-                                         collapsible = TRUE,
-                                         "Miasta, które odwiedziło najwięcej uczestników",
-                                         DT::dataTableOutput(outputId = "najbardziej_oblegane_tbl")
-)
 
-box_statystyki_ofert <- box(width = NULL,
-                            status = "primary",
-                            title = "Statystyki ofert",
-                            solidHeader = TRUE,
-                            collapsible = TRUE,
-                            DT::dataTableOutput(outputId = "statystyki_ofert_tbl")
-)
 
 
 ############ zakładka WYCIECZKI
@@ -234,53 +252,53 @@ tabbox_wycieczki_przegladaj <- tabBox(title = span(icon("fas fa-window-restore")
 ############# zakładka PRZEWODNICY
 
 tabbox_przewodnicy_przegladaj <- tabBox(title = span(icon("fas fa-window-restore"), "Przeglądaj"),
-                                      width = NULL,
-                                      side = "right",
-                                      tabPanel(title = span(icon("fas fa-address-card"), "Przewodnicy"),
-                                               selectInput('aktywnosc',label='Aktywność',choices=list("aktywni"=1,"wszyscy"=3,"nieaktywni"=2)),
-                                               DT::dataTableOutput(outputId = 'przewodnicy')
-                                      ),
-                                      tabPanel(title = span(icon("fas fa-star"),"Najbardziej doświadczeni przewodnicy"),
-                                               solidHeader = TRUE,
-                                               DT::dataTableOutput(outputId = 'doswiadczeni_przewodnicy')
-                                      ),
-                                      tabPanel(title = span(icon("fas fa-calendar-alt"), "Wycieczki przewodników"),
-                                               DT::dataTableOutput(outputId = 'wycieczki_przewodnikow')
-                                      )
-                                      
+                                        width = NULL,
+                                        side = "right",
+                                        tabPanel(title = span(icon("fas fa-address-card"), "Przewodnicy"),
+                                                 selectInput('aktywnosc',label='Aktywność',choices=list("aktywni"=1,"wszyscy"=3,"nieaktywni"=2)),
+                                                 DT::dataTableOutput(outputId = 'przewodnicy')
+                                        ),
+                                        tabPanel(title = span(icon("fas fa-star"),"Najbardziej doświadczeni przewodnicy"),
+                                                 solidHeader = TRUE,
+                                                 DT::dataTableOutput(outputId = 'doswiadczeni_przewodnicy')
+                                        ),
+                                        tabPanel(title = span(icon("fas fa-calendar-alt"), "Wycieczki przewodników"),
+                                                 DT::dataTableOutput(outputId = 'wycieczki_przewodnikow')
+                                        )
+                                        
 )
 
 tabbox_przewodnicy_zarzadzaj <- tabBox(title = span(icon("fas fa-cog"), "Zarządzaj"),
-                                      width = NULL,
-                                      side = "right",
-                                      tabPanel(title = span(icon("fas fa-calendar-plus"),"Zleć wycieczkę przewodnikowi"),
-                                               selectInput("p_zlec_wycieczke_select",label='Wybierz przewodnika',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
-                                               h4("Wycieczki możliwe do zlecenia - bez kolizji w terminach z innymi wycieczkami tego przewodnika:"),
-                                               selectInput("w_zlec_wycieczke_select",label='Wybierz wycieczkę',
-                                                           choices=dbGetQuery(con,"SELECT wycieczka_id FROM wycieczki;")$wycieczka_id)
-                                                           # choices = (DT::dataTableOutput(outputId = "wycieczki_do_zlecania"))$wycieczka_id)
-                                               ,
-                                               actionButton('p_zlec_wycieczke_button',label='Zleć wycieczkę przewodnikowi')
-                                      ),
-                                      tabPanel(title = span(icon("fas fa-user-edit"),"Zaktualizuj informacje"),
-                                               solidHeader = TRUE,
-                                               selectInput("przewodnik_do_akt_select",label='Wybierz przewodnika',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
-                                               textInput('p_akt_imie_input',label="Imię"),
-                                               textInput('p_akt_nazwisko_input',label='Nazwisko'),
-                                               textInput('p_akt_telefon_input',label='Telefon'),
-                                               actionButton('p_aktualizuj_id',label='Zaktualizuj informacje')
-                                      ),
-                                      tabPanel(title = span(icon("fas fa-user-minus"), "Zwolnij"),
-                                               selectInput("zwolnij",label='Wybierz przewodnika do zwolnienia',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
-                                               textOutput("info_zwolnij"),
-                                               actionButton(inputId = "zwolnij_button", label = "Zwolnij")
-                                      ),
-                                      tabPanel(title = span(icon("fas fa-user-plus"), "Zatrudnij"),
-                                               textInput('p_imie_input',label="Imię"),
-                                               textInput('p_nazwisko_input',label='Nazwisko'),
-                                               textInput('p_telefon_input',label='Telefon'),
-                                               actionButton('zatrudnij',label='Zatrudnij')
-                                      )
+                                       width = NULL,
+                                       side = "right",
+                                       tabPanel(title = span(icon("fas fa-calendar-plus"),"Zleć wycieczkę przewodnikowi"),
+                                                selectInput("p_zlec_wycieczke_select",label='Wybierz przewodnika',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
+                                                h4("Wycieczki możliwe do zlecenia - bez kolizji w terminach z innymi wycieczkami tego przewodnika:"),
+                                                selectInput("w_zlec_wycieczke_select",label='Wybierz wycieczkę',
+                                                            choices=dbGetQuery(con,"SELECT wycieczka_id FROM wycieczki;")$wycieczka_id)
+                                                # choices = (DT::dataTableOutput(outputId = "wycieczki_do_zlecania"))$wycieczka_id)
+                                                ,
+                                                actionButton('p_zlec_wycieczke_button',label='Zleć wycieczkę przewodnikowi')
+                                       ),
+                                       tabPanel(title = span(icon("fas fa-user-edit"),"Zaktualizuj informacje"),
+                                                solidHeader = TRUE,
+                                                selectInput("przewodnik_do_akt_select",label='Wybierz przewodnika',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
+                                                textInput('p_akt_imie_input',label="Imię"),
+                                                textInput('p_akt_nazwisko_input',label='Nazwisko'),
+                                                textInput('p_akt_telefon_input',label='Telefon'),
+                                                actionButton('p_aktualizuj_id',label='Zaktualizuj informacje')
+                                       ),
+                                       tabPanel(title = span(icon("fas fa-user-minus"), "Zwolnij"),
+                                                selectInput("zwolnij",label='Wybierz przewodnika do zwolnienia',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
+                                                textOutput("info_zwolnij"),
+                                                actionButton(inputId = "zwolnij_button", label = "Zwolnij")
+                                       ),
+                                       tabPanel(title = span(icon("fas fa-user-plus"), "Zatrudnij"),
+                                                textInput('p_imie_input',label="Imię"),
+                                                textInput('p_nazwisko_input',label='Nazwisko'),
+                                                textInput('p_telefon_input',label='Telefon'),
+                                                actionButton('zatrudnij',label='Zatrudnij')
+                                       )
 )
 
 
@@ -305,7 +323,7 @@ body = dashboardBody(
                    box_wyszukaj_uczestnikow
             )
     ),
-
+    
     # zakładki od ofert
     # zarządzanie ofertami
     tabItem(tabName = "zarzadzaj_oferty",
@@ -327,12 +345,7 @@ body = dashboardBody(
     ),
     # statystyki ofert
     tabItem(tabName = "statystyki_oferty",
-            column(6,
-                   box_najczestsze_docelowe,
-                   box_najbardziej_oblegane_docelowe
-            ),
-            column(6,
-                   box_statystyki_ofert
+            column(12, tabbox_statystyki_oferty
             )
     ),
     # zarządzanie wycieczkami 

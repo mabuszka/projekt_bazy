@@ -187,6 +187,11 @@ shinyServer<- function(input, output, session){
   #### UCZESTNICY KONIEC
   
   #### OFERTY
+  
+  ## przyciski do wybierania czy najczestszce cele czy najbardziej oblegane miejsca
+  observeEvent(input$najczestsze_sele_tab_select,{
+updateTabsetPanel(session, "najczestsze_cele_tabs", selected = input$najczestsze_sele_tab_select)
+  })
   ## najczestsze miejsca docelowe
   output$najczestsze_docelowe_tbl <- DT::renderDataTable(
     {tryCatch({dbGetQuery(con, "SELECT * FROM najczestsze_cele;")},
