@@ -117,7 +117,7 @@ FROM oferty o
 		ON (o.oferta_id = w.oferta_id)
 GROUP BY o.miejsce_wyjazdu
 ORDER BY SUM(w.liczba_uczestnikow) DESC
-LIMIT 5;
+LIMIT 10;
 
 
 

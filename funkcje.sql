@@ -509,3 +509,6 @@ $$ LANGUAGE 'plpgsql';
 -- '{"Mona", "Lisa",  "Niemcy", "Rycerska", "178", "Kwidzyn", "44-752","1963-06-7", "149700779", NULL}'
 
 -- SELECT wyszukaj_klienta('i', 'n', 'p', 'm', 'u', '1', '33-333', '888999777', '2000-09-09'::DATE, '12345678900')
+
+
+

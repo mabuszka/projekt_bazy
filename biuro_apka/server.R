@@ -3,6 +3,7 @@ library(shiny)
 library(DT)
 library(stringi)
 library(stringr)
+library(purrr)
 
 
 shinyServer<- function(input, output, session){
@@ -190,7 +191,7 @@ shinyServer<- function(input, output, session){
   
   ## przyciski do wybierania czy najczestszce cele czy najbardziej oblegane miejsca
   observeEvent(input$najczestsze_sele_tab_select,{
-updateTabsetPanel(session, "najczestsze_cele_tabs", selected = input$najczestsze_sele_tab_select)
+    updateTabsetPanel(session, "najczestsze_cele_tabs", selected = input$najczestsze_sele_tab_select)
   })
   ## najczestsze miejsca docelowe
   output$najczestsze_docelowe_tbl <- DT::renderDataTable(
@@ -236,9 +237,9 @@ updateTabsetPanel(session, "najczestsze_cele_tabs", selected = input$najczestsze
       sql <- "SELECT * FROM przewodnicy WHERE aktywny=FALSE;"
     }else{sql <- "SELECT * FROM przewodnicy;"}
     {tryCatch({dbGetQuery(con,sql)},
-                          error = function(e){
-                            return(data.frame())
-                          })
+              error = function(e){
+                return(data.frame())
+              })
     }}
   )
   
@@ -282,6 +283,9 @@ updateTabsetPanel(session, "najczestsze_cele_tabs", selected = input$najczestsze
       }
       if (str_detect(error_to_show, "DETAIL: ")){
         error_to_show <- str_split(error_to_show, "DETAIL: ")[[1]][1]
+      }
+      if (str_detect(error_to_show, "constraint")){
+        error_to_show <- "Błędne dane"
       }
       showModal(modalDialog(title = "Nie można zwolnić tego przewodnika", error_to_show, easyClose = TRUE, footer = NULL))
       
@@ -519,7 +523,7 @@ updateTabsetPanel(session, "najczestsze_cele_tabs", selected = input$najczestsze
   output$przegladaj_wycieczki_tbl <- DT::renderDataTable({
     sql<-paste0("SELECT * FROM wycieczki WHERE data_rozpoczecia>='",input$wyc_data_input[1],"'::DATE AND data_zakonczenia<='",input$wyc_data_input[2],"'::DATE;")
     if (input$wyc_oferta_select != 'all'){
-    sql<-paste0("SELECT * FROM wycieczki WHERE data_rozpoczecia>='",input$wyc_data_input[1],"'::DATE AND data_zakonczenia<='",input$wyc_data_input[2],"'::DATE AND oferta_id=",input$wyc_oferta_select,";")}
+      sql<-paste0("SELECT * FROM wycieczki WHERE data_rozpoczecia>='",input$wyc_data_input[1],"'::DATE AND data_zakonczenia<='",input$wyc_data_input[2],"'::DATE AND oferta_id=",input$wyc_oferta_select,";")}
     
     ####### coś nie działa z datą :/
     
@@ -559,7 +563,7 @@ updateTabsetPanel(session, "najczestsze_cele_tabs", selected = input$najczestsze
     
     })
   })
-
+  
   observeEvent(input$w_utworz, {
     data <- input$w_stworz_data_input
     id_o <- input$w_stworz_oferta_input
@@ -719,8 +723,8 @@ updateTabsetPanel(session, "najczestsze_cele_tabs", selected = input$najczestsze
   )
   
   output$selectedrow <- DT::renderDataTable({
-    selectedrowindex <<-     input$w_odwolaj_tbl_rows_selected[length(input$w_odwolaj_tbl_rows_selected)]
-    selectedrowindex <<- as.numeric(selectedrowindex)
+    selectedrowindex <- input$w_odwolaj_tbl_rows_selected[length(input$w_odwolaj_tbl_rows_selected)]
+    selectedrowindex <- as.numeric(selectedrowindex)
     selectedrow <- (w_odwolaj_tbl[selectedrowindex,])
     selectedrow
   })
@@ -739,6 +743,93 @@ updateTabsetPanel(session, "najczestsze_cele_tabs", selected = input$najczestsze
   })
   
   #### WYCIECZKI KONIEC
+  
+  #### ZAMOWIENIA START
+  ## update jakie wycieczki można wybrać
+  tryCatch({
+    wycieczki <- dbGetQuery(con, "SELECT wycieczka_id FROM wycieczki WHERE data_rozpoczecia > CURRENT_DATE ORDER BY wycieczka_id ASC;")
+    updateSelectInput(session, inputId = 'zamowienie_wycieczka',
+                      choices = wycieczki$wycieczka_id)
+    
+  }, error = function(e){}
+  )
+  ## update jakie są klasy zamowień
+  tryCatch({
+    klasy <- dbGetQuery(con, "SELECT klasa FROM klasy_ofert ORDER BY klasa ASC;")
+    updateSelectInput(session, inputId = 'zamowienie_klasa',
+                      choices = klasy$klasa)
+    
+  }, error = function(e){}
+  )
+  
+  
+  dane_ludzi_template <- reactive(c(t(sapply(c("Imię uczestnika ","Nazwisko uczestnika ", "Kraj zamieszkania uczestnika ", "Miasto zamieszkania uczestnika ", "Kod pocztowy uczestnika ", "Ulica zamieszkania uczestnika ", "Numer domu uczestnika ", "Data urodzenia uczestnika ", "PESEL uczestnika ", "Telefon uczestnika "),
+                                             function(x){ paste0(x,seq_len(input$ile_w_zamowieniu))} ))))
+  output$ludzie_w_zamowieniu <- renderUI({
+    map(dane_ludzi_template(), ~ textInput(.x, label = .x, value = isolate(input[[.x]])) %||% "")
+  })
+  
+  observeEvent(input$zatwierdz_dane,{
+    text <- list()
+    for (i in seq_len(input$ile_w_zamowieniu)){
+      if (!isTruthy(input[[paste("PESEL uczestnika", i)]])){
+        pesel <- "NULL"
+      }
+      else{
+        pesel <-paste0("\"",input[[paste("PESEL uczestnika", i)]], "\"")
+      }
+      text[i] <- paste0(paste0('{"',input[[paste("Imię uczestnika", i)]], '","',
+                               input[[paste("Nazwisko uczestnika", i)]],
+                               '","',input[[paste("Kraj zamieszkania uczestnika", i)]],
+                               '","',input[[paste("Miasto zamieszkania uczestnika", i)]],
+                               '","',input[[paste("Kod pocztowy uczestnika", i)]],
+                               '","',input[[paste("Ulica zamieszkania uczestnika", i)]],
+                               '","',input[[paste("Numer domu uczestnika", i)]],
+                               '","',input[[paste("Data urodzenia uczestnika", i)]],
+                               '",',pesel,
+                               ',"',input[[paste("Telefon uczestnika", i)]],
+                               '"}' ))
+      
+    }
+    # output$dane_ludzi <- renderText(str_c("'",unlist(text),"'", collapse = "' , '"))
+    # 
+    # output$dane_ludzi_w_zamowieniu <- renderUI({
+    #   textOutput("dane_ludzi") 
+    # })
+    
+    tryCatch({
+      sql <- paste0("SELECT dodaj_zamowienie_z_klientami (",input$zamowienie_wycieczka,",",input$zamowienie_klasa,",'",input$zamowienie_platnosc ,"',",str_c("'",unlist(text),"'", collapse = " , ") ,");" )
+      res <- dbSendQuery(con, sql)
+      if (dbHasCompleted(res)){
+        showNotification("Pomyślnie złożono zamówienie",type = "message")
+      }
+      dbClearResult(res)
+    },
+    error = function(e){
+      showModal(modalDialog(title = "Błąd dodawania", e ,easyClose = TRUE,footer = NULL))
+    })
+    ## update tabeli z uczestnikami
+    output$uczestnicy_tbl <- DT::renderDataTable(
+      {tryCatch({dbGetQuery(con,"SELECT * FROM uczestnicy;")},
+                error = function(e){
+                  return(data.frame())
+                })
+      }, options = list(scrollX=TRUE)
+    )
+    # update inputu do modyfikacji uczestników
+    uczestnicy <- dbGetQuery(con, "SELECT uczestnik_id FROM uczestnicy ORDER BY uczestnik_id ASC;")
+    updateSelectInput(session, "um_id_input", choices = uczestnicy$uczestnik_id)
+    
+    
+    
+  }
+  )
+  
+  
+  
+  
+  #### ZAMOWIENIA KONIEC
+  
   
   #### START
   

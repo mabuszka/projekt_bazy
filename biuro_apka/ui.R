@@ -181,7 +181,6 @@ tabbox_statystyki_oferty <- tabBox(width = NULL,
 
 
 
-
 ############ zakładka WYCIECZKI
 
 # dodać aktualizacje
@@ -301,6 +300,25 @@ tabbox_przewodnicy_zarzadzaj <- tabBox(title = span(icon("fas fa-cog"), "Zarząd
                                        )
 )
 
+#### zakładka ZAMOWIENIA
+
+box_zloz_mod_zamowienie <- box(id = "box_zloz_mod_zamowienie",width = NULL,
+                               title = "Złóż zamówienie",
+                               solidHeader = TRUE,
+                               status = "primary",
+                               numericInput("ile_w_zamowieniu", "Na ile osób składane jest zamówienie?", value = 1, min = 1),
+                               selectInput("zamowienie_wycieczka", "Wybierz id wycieczki", choices = NULL),
+                               selectInput("zamowienie_klasa", "Wybierz klasę zamówienia", choices = NULL),
+                               selectInput("zamowienie_platnosc", "Wybierz sposób płatności", choices = c('karta','gotowka','przelew internetowy','przelew tradycyjny','paypal','voucher')),
+                               uiOutput("ludzie_w_zamowieniu"),
+                               actionButton("zatwierdz_dane", span("Złóż zamówienie", icon("fas fa-check")))
+                               # ,
+                               # uiOutput("dane_ludzi_w_zamowieniu")
+)
+
+
+### zamowienia koniec
+
 
 
 body = dashboardBody(
@@ -361,20 +379,19 @@ body = dashboardBody(
     # zakładki do zamówień
     #przeglądanie zamówień
     tabItem(tabName = "przegladaj_zamowienia",
-            box(width = NULL,
-                status = "primary",
-                title = "cos",
-                solidHeader = TRUE
-                
+            column(6,
+                   box(width = NULL,
+                       status = "primary",
+                       title = "cos",
+                       solidHeader = TRUE
+                   )
+                   
             )
     ),
     #modyfikacja zamówień
     tabItem(tabName = "modyfikuj_zamowienie",
-            box(width = NULL,
-                status = "primary",
-                title = "cos",
-                solidHeader = TRUE
-                
+            column(6,
+                   box_zloz_mod_zamowienie
             )
     ),
     # zakładka do przewodników
