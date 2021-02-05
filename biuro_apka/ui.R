@@ -128,6 +128,32 @@ box_wyszukaj_uczestnikow <- box(width = NULL,
 
 ############ zakładka OFERTY
 
+####zarządzaj
+tabbox_zarzadzaj_oferty <- tabBox(width = NULL,
+                                  title = span(icon("fas fa-edit"), "Zarządzaj ofertami"),
+                                  side = 'right',
+                                  tabPanel(title=span(icon("fas fa-file-plus"),"Dodaj ofertę"),
+                                           textInput("o_utworz_miasto","Miejsce wyjazdu"),
+                                           numericInput("o_utworz_limit","limit ilości uczestników"),
+                                           numericInput("o_utworz_dni","Długość wyjazdu w dniach"),
+                                           numericInput("o_utworz_cena","Cena podstawowa"),
+                                           textInput("o_utworz_opis","Opis"),
+                                           numericInput("o_utworz_foto","Zdjęcie"),
+                                           actionButton("o_utworz_button","Utwórz ofertę")
+                                  ),
+                                  tabPanel(title=span(icon("fas fa-file-edit"),"Modyfikuj ofertę"),
+                                           selectInput("o_modyfikuj_select",label="Wybierz ofertę do modyfikacji",choices=NULL),
+                                           textInput("o_modyfikuj_opis","Nowy opis"),
+                                           numericInput("o_modyfikuj_foto","Nowe zdjęcie"),
+                                           actionButton("o_modyfikuj_button","Edytuj ofertę")
+                                  ),
+                                  tabPanel(title=span(icon("fas fa-file-minus"),"Usuń ofertę"),
+                                           selectInput("o_usun_select",label="Wybierz ofertę do modyfikacji",choices=NULL),
+                                           textOutput("o_usun_text"),
+                                           actionButton("o_usun_button","Edytuj ofertę")
+                                  )
+)
+
 ####statystyki
 tabbox_statystyki_oferty <- tabBox(width = NULL,
                                    title = span( icon("fas fa-chart-bar"), "Statystyki ofert"),
@@ -330,11 +356,7 @@ body = dashboardBody(
     # zakładki od ofert
     # zarządzanie ofertami
     tabItem(tabName = "zarzadzaj_oferty",
-            box(width = NULL,
-                status = "primary",
-                title = "cos",
-                solidHeader = TRUE
-                
+            tabbox_zarzadzaj_oferty
             )
     ),
     # przeglądanie ofert
