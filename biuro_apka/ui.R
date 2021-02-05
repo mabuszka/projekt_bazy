@@ -134,17 +134,17 @@ tabbox_zarzadzaj_oferty <- tabBox(width = NULL,
                                   side = 'right',
                                   tabPanel(title=span(icon("fas fa-file-plus"),"Dodaj ofertę"),
                                            textInput("o_utworz_miasto","Miejsce wyjazdu"),
-                                           numericInput("o_utworz_limit","limit ilości uczestników"),
-                                           numericInput("o_utworz_dni","Długość wyjazdu w dniach"),
-                                           numericInput("o_utworz_cena","Cena podstawowa"),
+                                           numericInput("o_utworz_limit","limit ilości uczestników",value=0),
+                                           numericInput("o_utworz_dni","Długość wyjazdu w dniach",value=0),
+                                           numericInput("o_utworz_cena","Cena podstawowa",value=0),
                                            textInput("o_utworz_opis","Opis"),
-                                           numericInput("o_utworz_foto","Zdjęcie"),
+                                           textInput("o_utworz_foto","Zdjęcie"),
                                            actionButton("o_utworz_button","Utwórz ofertę")
                                   ),
                                   tabPanel(title=span(icon("fas fa-file-edit"),"Modyfikuj ofertę"),
                                            selectInput("o_modyfikuj_select",label="Wybierz ofertę do modyfikacji",choices=NULL),
                                            textInput("o_modyfikuj_opis","Nowy opis"),
-                                           numericInput("o_modyfikuj_foto","Nowe zdjęcie"),
+                                           textInput("o_modyfikuj_foto","Nowe zdjęcie"),
                                            actionButton("o_modyfikuj_button","Edytuj ofertę")
                                   ),
                                   tabPanel(title=span(icon("fas fa-file-minus"),"Usuń ofertę"),
@@ -357,7 +357,7 @@ body = dashboardBody(
     # zarządzanie ofertami
     tabItem(tabName = "zarzadzaj_oferty",
             tabbox_zarzadzaj_oferty
-            )
+            
     ),
     # przeglądanie ofert
     tabItem(tabName = "przegladaj_oferty",
