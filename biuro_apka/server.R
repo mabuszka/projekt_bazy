@@ -213,41 +213,42 @@ shinyServer<- function(input, output, session){
               })
     }, options = list(scrollX = TRUE))
   
-  #zarządzanie
   
-  # observeEvent("o_utworz_button", {
-  #   miejsce<-input$o_utworz_miasto
-  #   limit<-input$o_utworz_limit
-  #   dni<-input$o_utworz_dni
-  #   cena<-input$o_utworz_cena
-  #   opis<-input$o_utworz_opis
-  #   foto<-input$o_utworz_foto
-  #   sql <- paste0("INSERT INTO oferty(miejsce_wyjazdu,limit_uczestnikow,dlugosc_wyjazdu,cena_podstawowa,opis_oferty,zdjecie) VALUES('",miejsce,"'",limit,dni,cena,"'",opis,"'",foto,");")
-  #   tryCatch({res <-dbGetQuery(con, sql)
-  #   }, error = function(e){
-  #     error_to_show <- str_split(e, pattern = "ERROR: ")[[1]][2]
-  #     if (str_detect(error_to_show, "CONTEXT: ")){
-  #       error_to_show <- str_split(error_to_show, "CONTEXT: ")[[1]][1]
-  #     }
-  #     if (str_detect(error_to_show, "DETAIL: ")){
-  #       error_to_show <- str_split(error_to_show, "DETAIL: ")[[1]][1]
-  #     }
-  #     if (str_detect(error_to_show, "constraint")){
-  #       error_to_show <- "Błędne dane"
-  #     }
-  #     showModal(modalDialog(title = "Nie można utworzyć takiej oferty", error_to_show, easyClose = TRUE, footer = NULL))
-  #   }
-  #   )
-  # #update ofert do utworzenia wycieczki
-  # tryCatch({
-  #   oferty <- dbGetQuery(con,'SELECT oferta_id FROM oferty;')
-  #   updateSelectInput(session, inputId = 'w_stworz_oferta_input',
-  #                     choices = oferty$oferta_id)
-  #   
-  # }, error = function(e){}
-  # )
-  # })
+  ##### zarządzanie
 
+  observeEvent("o_utworz_button", {
+   miejsce<-input$o_utworz_miasto
+   limit<-input$o_utworz_limit
+   dni<-input$o_utworz_dni
+   cena<-input$o_utworz_cena
+   opis<-input$o_utworz_opis
+   foto<-input$o_utworz_foto
+   sql <- paste0("INSERT INTO oferty(miejsce_wyjazdu,limit_uczestnikow,dlugosc_wyjazdu,cena_podstawowa,opis_oferty,zdjecie) VALUES('",miejsce,"',",limit,",",dni,",",cena,",'",opis,"','",foto,"');")
+   tryCatch({res <-dbGetQuery(con, sql)
+   }, error = function(e){
+     error_to_show <- str_split(e, pattern = "ERROR: ")[[1]][2]
+     if (str_detect(error_to_show, "CONTEXT: ")){
+       error_to_show <- str_split(error_to_show, "CONTEXT: ")[[1]][1]
+     }
+     if (str_detect(error_to_show, "DETAIL: ")){
+       error_to_show <- str_split(error_to_show, "DETAIL: ")[[1]][1]
+     }
+     if (str_detect(error_to_show, "constraint")){
+       error_to_show <- "Błędne dane"
+     }
+     showModal(modalDialog(title = "Nie można utworzyć takiej oferty", error_to_show, easyClose = TRUE, footer = NULL))
+   }
+   )
+  #update ofert do utworzenia wycieczki
+  tryCatch({
+   oferty <- dbGetQuery(con,'SELECT oferta_id FROM oferty;')
+   updateSelectInput(session, inputId = 'w_stworz_oferta_input',
+                     choices = oferty$oferta_id)
+    }, error = function(e){}
+  )
+  })
+  
+  
   tryCatch({
     oferty_do_edycji <- dbGetQuery(con, "SELECT oferta_id FROM oferty ORDER BY oferta_id ASC;")
     updateSelectInput(session, inputId = "o_modyfikuj_select",
