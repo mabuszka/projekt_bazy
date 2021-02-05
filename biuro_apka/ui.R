@@ -73,7 +73,7 @@ tabbox_uczestnicy_mod <- tabBox(title = span(icon("fas fa-clipboard"),"Zarządza
                                          textInput(inputId = "ud_nr_tel_input", label = "Wpisz numer telefonu"),
                                          
                                          
-                                         actionButton(inputId = "uczestnik_dodaj_id", label = "Dodaj uczestnika")
+                                         actionButton(inputId = "uczestnik_dodaj_id", label = "Dodaj uczestnika", icon = icon("fas fa-plus"))
                                 ),
                                 tabPanel(width = NULL,
                                          title = span(icon("fas fa-edit"),"Modyfikuj"),
@@ -93,7 +93,7 @@ tabbox_uczestnicy_mod <- tabBox(title = span(icon("fas fa-clipboard"),"Zarządza
                                          textInput(inputId = "um_nr_tel_input", label = "Wpisz numer telefonu"),
                                          
                                          
-                                         actionButton(inputId = "uczestnik_modyfikuj_id", label = "Zmodyfikuj uczestnika")
+                                         actionButton(inputId = "uczestnik_modyfikuj_id", label = "Zmodyfikuj uczestnika", icon = icon("fas fa-edit"))
                                 )
 )
 
@@ -118,11 +118,11 @@ tabbox_uczestnicy <- tabBox(width = NULL,
 )
 
 ## NIESKOŃCZONE box z wyszukiwaniem i wyświetlaniem tych wyszukanych uczestników
-box_wyszukaj_uczestnikow <- box(width = NULL,
-                                status = "primary",
-                                title = "Wyszukaj uczestników",
-                                solidHeader = TRUE   
-)
+# box_wyszukaj_uczestnikow <- box(width = NULL,
+#                                 status = "primary",
+#                                 title = "Wyszukaj uczestników",
+#                                 solidHeader = TRUE   
+# )
 
 
 
@@ -134,17 +134,29 @@ tabbox_zarzadzaj_oferty <- tabBox(width = NULL,
                                   side = 'right',
                                   tabPanel(title=span(icon("fas fa-file-plus"),"Dodaj ofertę"),
                                            textInput("o_utworz_miasto","Miejsce wyjazdu"),
+<<<<<<< HEAD
                                            numericInput("o_utworz_limit","limit ilości uczestników",value=0),
                                            numericInput("o_utworz_dni","Długość wyjazdu w dniach",value=0),
                                            numericInput("o_utworz_cena","Cena podstawowa",value=0),
                                            textInput("o_utworz_opis","Opis"),
                                            textInput("o_utworz_foto","Zdjęcie"),
+=======
+                                           numericInput("o_utworz_limit","limit ilości uczestników",value=20),
+                                           numericInput("o_utworz_dni","Długość wyjazdu w dniach",value=10),
+                                           numericInput("o_utworz_cena","Cena podstawowa",value=5000),
+                                           textInput("o_utworz_opis","Opis"),
+                                           numericInput("o_utworz_foto","Zdjęcie",value=0),
+>>>>>>> main
                                            actionButton("o_utworz_button","Utwórz ofertę")
                                   ),
                                   tabPanel(title=span(icon("fas fa-file-edit"),"Modyfikuj ofertę"),
                                            selectInput("o_modyfikuj_select",label="Wybierz ofertę do modyfikacji",choices=NULL),
                                            textInput("o_modyfikuj_opis","Nowy opis"),
+<<<<<<< HEAD
                                            textInput("o_modyfikuj_foto","Nowe zdjęcie"),
+=======
+                                           numericInput("o_modyfikuj_foto","Nowe zdjęcie",value=0),
+>>>>>>> main
                                            actionButton("o_modyfikuj_button","Edytuj ofertę")
                                   ),
                                   tabPanel(title=span(icon("fas fa-file-minus"),"Usuń ofertę"),
@@ -181,24 +193,29 @@ tabbox_statystyki_oferty <- tabBox(width = NULL,
                                             )
                                    ))
 
-# box_najczestsze_docelowe <- box(width = NULL,
-#                                 status = "primary",
-#                                 title = "Najczęściej odwiedzane miejsca wyjazdów",
-#                                 solidHeader = TRUE,
-#                                 collapsible = TRUE,
-#                                 "Miasta, do których pojechało najwięcej wycieczek",
-#                                 DT::dataTableOutput(outputId = "najczestsze_docelowe_tbl")
-# )
-# 
-# box_najbardziej_oblegane_docelowe <- box(width = NULL,
-#                                          status = "primary",
-#                                          title = "Najczęściej odwiedzane miejsca wyjazdów",
-#                                          solidHeader = TRUE,
-#                                          collapsible = TRUE,
-#                                          "Miasta, które odwiedziło najwięcej uczestników",
-#                                          DT::dataTableOutput(outputId = "najbardziej_oblegane_tbl")
-# )
-
+### przeglądanie ofert
+tabbox_przegladaj_oferty <- tabBox(title = span(icon("fas fa-compass"), "Oferty"),
+                                   width = NULL,
+                                   side = "right",
+                                   tabPanel(
+                                     title = span(icon("fas fa-search"),"Wyszukaj"),
+                                     fluidPage(column(4,
+                                                      selectInput("tagi_ofert_input", label = "Wybierz tagi",
+                                                                  choices = NULL, multiple = TRUE),
+                                                      checkboxInput("tagi_czy_wszystkie", label = "Wyszukaj oferty z dowolnym z wybranych tagów"),
+                                                      selectInput("atrakcje_ofert_input", label = "Wybierz atrakcje", choices = NULL, multiple = TRUE),
+                                               checkboxInput("atrakcje_czy_wszystkie", label = "Wyszukaj oferty z dowolnym z wybranych atrakcji"),
+                                               sliderInput("zakres_dni_ofert_input", label = "Wybierz zakres długości wyjazdu",
+                                                           min =2,max = 30, value = c(2, 5) ),
+                                               actionButton("wyszukaj_oferte", label = "Wyszukaj", icon = icon("fas fa-search"))
+                                               ),
+                                               column(8,
+                                                      textOutput("test"),
+                                                      DT::dataTableOutput("wyszukane_oferty")
+                                               )
+                                     )
+                                   )
+)
 
 
 ############ zakładka WYCIECZKI
@@ -211,20 +228,20 @@ tabbox_wycieczki_zarzadzaj <- tabBox(title = span(icon("fas fa-cog"), "Zarządza
                                               dateInput('w_stworz_data_input',label='Początek wycieczki'),
                                               selectInput(inputId = "w_stworz_oferta_input", label = "Wybierz ofertę", choices = dbGetQuery(con,'SELECT oferta_id FROM oferty;')$oferta_id),
                                               textOutput("w_info_oferta"),
-                                              actionButton('w_utworz',label='Utwórz wycieczkę')
+                                              actionButton('w_utworz',label='Utwórz wycieczkę', icon = icon("fas fa-plus"))
                                      ),
                                      
                                      tabPanel(title = span(icon("fas fa-edit"),"Modyfikuj"),
                                               selectInput(inputId = "w_modyfikuj_select", label = "Wybierz wycieczkę", choices = NULL),
                                               textOutput("w_info_modyfikuj"),
                                               dateInput('w_modyfikuj_data_input',label='Nowy początek wycieczki'),
-                                              actionButton('w_modyfikuj',label='Modyfikuj wycieczkę')
+                                              actionButton('w_modyfikuj',label='Modyfikuj wycieczkę', icon = icon("fas fa-edit"))
                                      ),
                                      
                                      tabPanel(title = span(icon("fas fa-calendar-minus"),"Usuń"),
                                               selectInput(inputId = "w_usun_select", label = "Wybierz wycieczkę do usunięcia", choices = NULL),
                                               textOutput("w_info_usun"),
-                                              actionButton('w_usun',label='Usuń wycieczkę')
+                                              actionButton('w_usun',label='Usuń wycieczkę', icon = icon("fas fa-minus"))
                                      )
 )
 
@@ -238,12 +255,12 @@ tabbox_wycieczki_przewodnictwa <- tabBox(title = span(icon("fas fa-user-cog"), "
                                                               # choices=dbGetQuery(con,"SELECT wycieczka_id FROM wycieczki;")$wycieczka_id)
                                                               choices = (DT::dataTableOutput(outputId = "przewodnicy_do_zlecania"))$przewodnik_id)
                                                   ,
-                                                  actionButton('w_zlec_wycieczke_button',label='Zleć wycieczkę przewodnikowi')
+                                                  actionButton('w_zlec_wycieczke_button',label='Zleć wycieczkę przewodnikowi', icon = icon("fas fa-check"))
                                          ),
                                          
                                          tabPanel(title = span(icon("fas fa-calendar-minus"),"Odwołaj przewodnika z wycieczki"),
                                                   DT::dataTableOutput('w_odwolaj_tbl'),
-                                                  actionButton('w_odwolaj',label='Odwołaj przewodnika')
+                                                  actionButton('w_odwolaj',label='Odwołaj przewodnika', icon = icon("fas fa-times"))
                                          )
 )
 
@@ -322,13 +339,16 @@ box_zloz_mod_zamowienie <- box(id = "box_zloz_mod_zamowienie",width = NULL,
                                selectInput("zamowienie_klasa", "Wybierz klasę zamówienia", choices = NULL),
                                selectInput("zamowienie_platnosc", "Wybierz sposób płatności", choices = c('karta','gotowka','przelew internetowy','przelew tradycyjny','paypal','voucher')),
                                uiOutput("ludzie_w_zamowieniu"),
-                               actionButton("zatwierdz_dane", span("Złóż zamówienie", icon("fas fa-check")))
+                               actionButton("zatwierdz_dane", label = "Złóż zamówienie", icon = icon("fas fa-check"))
                                # ,
                                # uiOutput("dane_ludzi_w_zamowieniu")
 )
 
 
 ### zamowienia koniec
+
+
+
 
 
 
@@ -347,9 +367,9 @@ body = dashboardBody(
                    tabbox_uczestnicy_mod
             ),
             column(8,
-                   # box_tabela_uczestnicy ,
-                   tabbox_uczestnicy,
-                   box_wyszukaj_uczestnikow
+                   tabbox_uczestnicy
+                   # ,
+                   # box_wyszukaj_uczestnikow
             )
     ),
     
@@ -361,12 +381,7 @@ body = dashboardBody(
     ),
     # przeglądanie ofert
     tabItem(tabName = "przegladaj_oferty",
-            box(width = NULL,
-                status = "primary",
-                title = "cos",
-                solidHeader = TRUE
-                
-            )
+            tabbox_przegladaj_oferty
     ),
     # statystyki ofert
     tabItem(tabName = "statystyki_oferty",
@@ -401,7 +416,7 @@ body = dashboardBody(
             )
     )
   )
-)
+
 
 dashboardPage(
   skin = "blue",

@@ -218,6 +218,7 @@ shinyServer<- function(input, output, session){
               })
     }, options = list(scrollX = TRUE))
   
+<<<<<<< HEAD
   #zarządzanie
   
   # observeEvent("o_utworz_button", {
@@ -312,7 +313,157 @@ shinyServer<- function(input, output, session){
   #   }
   #   )
   # })
+=======
   
+  ## wyszukiwanie i wyświetlanie ofert
+  output$wyszukane_oferty <- DT::renderDataTable(tryCatch({
+    dbGetQuery(con, "SELECT * from oferty;")
+  }, error = function(e){
+    return(data.frame())
+  }), options = list(pageLength = 5))
+
+  ## zapełnienie wybierania tagów
+  tryCatch({
+    tagi <- dbGetQuery(con, "SELECT tag FROM tagi;")$tag
+    updateSelectInput(session, "tagi_ofert_input", choices = tagi )
+  }, error = function(e){}
+  )
+  
+  ## zapełnienie wybierania atrakcji
+  tryCatch({
+    atrakcje <- dbGetQuery(con, "SELECT atrakcja FROM atrakcje;;")$atrakcja
+    updateSelectInput(session, "atrakcje_ofert_input", choices = atrakcje )
+  }, error = function(e){}
+  )
+  
+  # wyszukiwanie ofert
+  observeEvent(input$wyszukaj_oferte,{
+    tryCatch({
+      atrakcje <- str_c("'",input$atrakcje_ofert_input, "'", collapse = ",")
+      tagi <- str_c("'",input$tagi_ofert_input, "'", collapse = ",")
+      output$test <- renderText(tagi)
+      if (input$tagi_czy_wszystkie){
+        fcja_tagi <- "oferty_z_tagami"
+      }
+      else{
+        fcja_tagi <- "oferty_ze_wszystkimi_tagami"
+      }
+      if (input$atrakcje_czy_wszystkie){
+        fcja_atrakcje <- "oferty_z_atrakcjami"
+      }
+      else {
+        fcja_atrakcje <- "oferty_ze_wszystkimi_atrakcjami"
+      }
+      sql <- paste0("SELECT o.oferta_id, o.miejsce_wyjazdu,a.atrakcje, t.tagi, o.dlugosc_wyjazdu,o.limit_uczestnikow, o.cena_podstawowa FROM oferty o JOIN (SELECT * FROM ",
+                    fcja_atrakcje ,"(", atrakcje,")) AS a ON (a.oferta_id = o.oferta_id) JOIN (SELECT * FROM ",
+                    fcja_tagi, "(", tagi,")) AS t ON (o.oferta_id = t.oferta_id)", "WHERE o.dlugosc_wyjazdu BETWEEN ",
+                    input$zakres_dni_ofert_input[1], " AND ", input$zakres_dni_ofert_input[2],";")
+      output$wyszukane_oferty <- renderDataTable({
+        dbGetQuery(con, sql)
+      })
+    })
+  })
+>>>>>>> main
+  
+  # select o.oferta_id, o.miejsce_wyjazdu,a.atrakcje , t.tagi,o.limit_uczestnikow, o.dlugosc_wyjazdu, o.cena_podstawowa from oferty o join (SELECT * FROM oferty_ze_wszystkimi_atrakcjami('kregle')) as a on (a.oferta_id = o.oferta_id) join (SELECT * FROM oferty_ze_wszystkimi_tagami('morze')) as t on (o.oferta_id = t.oferta_id);
+    
+  #zarządzanie
+  
+  # observeEvent("o_utworz_button", {
+  #   miejsce<-input$o_utworz_miasto
+  #   limit<-input$o_utworz_limit
+  #   dni<-input$o_utworz_dni
+  #   cena<-input$o_utworz_cena
+  #   opis<-input$o_utworz_opis
+  #   foto<-input$o_utworz_foto
+  #   sql <- paste0("INSERT INTO oferty(miejsce_wyjazdu,limit_uczestnikow,dlugosc_wyjazdu,cena_podstawowa,opis_oferty,zdjecie) VALUES('",miejsce,"'",limit,dni,cena,"'",opis,"'",foto,");")
+  #   tryCatch({res <-dbGetQuery(con, sql)
+  #   }, error = function(e){
+  #     error_to_show <- str_split(e, pattern = "ERROR: ")[[1]][2]
+  #     if (str_detect(error_to_show, "CONTEXT: ")){
+  #       error_to_show <- str_split(error_to_show, "CONTEXT: ")[[1]][1]
+  #     }
+  #     if (str_detect(error_to_show, "DETAIL: ")){
+  #       error_to_show <- str_split(error_to_show, "DETAIL: ")[[1]][1]
+  #     }
+  #     if (str_detect(error_to_show, "constraint")){
+  #       error_to_show <- "Błędne dane"
+  #     }
+  #     showModal(modalDialog(title = "Nie można utworzyć takiej oferty", error_to_show, easyClose = TRUE, footer = NULL))
+  # 
+  #   }
+  #   )
+  # })
+  
+  # 
+  # tryCatch({
+  #   oferty_do_edycji <- dbGetQuery(con, "SELECT oferta_id FROM oferty ORDER BY oferta_id ASC;")
+  #   updateSelectInput(session, inputId = "o_modyfikuj_select",
+  #                     choices = oferty_do_edycji$oferty_id)
+  # 
+  # }, error = function(e){return(data.frame(oferta_id = c(1)))}
+  # 
+  # observeEvent("o_modyfikuj_button",{
+  #   id<-input$o_modyfikuj_select
+  #   opis<-input$o_modyfikuj_opis
+  #   foto<-input$o_modyfikuj_foto
+  #   sql <- paste0("UPDATE oferty SET opis_oferty='",opis,"',zdjecie=",foto," WHERE oferta_id=",id,");")
+  #   tryCatch({res <-dbGetQuery(con, sql)
+  #   }, error = function(e){
+  #     error_to_show <- str_split(e, pattern = "ERROR: ")[[1]][2]
+  #     if (str_detect(error_to_show, "CONTEXT: ")){
+  #       error_to_show <- str_split(error_to_show, "CONTEXT: ")[[1]][1]
+  #     }
+  #     if (str_detect(error_to_show, "DETAIL: ")){
+  #       error_to_show <- str_split(error_to_show, "DETAIL: ")[[1]][1]
+  #     }
+  #     if (str_detect(error_to_show, "constraint")){
+  #       error_to_show <- "Błędne dane"
+  #     }
+  #     showModal(modalDialog(title = "Nie można edytować oferty", error_to_show, easyClose = TRUE, footer = NULL))
+  # 
+  #   }
+  #   )
+  # })
+  # 
+  # )
+  # tryCatch({
+  #   oferty_do_usuniecia <- dbGetQuery(con, "SELECT oferta_id FROM oferty ORDER BY oferta_id ASC;")
+  #   updateSelectInput(session, inputId = "o_usun_select",
+  #                     choices = oferty_do_usuniecia$oferty_id)
+  # }, error = function(e){return(data.frame(oferta_id = c(1)))}
+  # )
+  # 
+  # output$o_usun_text <- renderText({
+  #   id<-input$o_usun_select
+  #   tryCatch({res <- dbGetQuery(con, paste0("SELECT oferta_id,miejsce_wyjazdu,limit_uczestnikow,dlugosc_wyjazdu,cena_podstawowa FROM oferty WHERE oferta_id=",id,";"))
+  #   str_c(c("ID:", ", Miejsce wyjazdu:", ", Limit uczestników:", ", Długość wyjazdu:", ", Cena podstawowa:"),unname(res), sep = " ", collapse = "")
+  # 
+  #   })
+  # })
+  # 
+  # 
+  # observeEvent("o_usun_button",{
+  #   id<-input$o_usun_select
+  #   sql <- paste0("DELETE FROM oferty WHERE oferta_id=",id,";")
+  #   tryCatch({res <-dbGetQuery(con, sql)
+  #   }, error = function(e){
+  #     error_to_show <- str_split(e, pattern = "ERROR: ")[[1]][2]
+  #     if (str_detect(error_to_show, "CONTEXT: ")){
+  #       error_to_show <- str_split(error_to_show, "CONTEXT: ")[[1]][1]
+  #     }
+  #     if (str_detect(error_to_show, "DETAIL: ")){
+  #       error_to_show <- str_split(error_to_show, "DETAIL: ")[[1]][1]
+  #     }
+  #     if (str_detect(error_to_show, "constraint")){
+  #       error_to_show <- "Błędne dane"
+  #     }
+  #     showModal(modalDialog(title = "Nie można usunąć tej oferty", error_to_show, easyClose = TRUE, footer = NULL))
+  # 
+  #   }
+  #   )
+  # })
+
   #### OFERTY KONIEC
   
   
