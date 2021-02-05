@@ -218,6 +218,58 @@ shinyServer<- function(input, output, session){
               })
     }, options = list(scrollX = TRUE))
   
+  
+  ## wyszukiwanie i wyświetlanie ofert
+  output$wyszukane_oferty <- DT::renderDataTable(tryCatch({
+    dbGetQuery(con, "SELECT * from oferty;")
+  }, error = function(e){
+    return(data.frame())
+  }), options = list(pageLength = 5))
+
+  ## zapełnienie wybierania tagów
+  tryCatch({
+    tagi <- dbGetQuery(con, "SELECT tag FROM tagi;")$tag
+    updateSelectInput(session, "tagi_ofert_input", choices = tagi )
+  }, error = function(e){}
+  )
+  
+  ## zapełnienie wybierania atrakcji
+  tryCatch({
+    atrakcje <- dbGetQuery(con, "SELECT atrakcja FROM atrakcje;;")$atrakcja
+    updateSelectInput(session, "atrakcje_ofert_input", choices = atrakcje )
+  }, error = function(e){}
+  )
+  
+  # wyszukiwanie ofert
+  observeEvent(input$wyszukaj_oferte,{
+    tryCatch({
+      atrakcje <- str_c("'",input$atrakcje_ofert_input, "'", collapse = ",")
+      tagi <- str_c("'",input$tagi_ofert_input, "'", collapse = ",")
+      output$test <- renderText(tagi)
+      if (input$tagi_czy_wszystkie){
+        fcja_tagi <- "oferty_z_tagami"
+      }
+      else{
+        fcja_tagi <- "oferty_ze_wszystkimi_tagami"
+      }
+      if (input$atrakcje_czy_wszystkie){
+        fcja_atrakcje <- "oferty_z_atrakcjami"
+      }
+      else {
+        fcja_atrakcje <- "oferty_ze_wszystkimi_atrakcjami"
+      }
+      sql <- paste0("SELECT o.oferta_id, o.miejsce_wyjazdu,a.atrakcje, t.tagi, o.dlugosc_wyjazdu,o.limit_uczestnikow, o.cena_podstawowa FROM oferty o JOIN (SELECT * FROM ",
+                    fcja_atrakcje ,"(", atrakcje,")) AS a ON (a.oferta_id = o.oferta_id) JOIN (SELECT * FROM ",
+                    fcja_tagi, "(", tagi,")) AS t ON (o.oferta_id = t.oferta_id)", "WHERE o.dlugosc_wyjazdu BETWEEN ",
+                    input$zakres_dni_ofert_input[1], " AND ", input$zakres_dni_ofert_input[2],";")
+      output$wyszukane_oferty <- renderDataTable({
+        dbGetQuery(con, sql)
+      })
+    })
+  })
+  
+  # select o.oferta_id, o.miejsce_wyjazdu,a.atrakcje , t.tagi,o.limit_uczestnikow, o.dlugosc_wyjazdu, o.cena_podstawowa from oferty o join (SELECT * FROM oferty_ze_wszystkimi_atrakcjami('kregle')) as a on (a.oferta_id = o.oferta_id) join (SELECT * FROM oferty_ze_wszystkimi_tagami('morze')) as t on (o.oferta_id = t.oferta_id);
+    
   #### OFERTY KONIEC
   
   
