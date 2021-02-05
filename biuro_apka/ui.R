@@ -25,8 +25,8 @@ sidebar = dashboardSidebar(
     menuItem("Klienci i uczestnicy", tabName = "uczestnicy_tab", icon = icon("fas fa-user-friends")
     ),
     menuItem("Zamówienia", tabName = "zamowienia_tab", icon = icon("fas fa-list-alt")),
-
-
+    
+    
     menuItem("Przewodnicy", tabName = "przewodnicy_tab", icon = icon("fas fa-address-card")
     )
   )
@@ -166,16 +166,25 @@ tabbox_przegladaj_oferty <- tabBox(title = span(icon("fas fa-compass"), "Oferty"
                                                                   choices = NULL, multiple = TRUE),
                                                       checkboxInput("tagi_czy_wszystkie", label = "Wyszukaj oferty z dowolnym z wybranych tagów"),
                                                       selectInput("atrakcje_ofert_input", label = "Wybierz atrakcje", choices = NULL, multiple = TRUE),
-                                               checkboxInput("atrakcje_czy_wszystkie", label = "Wyszukaj oferty z dowolnym z wybranych atrakcji"),
-                                               sliderInput("zakres_dni_ofert_input", label = "Wybierz zakres długości wyjazdu",
-                                                           min =2,max = 30, value = c(2, 5) ),
-                                               actionButton("wyszukaj_oferte", label = "Wyszukaj", icon = icon("fas fa-search"))
-                                               ),
-                                               column(8,
-                                                      textOutput("test"),
-                                                      DT::dataTableOutput("wyszukane_oferty")
-                                               )
+                                                      checkboxInput("atrakcje_czy_wszystkie", label = "Wyszukaj oferty z dowolnym z wybranych atrakcji"),
+                                                      sliderInput("zakres_dni_ofert_input", label = "Wybierz zakres długości wyjazdu",
+                                                                  min =2,max = 30, value = c(2, 5) ),
+                                                      actionButton("wyszukaj_oferte", label = "Wyszukaj", icon = icon("fas fa-search"))
+                                     ),
+                                     column(8,
+                                            textOutput("test"),
+                                            DT::dataTableOutput("wyszukane_oferty")
                                      )
+                                     )
+                                     
+                                   ),
+                                   tabPanel(title = span(icon("fas fa-chalkboard-teacher"), "Przedstaw ofertę"),
+                                            selectInput("przedstaw_oferte_input", label = "Wybierz ofertę do przedstawienia", choices = NULL),
+                                            h3(textOutput("przedstaw_oferte_miejsce")),
+                                            h4(textOutput("przedstaw_oferte_dlugosc")),
+                                            h4(textOutput("przedstaw_oferte_tagi")),
+                                            h4(textOutput("przedstaw_oferte_atrakcje")),
+                                            h5(textOutput("przedstaw_oferte_opis"))
                                    )
 )
 

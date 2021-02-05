@@ -218,14 +218,14 @@ shinyServer<- function(input, output, session){
               })
     }, options = list(scrollX = TRUE))
   
-  
+  ### MAGDA
   ## wyszukiwanie i wyświetlanie ofert
   output$wyszukane_oferty <- DT::renderDataTable(tryCatch({
     dbGetQuery(con, "SELECT * from oferty;")
   }, error = function(e){
     return(data.frame())
   }), options = list(pageLength = 5))
-
+  
   ## zapełnienie wybierania tagów
   tryCatch({
     tagi <- dbGetQuery(con, "SELECT tag FROM tagi;")$tag
@@ -268,8 +268,32 @@ shinyServer<- function(input, output, session){
     })
   })
   
-  # select o.oferta_id, o.miejsce_wyjazdu,a.atrakcje , t.tagi,o.limit_uczestnikow, o.dlugosc_wyjazdu, o.cena_podstawowa from oferty o join (SELECT * FROM oferty_ze_wszystkimi_atrakcjami('kregle')) as a on (a.oferta_id = o.oferta_id) join (SELECT * FROM oferty_ze_wszystkimi_tagami('morze')) as t on (o.oferta_id = t.oferta_id);
-    
+  
+  ## przedstaw ofertę
+  tryCatch({
+    oferty <- dbGetQuery(con, "SELECT oferta_id FROM oferty ORDER BY oferta_id ASC;")$oferta_id
+    updateSelectInput(session, inputId = "przedstaw_oferte_input",
+                      choices = oferty )
+  }, error = function(e){})
+  
+  observeEvent(input$przedstaw_oferte_input,{
+    tryCatch({
+      oferta <-dbGetQuery(con, paste0("SELECT * FROM oferty WHERE oferta_id = ",input$przedstaw_oferte_input ,";"))
+      tagi <- dbGetQuery(con, paste0("SELECT * FROM tagi t JOIN tagi_ofert t_o ON (t_o.tag = t.tag) WHERE t_o.oferta_id =",
+                                     input$przedstaw_oferte_input,";"))
+      atrakcje <- dbGetQuery(con, paste0("SELECT * FROM atrakcje a JOIN atrakcje_w_ofercie ao ON (ao.atrakcja = a.atrakcja) WHERE ao.oferta_id =",
+                                     input$przedstaw_oferte_input,";"))
+      output$przedstaw_oferte_miejsce <- renderText(paste("Miejsce wyjazdu:",oferta$miejsce_wyjazdu ))
+      output$przedstaw_oferte_dlugosc <- renderText(paste("Długość wyjazdu:", oferta$dlugosc_wyjazdu, "dni"))
+      output$przedstaw_oferte_tagi <- renderText(paste("Tagi oferty:",str_c(tagi$tag, collapse = ", ")))
+      output$przedstaw_oferte_atrakcje <- renderText(paste("Atrakcje w ramach wyjazdu:",str_c(atrakcje$atrakcja, collapse = ", ")))
+      output$przedstaw_oferte_opis <- renderText(oferta$opis)
+      
+    }, error = function(e){}
+    )
+  })
+  ### MAGDA
+  
   #### OFERTY KONIEC
   
   
