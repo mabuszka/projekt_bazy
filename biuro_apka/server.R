@@ -800,6 +800,7 @@ shinyServer<- function(input, output, session){
     tryCatch({
       sql <- paste0("SELECT dodaj_zamowienie_z_klientami (",input$zamowienie_wycieczka,",",input$zamowienie_klasa,",'",input$zamowienie_platnosc ,"',",str_c("'",unlist(text),"'", collapse = " , ") ,");" )
       res <- dbSendQuery(con, sql)
+      dbFetch(res)
       if (dbHasCompleted(res)){
         showNotification("Pomyślnie złożono zamówienie",type = "message")
       }
