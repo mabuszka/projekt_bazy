@@ -134,16 +134,11 @@ tabbox_zarzadzaj_oferty <- tabBox(width = NULL,
                                   side = 'right',
                                   tabPanel(title=span(icon("fas fa-file-plus"),"Dodaj ofertę"),
                                            textInput("o_utworz_miasto","Miejsce wyjazdu"),
-                                           numericInput("o_utworz_limit","limit ilości uczestników",value=0),
+                                           numericInput("o_utworz_limit","Limit ilości uczestników",value=0),
                                            numericInput("o_utworz_dni","Długość wyjazdu w dniach",value=0),
                                            numericInput("o_utworz_cena","Cena podstawowa",value=0),
                                            textInput("o_utworz_opis","Opis"),
                                            textInput("o_utworz_foto","Zdjęcie"),
-                                           numericInput("o_utworz_limit","limit ilości uczestników",value=20),
-                                           numericInput("o_utworz_dni","Długość wyjazdu w dniach",value=10),
-                                           numericInput("o_utworz_cena","Cena podstawowa",value=5000),
-                                           textInput("o_utworz_opis","Opis"),
-                                           numericInput("o_utworz_foto","Zdjęcie",value=0),
                                            actionButton("o_utworz_button","Utwórz ofertę")
                                   ),
                                   tabPanel(title=span(icon("fas fa-file-edit"),"Modyfikuj ofertę"),
@@ -156,7 +151,7 @@ tabbox_zarzadzaj_oferty <- tabBox(width = NULL,
                                   tabPanel(title=span(icon("fas fa-file-minus"),"Usuń ofertę"),
                                            selectInput("o_usun_select",label="Wybierz ofertę do usunięcia",choices=NULL),
                                            textOutput("o_usun_text"),
-                                           actionButton("o_usun_button","Edytuj ofertę")
+                                           actionButton("o_usun_button","Usuń ofertę")
                                   )
 )
 
