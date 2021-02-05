@@ -134,33 +134,27 @@ tabbox_zarzadzaj_oferty <- tabBox(width = NULL,
                                   side = 'right',
                                   tabPanel(title=span(icon("fas fa-file-plus"),"Dodaj ofertę"),
                                            textInput("o_utworz_miasto","Miejsce wyjazdu"),
-<<<<<<< HEAD
                                            numericInput("o_utworz_limit","limit ilości uczestników",value=0),
                                            numericInput("o_utworz_dni","Długość wyjazdu w dniach",value=0),
                                            numericInput("o_utworz_cena","Cena podstawowa",value=0),
                                            textInput("o_utworz_opis","Opis"),
                                            textInput("o_utworz_foto","Zdjęcie"),
-=======
                                            numericInput("o_utworz_limit","limit ilości uczestników",value=20),
                                            numericInput("o_utworz_dni","Długość wyjazdu w dniach",value=10),
                                            numericInput("o_utworz_cena","Cena podstawowa",value=5000),
                                            textInput("o_utworz_opis","Opis"),
                                            numericInput("o_utworz_foto","Zdjęcie",value=0),
->>>>>>> main
                                            actionButton("o_utworz_button","Utwórz ofertę")
                                   ),
                                   tabPanel(title=span(icon("fas fa-file-edit"),"Modyfikuj ofertę"),
                                            selectInput("o_modyfikuj_select",label="Wybierz ofertę do modyfikacji",choices=NULL),
                                            textInput("o_modyfikuj_opis","Nowy opis"),
-<<<<<<< HEAD
                                            textInput("o_modyfikuj_foto","Nowe zdjęcie"),
-=======
                                            numericInput("o_modyfikuj_foto","Nowe zdjęcie",value=0),
->>>>>>> main
                                            actionButton("o_modyfikuj_button","Edytuj ofertę")
                                   ),
                                   tabPanel(title=span(icon("fas fa-file-minus"),"Usuń ofertę"),
-                                           selectInput("o_usun_select",label="Wybierz ofertę do modyfikacji",choices=NULL),
+                                           selectInput("o_usun_select",label="Wybierz ofertę do usunięcia",choices=NULL),
                                            textOutput("o_usun_text"),
                                            actionButton("o_usun_button","Edytuj ofertę")
                                   )
@@ -226,20 +220,20 @@ tabbox_wycieczki_zarzadzaj <- tabBox(title = span(icon("fas fa-cog"), "Zarządza
                                      side = "right",
                                      tabPanel(title = span(icon("fas fa-calendar-plus"),"Utwórz"),
                                               dateInput('w_stworz_data_input',label='Początek wycieczki'),
-                                              selectInput(inputId = "w_stworz_oferta_input", label = "Wybierz ofertę", choices = dbGetQuery(con,'SELECT oferta_id FROM oferty;')$oferta_id),
+                                              selectInput(inputId = "w_stworz_oferta_input", label = "Wybierz ofertę", choices = NULL),
                                               textOutput("w_info_oferta"),
                                               actionButton('w_utworz',label='Utwórz wycieczkę', icon = icon("fas fa-plus"))
                                      ),
                                      
                                      tabPanel(title = span(icon("fas fa-edit"),"Modyfikuj"),
-                                              selectInput(inputId = "w_modyfikuj_select", label = "Wybierz wycieczkę", choices = dbGetQuery(con,'SELECT wycieczka_id FROM wycieczki;')$wycieczka_id),
+                                              selectInput(inputId = "w_modyfikuj_select", label = "Wybierz wycieczkę", choices = NULL),
                                               textOutput("w_info_modyfikuj"),
                                               dateInput('w_modyfikuj_data_input',label='Nowy początek wycieczki'),
                                               actionButton('w_modyfikuj',label='Modyfikuj wycieczkę', icon = icon("fas fa-edit"))
                                      ),
                                      
                                      tabPanel(title = span(icon("fas fa-calendar-minus"),"Usuń"),
-                                              selectInput(inputId = "w_usun_select", label = "Wybierz wycieczkę do usunięcia", choices = dbGetQuery(con,'SELECT wycieczka_id FROM wycieczki;')$wycieczka_id),
+                                              selectInput(inputId = "w_usun_select", label = "Wybierz wycieczkę do usunięcia", choices = NULL),
                                               textOutput("w_info_usun"),
                                               actionButton('w_usun',label='Usuń wycieczkę', icon = icon("fas fa-minus"))
                                      )
@@ -249,7 +243,7 @@ tabbox_wycieczki_przewodnictwa <- tabBox(title = span(icon("fas fa-user-cog"), "
                                          width=NULL,
                                          side="right",
                                          tabPanel(title = span(icon("fas fa-calendar-plus"),"Zleć wycieczkę przewodnikowi"),
-                                                  selectInput("ww_zlec_wycieczke_select",label='Wybierz wycieczkę',choices=dbGetQuery(con,"SELECT wycieczka_id FROM wycieczki;")$wycieczka_id),
+                                                  selectInput("ww_zlec_wycieczke_select",label='Wybierz wycieczkę',choices=NULL),
                                                   h4("Przewodnicy możliwi do wybrania - bez kolizji w terminach z innymi wycieczkami tego przewodnika:"),
                                                   selectInput("wp_zlec_wycieczke_select",label='Wybierz przewodnika',
                                                               # choices=dbGetQuery(con,"SELECT wycieczka_id FROM wycieczki;")$wycieczka_id)
@@ -259,7 +253,8 @@ tabbox_wycieczki_przewodnictwa <- tabBox(title = span(icon("fas fa-user-cog"), "
                                          ),
                                          
                                          tabPanel(title = span(icon("fas fa-calendar-minus"),"Odwołaj przewodnika z wycieczki"),
-                                                  DT::dataTableOutput('w_odwolaj_tbl'),
+                                                  selectInput("w_odwolaj_select",label="Wybierz wycieczkę",choices=NULL),
+                                                  selectInput("w_odwolaj_select_przew",label="Wybierz przewodnika",choices=NULL),
                                                   actionButton('w_odwolaj',label='Odwołaj przewodnika', icon = icon("fas fa-times"))
                                          )
 )
@@ -307,15 +302,15 @@ tabbox_przewodnicy_przegladaj <- tabBox(title = span(icon("fas fa-window-restore
 tabbox_przewodnicy_zarzadzaj <- tabBox(title = span(icon("fas fa-cog"), "Zarządzaj"),
                                        width = NULL,
                                        side = "right",
-                                       tabPanel(title = span(icon("fas fa-calendar-plus"),"Zleć wycieczkę przewodnikowi"),
-                                                selectInput("p_zlec_wycieczke_select",label='Wybierz przewodnika',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
-                                                h4("Wycieczki możliwe do zlecenia - bez kolizji w terminach z innymi wycieczkami tego przewodnika:"),
-                                                selectInput("w_zlec_wycieczke_select",label='Wybierz wycieczkę',
-                                                            choices=dbGetQuery(con,"SELECT wycieczka_id FROM wycieczki;")$wycieczka_id)
-                                                # choices = (DT::dataTableOutput(outputId = "wycieczki_do_zlecania"))$wycieczka_id)
-                                                ,
-                                                actionButton('p_zlec_wycieczke_button',label='Zleć wycieczkę przewodnikowi')
-                                       ),
+                                       # tabPanel(title = span(icon("fas fa-calendar-plus"),"Zleć wycieczkę przewodnikowi"),
+                                       #          selectInput("p_zlec_wycieczke_select",label='Wybierz przewodnika',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
+                                       #          h4("Wycieczki możliwe do zlecenia - bez kolizji w terminach z innymi wycieczkami tego przewodnika:"),
+                                       #          selectInput("w_zlec_wycieczke_select",label='Wybierz wycieczkę',
+                                       #                      choices=dbGetQuery(con,"SELECT wycieczka_id FROM wycieczki;")$wycieczka_id)
+                                       #          # choices = (DT::dataTableOutput(outputId = "wycieczki_do_zlecania"))$wycieczka_id)
+                                       #          ,
+                                       #          actionButton('p_zlec_wycieczke_button',label='Zleć wycieczkę przewodnikowi')
+                                       # ),
                                        tabPanel(title = span(icon("fas fa-user-edit"),"Zaktualizuj informacje"),
                                                 solidHeader = TRUE,
                                                 selectInput("przewodnik_do_akt_select",label='Wybierz przewodnika',choices=dbGetQuery(con,"SELECT przewodnik_id FROM przewodnicy WHERE aktywny=TRUE;")$przewodnik_id),
