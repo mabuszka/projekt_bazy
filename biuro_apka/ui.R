@@ -151,8 +151,8 @@ box_modyfikuj_oferte <- box(width=NULL,
                             selectInput("o_modyfikuj_select",label="Wybierz ofertę do modyfikacji",choices=NULL),
                             textInput("o_modyfikuj_opis","Nowy opis"),
                             textInput("o_modyfikuj_foto","Nowe zdjęcie"),
-                            numericInput("o_modyfikuj_foto","Nowe zdjęcie",value=0),
-                            actionButton("o_modyfikuj_button","Edytuj ofertę")
+                            actionButton("edytuj_oferte", label = "Edytuj", icon = icon("fas fa-edit")),
+                            textOutput("text")
   
 )
 box_usun_oferte <- box(width=NULL,
