@@ -227,7 +227,9 @@ shinyServer<- function(input, output, session){
    tryCatch({res <-dbSendQuery(con, sql)
    if(dbHasCompleted(res)){
      showNotification("Utworzono ofertę", type = "message")
-   }}, error = function(e){
+   }
+   dbClearResult(res)
+   }, error = function(e){
      error_to_show <- str_split(e, pattern = "ERROR: ")[[1]][2]
      if (str_detect(error_to_show, "CONTEXT: ")){
        error_to_show <- str_split(error_to_show, "CONTEXT: ")[[1]][1]
@@ -248,6 +250,14 @@ shinyServer<- function(input, output, session){
                      choices = oferty$oferta_id)
     }, error = function(e){}
   )
+   #update ofert do modyfikacji
+   tryCatch({
+     oferty_do_edycji <- dbGetQuery(con, "SELECT oferta_id FROM oferty ORDER BY oferta_id ASC;")
+     updateSelectInput(session, inputId = "o_modyfikuj_select",
+                       choices = oferty_do_edycji$oferta_id)
+     
+   }, error = function(e){return(data.frame(oferta_id = c(1)))})
+   
   })
   
   
@@ -257,7 +267,7 @@ shinyServer<- function(input, output, session){
                       choices = oferty_do_edycji$oferta_id)
 
   }, error = function(e){return(data.frame(oferta_id = c(1)))})
-
+  
   
   observeEvent(input$o_modyfikuj_button,{
     id<-input$o_modyfikuj_select
@@ -296,7 +306,8 @@ shinyServer<- function(input, output, session){
     tryCatch({res <-dbSendQuery(con, sql)
     if(dbHasCompleted(res)){
       showNotification("Usunięto ofertę", type = "message")
-    }}, error = function(e){
+    }
+    dbClearResult(res)}, error = function(e){
       error_to_show <- str_split(e, pattern = "ERROR: ")[[1]][2]
       if (str_detect(error_to_show, "CONTEXT: ")){
         error_to_show <- str_split(error_to_show, "CONTEXT: ")[[1]][1]
@@ -318,6 +329,14 @@ shinyServer<- function(input, output, session){
 
   }, error = function(e){}
   )
+    #update ofert do modyfikacji
+    tryCatch({
+      oferty_do_edycji <- dbGetQuery(con, "SELECT oferta_id FROM oferty ORDER BY oferta_id ASC;")
+      updateSelectInput(session, inputId = "o_modyfikuj_select",
+                        choices = oferty_do_edycji$oferta_id)
+      
+    }, error = function(e){return(data.frame(oferta_id = c(1)))})
+    
   })
 
   
@@ -405,7 +424,7 @@ shinyServer<- function(input, output, session){
       output$przedstaw_oferte_cena <- renderText(paste("Jedynie ",oferta$cena_podstawowa, " zł od osoby (w pakiecie podstawowym)"))
       
       output$html_out <- renderUI({
-        sql <- paste0("SELECT encode(zdjecie, 'base64') FROM oferty WHERE Oferta_id = ", input$przedstaw_oferte_input, ";")
+        sql <- paste0("SELECT encode(zdjecie::bytea, 'base64') FROM oferty WHERE Oferta_id = ", input$przedstaw_oferte_input, ";")
         res <- dbSendQuery(con, sql)
         
         pic <- dbFetch(res, n=-1)

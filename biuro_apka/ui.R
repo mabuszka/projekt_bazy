@@ -140,7 +140,7 @@ box_dodaj_oferte <- box(width=NULL,
                         numericInput("o_utworz_cena","Cena podstawowa",value=0),
                         textInput("o_utworz_opis","Opis"),
                         textInput("o_utworz_foto","Zdjęcie"),
-                        actionButton("o_utworz_button","Utwórz ofertę")
+                        actionButton("o_utworz_button","Utwórz ofertę",icon = icon("fas fa-plus"))
                         
   
 )
@@ -151,7 +151,7 @@ box_modyfikuj_oferte <- box(width=NULL,
                             selectInput("o_modyfikuj_select",label="Wybierz ofertę do modyfikacji",choices=NULL),
                             textInput("o_modyfikuj_opis","Nowy opis"),
                             textInput("o_modyfikuj_foto","Nowe zdjęcie"),
-                            actionButton("edytuj_oferte", label = "Edytuj", icon = icon("fas fa-edit")),
+                            actionButton("o_modyfikuj_button", label = "Edytuj", icon = icon("fas fa-edit")),
                             textOutput("text")
   
 )
@@ -161,7 +161,7 @@ box_usun_oferte <- box(width=NULL,
                        title=span(icon("fas fa-file-minus"),"Usuń ofertę"),
                        selectInput("o_usun_select",label="Wybierz ofertę do usunięcia",choices=NULL),
                        textOutput("o_usun_text"),
-                       actionButton("o_usun_button","Usuń ofertę")
+                       actionButton("o_usun_button","Usuń ofertę",icon = icon("fas fa-minus"))
 )
 
 
