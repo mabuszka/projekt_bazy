@@ -327,7 +327,11 @@ shinyServer<- function(input, output, session){
   ### MAGDA
   ## wyszukiwanie i wyświetlanie ofert
   output$wyszukane_oferty <- DT::renderDataTable(tryCatch({
-    dbGetQuery(con, "SELECT * from oferty;")
+    dbGetQuery(con, "SELECT oferta_id,
+				miejsce_wyjazdu,
+				limit_uczestnikow,
+				dlugosc_wyjazdu,
+				cena_podstawowa from oferty;")
   }, error = function(e){
     return(data.frame())
   }), options = list(pageLength = 5))
@@ -385,7 +389,13 @@ shinyServer<- function(input, output, session){
   
   observeEvent(input$przedstaw_oferte_input,{
     tryCatch({
-      oferta <-dbGetQuery(con, paste0("SELECT * FROM oferty WHERE oferta_id = ",input$przedstaw_oferte_input ,";"))
+      oferta <-dbGetQuery(con, paste0("SELECT oferta_id,
+				miejsce_wyjazdu,
+				limit_uczestnikow,
+				dlugosc_wyjazdu,
+				cena_podstawowa,
+				opis_oferty
+				FROM oferty WHERE oferta_id = ",input$przedstaw_oferte_input ,";"))
       tagi <- dbGetQuery(con, paste0("SELECT * FROM tagi t JOIN tagi_ofert t_o ON (t_o.tag = t.tag) WHERE t_o.oferta_id =",
                                      input$przedstaw_oferte_input,";"))
       atrakcje <- dbGetQuery(con, paste0("SELECT * FROM atrakcje a JOIN atrakcje_w_ofercie ao ON (ao.atrakcja = a.atrakcja) WHERE ao.oferta_id =",
@@ -394,7 +404,22 @@ shinyServer<- function(input, output, session){
       output$przedstaw_oferte_dlugosc <- renderText(paste("Długość wyjazdu:", oferta$dlugosc_wyjazdu, "dni"))
       output$przedstaw_oferte_tagi <- renderText(paste("Tagi oferty:",str_c(tagi$tag, collapse = ", ")))
       output$przedstaw_oferte_atrakcje <- renderText(paste("Atrakcje w ramach wyjazdu:",str_c(atrakcje$atrakcja, collapse = ", ")))
-      output$przedstaw_oferte_opis <- renderText(oferta$opis)
+      output$przedstaw_oferte_opis <- renderText(oferta$opis_oferty)
+      output$przedstaw_oferte_cena <- renderText(paste("Jedynie ",oferta$cena_podstawowa, " zł od osoby (w pakiecie podstawowym)"))
+      
+      output$html_out <- renderUI({
+        sql <- paste0("SELECT encode(zdjecie, 'base64') FROM oferty WHERE Oferta_id = ", input$przedstaw_oferte_input, ";")
+        res <- dbSendQuery(con, sql)
+        
+        pic <- dbFetch(res, n=-1)
+        dbClearResult(res)
+        img <- paste0("data:image/jpg;base64,", pic$encode)
+        return(tags$img(src = img, style = "width: 500px; height: 500px"))
+        
+      })
+      
+      
+      
       
     }, error = function(e){}
     )

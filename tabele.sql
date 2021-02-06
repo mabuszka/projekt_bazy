@@ -51,7 +51,7 @@ CREATE TABLE oferty(
 				dlugosc_wyjazdu  	INTEGER,
 				cena_podstawowa  	DECIMAL(10,2),
 				opis_oferty 	 	TEXT,
-				zdjecie	 		 	TEXT
+				zdjecie	 		 	bytea
 );
 
 CREATE TABLE tagi(

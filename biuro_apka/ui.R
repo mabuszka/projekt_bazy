@@ -206,12 +206,17 @@ tabbox_przegladaj_oferty <- tabBox(title = span(icon("fas fa-compass"), "Oferty"
                                      
                                    ),
                                    tabPanel(title = span(icon("fas fa-chalkboard-teacher"), "Przedstaw ofertę"),
-                                            selectInput("przedstaw_oferte_input", label = "Wybierz ofertę do przedstawienia", choices = NULL),
+                                            fluidPage(
+                                              column(4, selectInput("przedstaw_oferte_input", label = "Wybierz ofertę do przedstawienia", choices = NULL),
                                             h3(textOutput("przedstaw_oferte_miejsce")),
                                             h4(textOutput("przedstaw_oferte_dlugosc")),
                                             h4(textOutput("przedstaw_oferte_tagi")),
                                             h4(textOutput("przedstaw_oferte_atrakcje")),
-                                            h5(textOutput("przedstaw_oferte_opis"))
+                                            h5(textOutput("przedstaw_oferte_opis")),
+                                            h4(textOutput("przedstaw_oferte_cena"))
+                                            ),
+                                            column(8,
+                                            htmlOutput(outputId = "html_out")))
                                    )
 )
 
