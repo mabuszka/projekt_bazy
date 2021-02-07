@@ -1,4 +1,3 @@
-\cd 'C:\Users\zuzbrzo\studia\sem5\bazy danych\projekt\projekt_bazy\zdjecia'
 UPDATE oferty SET zdjecie=pg_read_binary_file('pic1.jpg') WHERE oferta_id=1;
 UPDATE oferty SET zdjecie=pg_read_binary_file('pic2.jpg') WHERE oferta_id=2;
 UPDATE oferty SET zdjecie=pg_read_binary_file('pic3.jpg') WHERE oferta_id=3;

@@ -504,11 +504,7 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 
--- SELECT dodaj_zamowienie_z_klientami(2,1,'a','{"Mike", "Fredson",  "Polska", "Kwidzyn","44-752","Rycerska", "178", "1963-06-7", "63060781605","149700779" }', '{"Mona", "Lisa",  "Niemcy", "Kwidzyn","44-752","Rycerska", "178","1963-06-7", NULL, "149700779"}');
 
--- '{"Mona", "Lisa",  "Niemcy", "Rycerska", "178", "Kwidzyn", "44-752","1963-06-7", "149700779", NULL}'
-
--- SELECT wyszukaj_klienta('i', 'n', 'p', 'm', 'u', '1', '33-333', '888999777', '2000-09-09'::DATE, '12345678900')
 
 
 

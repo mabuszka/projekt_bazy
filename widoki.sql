@@ -6,22 +6,7 @@ FROM uczestnicy u
 			ON (u.uczestnik_id = z.uczestnik_id)
 GROUP BY u.uczestnik_id;
 
--- dane do spr widoku z jeżdżeniem (Działa! :D)
--- INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania) VALUES ('Adam','Nowak','Polska');
--- INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania) VALUES ('Borys','Nowak','Polska');
--- INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania) VALUES ('Hans','Nowak','Niemcy');
--- INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania) VALUES ('Stef','Nowak','Niemcy');
--- INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania) VALUES ('Pierr','Nowak','Francja');
--- INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania) VALUES ('Jaux','Nowak','Francja');
 
--- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(1,1);
--- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(1,2);
--- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(2,1);
--- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(3,1);
--- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(3,2);
--- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(4,1);
--- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(5,1);
--- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(5,2);
 
 
 -- uczestnicy jezdzączy cześciej niż średnia w ich kraju
@@ -72,13 +57,6 @@ GROUP BY z.klient_id
 HAVING COUNT(*) > 3
 ORDER BY count(*);
 
--- dane do testu widoku stali klienci
--- INSERT INTO zamowienia(zamowienie_id, klient_id) VALUES (1,1);
--- INSERT INTO zamowienia(zamowienie_id, klient_id) VALUES (2,1);
--- INSERT INTO zamowienia(zamowienie_id, klient_id) VALUES (3,1);
--- INSERT INTO zamowienia(zamowienie_id, klient_id) VALUES (4,1);
--- INSERT INTO zamowienia(zamowienie_id, klient_id) VALUES (5,2);
--- INSERT INTO zamowienia(zamowienie_id, klient_id) VALUES (6,2);
 
 -- 10 najczęstszych miejsc docelowych wycieczek
 
@@ -91,22 +69,7 @@ GROUP BY o.miejsce_wyjazdu
 ORDER BY COUNT(*) DESC
 LIMIT 10;
 
--- dane do testu
--- INSERT INTO oferty(miejsce_wyjazdu) VALUES ('a');
--- INSERT INTO oferty(miejsce_wyjazdu) VALUES ('b');
--- INSERT INTO oferty(miejsce_wyjazdu) VALUES ('c');
--- INSERT INTO wycieczki(oferta_id, liczba_uczestnikow) VALUES (1,2);
--- INSERT INTO wycieczki(oferta_id,liczba_uczestnikow) VALUES (1,2);
--- INSERT INTO wycieczki(oferta_id,liczba_uczestnikow) VALUES (1,2);
--- INSERT INTO wycieczki(oferta_id,liczba_uczestnikow) VALUES (1,2);
--- INSERT INTO wycieczki(oferta_id,liczba_uczestnikow) VALUES (1,2);
--- INSERT INTO wycieczki(oferta_id) VALUES (1);
--- INSERT INTO wycieczki(oferta_id) VALUES (1);
--- INSERT INTO wycieczki(oferta_id) VALUES (2);
--- INSERT INTO wycieczki(oferta_id) VALUES (2);
--- INSERT INTO wycieczki(oferta_id) VALUES (2);
--- INSERT INTO wycieczki(oferta_id) VALUES (3);
--- INSERT INTO wycieczki(oferta_id) VALUES (3);
+
 
 -- 5 najbardziej popularnych ofert 
 
@@ -134,8 +97,6 @@ GROUP BY (p.przewodnik_id, p.imie, p.nazwisko)
 ORDER BY COUNT(p.przewodnik_id) DESC
 LIMIT 10;
 
--- dane do sprawdzenia 
--- INSERT INTO przewodnicy(imie) VALUES ('Adam')
 
 
 -- kolidujące wycieczki dla przewodników (id przewodnika - id wycieczki ktorej nie może poprowadzić bo już ma coś w tym terminie)
@@ -164,36 +125,10 @@ FROM przewodnicy p
 	-- JOIN wycieczki w 
 		-- ON (w.wycieczka_id = pa.wycieczka_id)
 ORDER BY przewodnik_id ASC;
-				
--- INSERT INTO przewodnicy(imie) VALUES ('Adam'); --1
--- INSERT INTO przewodnicy(imie) VALUES ('Borys'); --2
--- INSERT INTO przewodnicy(imie ) VALUES ('Hans');--3
--- INSERT INTO przewodnicy(imie ) VALUES ('Stef');--4
--- INSERT INTO przewodnicy(imie) VALUES ('Pierr');--5
--- INSERT INTO przewodnicy(imie) VALUES ('Jaux');--6
-			
-			
--- INSERT INTO wycieczki(data_rozpoczecia, data_zakonczenia) VALUES ('2020.01.01','2020.01.14'); --16
--- INSERT INTO wycieczki(data_rozpoczecia, data_zakonczenia) VALUES ('2020.01.07','2020.01.14'); --17
--- INSERT INTO wycieczki(data_rozpoczecia, data_zakonczenia) VALUES ('2020.02.07','2020.02.14'); --18
--- INSERT INTO wycieczki(data_rozpoczecia, data_zakonczenia) VALUES ('2020.02.07','2020.02.10'); --19
-
--- INSERT INTO przewodnictwa(przewodnik_id, wycieczka_id) VALUES (1,16);
--- INSERT INTO przewodnictwa(przewodnik_id, wycieczka_id) VALUES (1,17);
--- INSERT INTO przewodnictwa(przewodnik_id, wycieczka_id) VALUES (2,16);
--- INSERT INTO przewodnictwa(przewodnik_id, wycieczka_id) VALUES (3,18);
--- INSERT INTO przewodnictwa(przewodnik_id, wycieczka_id) VALUES (4,19);
 
 
--- CREATE VIEW zblizajace_sie_wycieczki AS
--- SELECT *
--- FROM wycieczki w
-	-- JOIN oferty o
-		-- ON (o.oferta_id = w.oferta_id)
--- WHERE 
 
 
--- CREATE VIEW przewodnicy_bez_zlecenia AS
 
 
 CREATE VIEW statystyki_ofert AS
@@ -211,34 +146,3 @@ FROM oferty o
 	JOIN uczestnicy u
 		ON (u.uczestnik_id = uz.uczestnik_id)
 GROUP BY (o.oferta_id, o.miejsce_wyjazdu, o.dlugosc_wyjazdu);
-
--- do sprawdzenia statystyki_ofert (musza byc swieze tabele zeby sie id zgadzaly)
--- INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Adam','Nowak','Polska', '1999-03-13' );
--- INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Borys','Nowak','Polska','2001-03-13');
--- INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Hans','Nowak','Niemcy', '1987-03-13');
--- INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Stef','Nowak','Niemcy', '1954-03-13');
--- INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Pierr','Nowak','Francja', '1996-03-13');
--- INSERT INTO uczestnicy(imie, nazwisko, kraj_zamieszkania, data_urodzenia) VALUES ('Jaux','Nowak','Francja', '2003-03-13');
-
--- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(1,1);
--- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(1,2);
--- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(2,1);
--- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(3,1);
--- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(3,2);
--- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(4,1);
--- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(5,1);
--- INSERT INTO uczestnicy_w_zamowieniu(uczestnik_id, zamowienie_id) VALUES(5,2);
-
--- INSERT INTO zamowienia(wycieczka_id) VALUES (1),(2),(3),(4);
-
--- INSERT INTO oferty(miejsce_wyjazdu) VALUES ('a');
--- INSERT INTO oferty(miejsce_wyjazdu) VALUES ('b');
--- INSERT INTO oferty(miejsce_wyjazdu) VALUES ('c');
-
--- INSERT INTO wycieczki(oferta_id) VALUES (1);
--- INSERT INTO wycieczki(oferta_id) VALUES (1);
--- INSERT INTO wycieczki(oferta_id) VALUES (2);
--- INSERT INTO wycieczki(oferta_id) VALUES (2);
--- INSERT INTO wycieczki(oferta_id) VALUES (2);
--- INSERT INTO wycieczki(oferta_id) VALUES (3);
--- INSERT INTO wycieczki(oferta_id) VALUES (3);

@@ -45,7 +45,7 @@ CREATE TRIGGER aktualizacja_liczby_uczestnikow AFTER INSERT OR DELETE ON uczestn
 	FOR EACH ROW EXECUTE PROCEDURE aktualizacja_liczby_uczestnikow();
 
 
---nie mozna edytowac starych zamowień i wycieczek
+--nie mozna edytowac starych zamowień i wycieczek (zakomentowane żeby przy odpalaniu skryptu dało się dodać przeszłe dane)
 -- DROP FUNCTION zostaw_stare CASCADE;
 -- CREATE FUNCTION zostaw_stare() RETURNS TRIGGER AS $$
 -- DECLARE

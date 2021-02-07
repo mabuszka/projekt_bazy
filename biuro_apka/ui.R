@@ -117,14 +117,6 @@ tabbox_uczestnicy <- tabBox(width = NULL,
                             tags$head(tags$style(HTML(tabs_color)))
 )
 
-## NIESKOŃCZONE box z wyszukiwaniem i wyświetlaniem tych wyszukanych uczestników
-# box_wyszukaj_uczestnikow <- box(width = NULL,
-#                                 status = "primary",
-#                                 title = "Wyszukaj uczestników",
-#                                 solidHeader = TRUE   
-# )
-
-
 
 ############ zakładka OFERTY
 
