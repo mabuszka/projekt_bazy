@@ -64,6 +64,9 @@ shinyServer<- function(input, output, session){
       if (str_detect(error_to_show, "DETAIL: ")){
         error_to_show <- str_split(error_to_show, "DETAIL: ")[[1]][1]
       }
+      if (str_detect(error_to_show, "date")){
+        error_to_show <- "Nieprawidłowa data urodzenia"
+      }
       if (str_detect(error_to_show, "check constraint")){
         error_to_show <- "Wpisano błędne dane"
       }
@@ -152,6 +155,9 @@ shinyServer<- function(input, output, session){
       }
       if (str_detect(error_to_show, "DETAIL: ")){
         error_to_show <- str_split(error_to_show, "DETAIL: ")[[1]][1]
+      }
+      if (str_detect(error_to_show, "date")){
+        error_to_show <- "Nieprawidłowa data urodzenia"
       }
       if (str_detect(error_to_show, "check constraint")){
           error_to_show <- "Wpisano niepoprawne dane"
