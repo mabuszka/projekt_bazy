@@ -383,7 +383,8 @@ body = dashboardBody(
   # zakładka przeglądaj i modyfikuj uczestników
   tabItems(
     tabItem(tabName = "start_tab",
-            plotOutput("start")
+            img(src='logo.png',width=1100)
+            
     ),
     tabItem(tabName = "uczestnicy_tab",
             column(4,
