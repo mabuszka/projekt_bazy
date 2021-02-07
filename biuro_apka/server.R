@@ -222,7 +222,7 @@ shinyServer<- function(input, output, session){
    cena<-input$o_utworz_cena
    opis<-input$o_utworz_opis
    foto<-input$o_utworz_foto
-   sql <- paste0("INSERT INTO oferty(miejsce_wyjazdu,limit_uczestnikow,dlugosc_wyjazdu,cena_podstawowa,opis_oferty,zdjecie) VALUES('",miejsce,"',",limit,",",dni,",",cena,",'",opis,"','",foto,"');")
+   sql <- paste0("INSERT INTO oferty(miejsce_wyjazdu,limit_uczestnikow,dlugosc_wyjazdu,cena_podstawowa,opis_oferty,zdjecie) VALUES('",miejsce,"',",limit,",",dni,",",cena,",'",opis,"',pg_read_binary_file('",foto,"'));")
    tryCatch({res <-dbSendQuery(con, sql)
    if(dbHasCompleted(res)){
      showNotification("Utworzono ofertę", type = "message")
@@ -249,6 +249,13 @@ shinyServer<- function(input, output, session){
                      choices = oferty$oferta_id)
     }, error = function(e){}
   )
+   ## przedstaw ofertę
+   tryCatch({
+     oferty <- dbGetQuery(con, "SELECT oferta_id FROM oferty ORDER BY oferta_id ASC;")$oferta_id
+     updateSelectInput(session, inputId = "przedstaw_oferte_input",
+                       choices = oferty )
+   }, error = function(e){})
+   
    #update ofert do modyfikacji
    tryCatch({
      oferty_do_edycji <- dbGetQuery(con, "SELECT oferta_id FROM oferty ORDER BY oferta_id ASC;")
@@ -272,7 +279,7 @@ shinyServer<- function(input, output, session){
     id<-input$o_modyfikuj_select
     opis<-input$o_modyfikuj_opis
     foto<-input$o_modyfikuj_foto
-    sql <- paste0("UPDATE oferty SET opis_oferty='",opis,"',zdjecie='",foto,"' WHERE oferta_id=",id,";")
+    sql <- paste0("UPDATE oferty SET opis_oferty='",opis,"',zdjecie=pg_read_binary_file('",foto,"') WHERE oferta_id=",id,";")
     tryCatch({res <-dbSendQuery(con, sql)
     if(dbHasCompleted(res)){
       showNotification("Zaktualizowano ofertę", type = "message")
@@ -332,6 +339,13 @@ shinyServer<- function(input, output, session){
       showModal(modalDialog(title = "Nie można usunąć tej oferty", error_to_show, easyClose = TRUE, footer = NULL))
     }
     )
+    ## przedstaw ofertę
+    tryCatch({
+      oferty <- dbGetQuery(con, "SELECT oferta_id FROM oferty ORDER BY oferta_id ASC;")$oferta_id
+      updateSelectInput(session, inputId = "przedstaw_oferte_input",
+                        choices = oferty )
+    }, error = function(e){})
+    
   # update ofert do utworzenia wycieczki
   tryCatch({
     oferty <- dbGetQuery(con,'SELECT oferta_id FROM oferty;')
