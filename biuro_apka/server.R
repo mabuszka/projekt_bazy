@@ -278,6 +278,18 @@ shinyServer<- function(input, output, session){
       showNotification("Zaktualizowano ofertę", type = "message")
     }
     dbClearResult(res)
+    }, error = function(e){
+      error_to_show <- str_split(e, pattern = "ERROR: ")[[1]][2]
+      if (str_detect(error_to_show, "CONTEXT: ")){
+        error_to_show <- str_split(error_to_show, "CONTEXT: ")[[1]][1]
+      }
+      if (str_detect(error_to_show, "DETAIL: ")){
+        error_to_show <- str_split(error_to_show, "DETAIL: ")[[1]][1]
+      }
+      if (str_detect(error_to_show, "constraint")){
+        error_to_show <- "Błędne dane"
+      }
+      showModal(modalDialog(title = "Nie można zmodyfikować tej oferty", error_to_show, easyClose = TRUE, footer = NULL))
     }
     )
   })
@@ -826,6 +838,18 @@ shinyServer<- function(input, output, session){
       showNotification("Utworzono nową wycieczkę")
     }
     dbClearResult(res)
+    },error=function(e){
+      error_to_show <- str_split(e, pattern = "ERROR: ")[[1]][2]
+      if (str_detect(error_to_show, "CONTEXT: ")){
+        error_to_show <- str_split(error_to_show, "CONTEXT: ")[[1]][1]
+      }
+      if (str_detect(error_to_show, "DETAIL: ")){
+        error_to_show <- str_split(error_to_show, "DETAIL: ")[[1]][1]
+      }
+      if (str_detect(error_to_show, "constraint")){
+        error_to_show <- "Błędne dane"
+      }
+      showModal(modalDialog(title = "Nie można usunąć tej oferty", error_to_show, easyClose = TRUE, footer = NULL))
     })
     #update wycieczek do zlecania przewodnictwa
     tryCatch({
@@ -897,6 +921,18 @@ shinyServer<- function(input, output, session){
       showNotification("Zmodyfikowano wycieczkę")
     }
     dbClearResult(res)
+    },error=function(e){
+      error_to_show <- str_split(e, pattern = "ERROR: ")[[1]][2]
+      if (str_detect(error_to_show, "CONTEXT: ")){
+        error_to_show <- str_split(error_to_show, "CONTEXT: ")[[1]][1]
+      }
+      if (str_detect(error_to_show, "DETAIL: ")){
+        error_to_show <- str_split(error_to_show, "DETAIL: ")[[1]][1]
+      }
+      if (str_detect(error_to_show, "constraint")){
+        error_to_show <- "Błędne dane"
+      }
+      showModal(modalDialog(title = "Nie można usunąć tej oferty", error_to_show, easyClose = TRUE, footer = NULL))
     })
     #update wycieczek do zlecania przewodnictwa
     tryCatch({
@@ -951,6 +987,18 @@ shinyServer<- function(input, output, session){
       showNotification("Usunięto wycieczkę")
     }
     dbClearResult(res)
+    },error=function(e){
+      error_to_show <- str_split(e, pattern = "ERROR: ")[[1]][2]
+      if (str_detect(error_to_show, "CONTEXT: ")){
+        error_to_show <- str_split(error_to_show, "CONTEXT: ")[[1]][1]
+      }
+      if (str_detect(error_to_show, "DETAIL: ")){
+        error_to_show <- str_split(error_to_show, "DETAIL: ")[[1]][1]
+      }
+      if (str_detect(error_to_show, "constraint")){
+        error_to_show <- "Błędne dane"
+      }
+      showModal(modalDialog(title = "Nie można usunąć tej oferty", error_to_show, easyClose = TRUE, footer = NULL))
     })
     #update wycieczek do zlecania przewodnictwa
     tryCatch({
@@ -1018,6 +1066,18 @@ shinyServer<- function(input, output, session){
       showNotification("Zlecono przewodnikowi nową wycieczkę")
     }
     dbClearResult(res)
+    },error=function(e){
+      error_to_show <- str_split(e, pattern = "ERROR: ")[[1]][2]
+      if (str_detect(error_to_show, "CONTEXT: ")){
+        error_to_show <- str_split(error_to_show, "CONTEXT: ")[[1]][1]
+      }
+      if (str_detect(error_to_show, "DETAIL: ")){
+        error_to_show <- str_split(error_to_show, "DETAIL: ")[[1]][1]
+      }
+      if (str_detect(error_to_show, "constraint")){
+        error_to_show <- "Błędne dane"
+      }
+      showModal(modalDialog(title = "Nie można usunąć tej oferty", error_to_show, easyClose = TRUE, footer = NULL))
     })
     przewodnicy_do_zlecania <- tryCatch({dbGetQuery(con, paste0("SELECT przewodnik_id FROM przewodnicy EXCEPT
                                      (SELECT przewodnik_id FROM kolidujace_wycieczki_przewodnikow WHERE wycieczka_id=",input$ww_zlec_wycieczke_select,") ORDER BY wycieczka_id ASC;"))
@@ -1092,6 +1152,18 @@ shinyServer<- function(input, output, session){
         showNotification("Usunięto przewodnika z wycieczki")
       }
       dbClearResult(res)
+      }, error=function(e){
+        error_to_show <- str_split(e, pattern = "ERROR: ")[[1]][2]
+        if (str_detect(error_to_show, "CONTEXT: ")){
+          error_to_show <- str_split(error_to_show, "CONTEXT: ")[[1]][1]
+        }
+        if (str_detect(error_to_show, "DETAIL: ")){
+          error_to_show <- str_split(error_to_show, "DETAIL: ")[[1]][1]
+        }
+        if (str_detect(error_to_show, "constraint")){
+          error_to_show <- "Błędne dane"
+        }
+        showModal(modalDialog(title = "Nie można usunąć tej oferty", error_to_show, easyClose = TRUE, footer = NULL))
       })
     }
     #update wycieczek do zlecania przewodnictwa
